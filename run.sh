@@ -1,0 +1,1 @@
+c++ src/* && ./a.out config_files/config_git
