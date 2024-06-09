@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jack <jack@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/09 17:56:39 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/09 22:30:49 by jack             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,20 +42,33 @@ Webserv::Webserv(std::string fileName)
 		std::cerr << "Error: Unable to open file " << fileName << std::endl;
 		return ;
 	}
-	buffer << file.rdbuf();
-	content = buffer.str();
-	std::regex pattern(R"(server\s*\{([^}]*)\})");
-	std::sregex_iterator begin(content.begin(), content.end(), pattern);
-	std::sregex_iterator end;
-	for (std::sregex_iterator iter = begin; iter != end; ++iter)
+	std::string line;
+	std::regex startPattern(R"(server\s*\{)");
+	int index;
+	std::string serverStrings[10];
+	while (std::getline(file, line))
 	{
-        Server[
-		std::smatch match = *iter;
-		// Store the captured group (the content inside the braces)
-		serverConfigs.push_back(match[1].str());
+		if (std::regex_search(line, startPattern))
+		{
+			// std::cout << "server switch" << std::endl;
+			index++;
+		}
+		serverStrings[index] += line + '\n';
 	}
+	for (size_t i = 0; i <= index ; i++)
+		servers_.emplace_back(serverStrings[i]);
 }
 
 Webserv::~Webserv()
 {
 }
+// buffer << file.rdbuf();
+
+// content = buffer.str();
+// std::regex pattern(R"(server\s*\{)");
+// std::sregex_iterator begin(content.begin(), content.end(), pattern);
+// std::sregex_iterator end;
+// for (std::sregex_iterator iter = begin; iter != end; ++iter)
+// {
+// 	std::smatch match = *iter;
+// 	std::cout << match.str() << std::endl;

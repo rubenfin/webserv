@@ -1,1 +1,1 @@
-c++ src/* && ./a.out config_files/config_git
+c++ -std=c++11 src/* && ./a.out config_files/config_git
