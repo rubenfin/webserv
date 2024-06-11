@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jack <jack@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/09 22:31:00 by jack             ###   ########.fr       */
+/*   Updated: 2024/06/11 15:37:24 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,61 @@ class Server
 	std::string port_;
 	std::string root_;
 	std::string index_;
+	std::string methodsList_;
 	std::unordered_set<HttpMethod> allowMethods_;
 	std::vector<Locations> locations_;
 
   public:
+	void getLocationStack(std::string locationContent)
+	{
+		std::vector<std::string> result;
+		std::string line;
+		std::stack<char> bracketStack;
+		bool insideBrackets = false;
+		std::ostringstream currentContent;
+		std::istringstream iss(locationContent);
+
+		while (std::getline(iss, line))
+		{
+			for (char ch : line)
+			{
+				if (ch == '{')
+				{
+					bracketStack.push(ch);
+					if (bracketStack.size() == 1)
+					{
+						insideBrackets = true;
+						currentContent.str("");
+					}
+				}
+				else if (ch == '}')
+				{
+					if (!bracketStack.empty())
+					{
+						bracketStack.pop();
+						if (bracketStack.empty())
+						{
+							insideBrackets = false;
+							result.push_back(currentContent.str());
+						}
+					}
+				}
+				if (insideBrackets)
+				{
+					currentContent << ch;
+				}
+			}
+			if (insideBrackets)
+			{
+				currentContent << '\n';
+			}
+		}
+		for (const auto &line : result)
+		{
+			locations_.emplace_back(line);
+			// std::cout << "Location" << line << std::endl;
+		}
+	}
 	std::string extractValue(const std::string &searchString)
 	{
 		size_t pos = serverContent_.find(searchString);
@@ -75,10 +126,42 @@ class Server
 	}
 	void setMethods(std::string serverContent)
 	{
-		std::string methodsList = extractValue("methods");
+		methodsList_ = extractValue("methods");
 		// std::cout << "methods " << methodsList << std::endl;
 	}
-	void setLocations(std::string serverContent)
+
+	std::string getServerName(void)
+	{
+		return (serverName_);
+	}
+	std::string getPort(void)
+	{
+		return (port_);
+	}
+	std::string getRoot(void)
+	{
+		return (root_);
+	}
+	std::string getIndex(void)
+	{
+		return (index_);
+	}
+	std::unordered_set<HttpMethod> getMethods(void)
+	{
+		return (allowMethods_);
+	}
+
+	std::string getMethodsList(void)
+	{
+		return (methodsList_);
+	}
+
+	std::vector<Locations> getLocation(void)
+	{
+		return(locations_);
+	}
+
+	void setLocationsRegex(std::string serverContent)
 	{
 		int index = 0;
 		bool copyAllowed = false;
@@ -98,20 +181,36 @@ class Server
 				locationsStrings[index] += line + '\n';
 		}
 		for (size_t i = 0; i <= index; i++)
+		{
+			// std::cout << "Regex parsing set Locations\n" << locationsStrings[i];
 			locations_.emplace_back(locationsStrings[i]);
+		}
 
-    	std::cout << "New server" << std::endl;
-
+		// std::cout << "New server" << std::endl;
 	}
 
 	Server(std::string serverContent)
 	{
 		serverContent_ = serverContent;
+		// std::cout << "test0" << std::endl;
+		std::cout << serverContent << std::endl;
 		setServerName(serverContent);
+		// std::cout << "test1" << std::endl;
 		setPort(serverContent);
+		// std::cout << "test2" << std::endl;
+
 		setRoot(serverContent);
+		// std::cout << "test3" << std::endl;
+
 		setIndex(serverContent);
+		// std::cout << "test4" << std::endl;
+
 		setMethods(serverContent);
-		setLocations(serverContent);
+		// std::cout << "test5" << std::endl;
+
+		setLocationsRegex(serverContent);
+		// std::cout << "test6" << std::endl;
+
+		// getLocationStack(serverContent);
 	}
 };

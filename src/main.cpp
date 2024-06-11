@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:50:29 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/09 17:10:30 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/11 13:01:12 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,5 +18,6 @@ int	main(int argc, char **argv)
 		return (1);
 	std::string filename = argv[1];
 	Webserv webserv(filename);
+	webserv.printParsing();
 	return (0);
 }

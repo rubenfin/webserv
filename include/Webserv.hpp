@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jack <jack@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/09 22:30:49 by jack             ###   ########.fr       */
+/*   Updated: 2024/06/11 16:07:58 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 class Webserv
 {
@@ -26,14 +32,35 @@ class Webserv
 	std::vector<Server> servers_;
 
   public:
-	Webserv(std::string fileName);
-	~Webserv();
-};
+	void printParsing(void)
+	{
+		std::cout << "Amount servers == " << servers_.size() << std::endl;
 
-Webserv::Webserv(std::string fileName)
+		for (size_t i = 0; i < servers_.size(); i++)
+		{
+			std::cout << i << "<---- server index" << std::endl;
+			std::cout << "ServerName = " << servers_[i].getServerName() << std::endl;
+			std::cout << "Port = " << servers_[i].getPort() << std::endl;
+			std::cout << "Root = " << servers_[i].getRoot() << std::endl;
+			std::cout << "Index = " << servers_[i].getIndex() << std::endl;
+			std::cout << "Methods list = " << servers_[i].getMethodsList() << std::endl;
+			std::vector<Locations> tmp = servers_[i].getLocation();
+			for (size_t i = 0; i < tmp.size(); i++)
+			{
+				std::cout << "A location!! " << std::endl;
+				tmp[i].printLocationsContent();
+			}
+			
+		}
+	}
+Webserv(std::string fileName)
 {
-	int	count;
+	int		count;
+	int		index;
+	bool	flag;
 
+	index = 0;
+	flag = false;
 	std::string content;
 	std::stringstream buffer;
 	std::ifstream file(fileName);
@@ -44,24 +71,42 @@ Webserv::Webserv(std::string fileName)
 	}
 	std::string line;
 	std::regex startPattern(R"(server\s*\{)");
-	int index;
-	std::string serverStrings[10];
+	std::vector<std::string> serverStrings;
 	while (std::getline(file, line))
 	{
 		if (std::regex_search(line, startPattern))
 		{
-			// std::cout << "server switch" << std::endl;
-			index++;
+			if (flag)
+			{
+				serverStrings.push_back("");
+				index++;
+			}
+			flag = true;
 		}
-		serverStrings[index] += line + '\n';
+		if (flag)
+		{
+			if (serverStrings.size() <= index)
+			{
+				serverStrings.push_back("");
+			}
+			serverStrings[index] += line + '\n';
+		}
 	}
-	for (size_t i = 0; i <= index ; i++)
-		servers_.emplace_back(serverStrings[i]);
+    if (!serverStrings.empty())
+    {
+        servers_.reserve(servers_.size() + serverStrings.size());
+        for (const auto& serverString : serverStrings)
+        {
+            servers_.emplace_back(serverString);
+        }
+    }
 }
 
-Webserv::~Webserv()
+~Webserv()
 {
 }
+};
+
 // buffer << file.rdbuf();
 
 // content = buffer.str();
