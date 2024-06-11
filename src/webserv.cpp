@@ -1,19 +1,13 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   main.cpp                                           :+:    :+:            */
+/*   webserv.cpp                                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2024/06/11 09:27:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/11 09:28:14 by rfinneru      ########   odam.nl         */
+/*   Created: 2024/06/11 09:27:24 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/11 09:27:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "include/webserv.hpp"
-
-int	main(int ac, char **av)
-{
-    
-	return (0);
-}
+#include "../include/webserv.hpp"
