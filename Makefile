@@ -40,7 +40,7 @@ re: fclean all
 
 $(NAME): $(OBJS_DIR) $(OBJ) $(LIBS_TARGET)
 	@$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LINKERFLAGS) $(LIBS_TARGET) $(LIBS_TARGET) -lreadline 
-	@echo "$(GREEN)Compiled minishell!$(DEFAULT)"
+	@echo "$(GREEN)Compiled webserv!$(DEFAULT)"
 
 $(OBJS_DIR)/%.o: $(SRC_DIR)/%.c
 	echo $<

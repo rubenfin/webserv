@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/11 15:37:24 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.hpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/11 16:36:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,11 @@ enum class HttpMethod
 class Server
 {
   protected:
+	int socket;
 	std::string serverContent_;
 	std::string serverName_;
-	std::string port_;
+	std::string portString_;
+	u_int16_t port_;
 	std::string root_;
 	std::string index_;
 	std::string methodsList_;
@@ -111,7 +113,8 @@ class Server
 	}
 	void setPort(std::string serverContent)
 	{
-		port_ = extractValue("listen");
+		portString_ = extractValue("listen");
+		port_ = std::stoi(portString_);
 		// std::cout << "port " << port_ << std::endl;
 	}
 	void setRoot(std::string serverContent)
@@ -134,10 +137,16 @@ class Server
 	{
 		return (serverName_);
 	}
-	std::string getPort(void)
+	std::string getPortString(void)
+	{
+		return (portString_);
+	}
+
+	u_int16_t getPort(void)
 	{
 		return (port_);
 	}
+
 	std::string getRoot(void)
 	{
 		return (root_);
@@ -158,7 +167,7 @@ class Server
 
 	std::vector<Locations> getLocation(void)
 	{
-		return(locations_);
+		return (locations_);
 	}
 
 	void setLocationsRegex(std::string serverContent)

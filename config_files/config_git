@@ -19,7 +19,7 @@ server {
 	}
 
 	location /directory {
-		alias
+		alias 
 		allow_methods GET
 		root YoupiBanane/
 		index youpi.bad_extension

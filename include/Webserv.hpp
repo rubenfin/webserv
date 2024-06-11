@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/11 16:07:58 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.hpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/11 16:17:20 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,16 @@
 #include "Server.hpp" // Include Server.hpp here
 #include <fstream>
 #include <iostream>
+#include <netinet/in.h>
 #include <regex>
 #include <sstream>
-#include <string>
-#include <vector>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
 class Webserv
 {
@@ -32,6 +32,7 @@ class Webserv
 	std::vector<Server> servers_;
 
   public:
+	int execute(void);
 	void printParsing(void)
 	{
 		std::cout << "Amount servers == " << servers_.size() << std::endl;
@@ -50,61 +51,60 @@ class Webserv
 				std::cout << "A location!! " << std::endl;
 				tmp[i].printLocationsContent();
 			}
-			
 		}
 	}
-Webserv(std::string fileName)
-{
-	int		count;
-	int		index;
-	bool	flag;
+	Webserv(std::string fileName)
+	{
+		int count;
+		int index;
+		bool flag;
 
-	index = 0;
-	flag = false;
-	std::string content;
-	std::stringstream buffer;
-	std::ifstream file(fileName);
-	if (!file.is_open())
-	{
-		std::cerr << "Error: Unable to open file " << fileName << std::endl;
-		return ;
-	}
-	std::string line;
-	std::regex startPattern(R"(server\s*\{)");
-	std::vector<std::string> serverStrings;
-	while (std::getline(file, line))
-	{
-		if (std::regex_search(line, startPattern))
+		index = 0;
+		flag = false;
+		std::string content;
+		std::stringstream buffer;
+		std::ifstream file(fileName);
+		if (!file.is_open())
 		{
+			std::cerr << "Error: Unable to open file " << fileName << std::endl;
+			return ;
+		}
+		std::string line;
+		std::regex startPattern(R"(server\s*\{)");
+		std::vector<std::string> serverStrings;
+		while (std::getline(file, line))
+		{
+			if (std::regex_search(line, startPattern))
+			{
+				if (flag)
+				{
+					serverStrings.push_back("");
+					index++;
+				}
+				flag = true;
+			}
 			if (flag)
 			{
-				serverStrings.push_back("");
-				index++;
+				if (serverStrings.size() <= index)
+				{
+					serverStrings.push_back("");
+				}
+				serverStrings[index] += line + '\n';
 			}
-			flag = true;
 		}
-		if (flag)
+		if (!serverStrings.empty())
 		{
-			if (serverStrings.size() <= index)
+			servers_.reserve(servers_.size() + serverStrings.size());
+			for (const auto &serverString : serverStrings)
 			{
-				serverStrings.push_back("");
+				servers_.emplace_back(serverString);
 			}
-			serverStrings[index] += line + '\n';
 		}
 	}
-    if (!serverStrings.empty())
-    {
-        servers_.reserve(servers_.size() + serverStrings.size());
-        for (const auto& serverString : serverStrings)
-        {
-            servers_.emplace_back(serverString);
-        }
-    }
-}
 
-~Webserv()
-{
-}
+	~Webserv()
+	{
+	}
 };
 
 // buffer << file.rdbuf();
