@@ -1,1 +1,0 @@
-c++ -std=c++20 src/* -g && gdb --args ./a.out config_files/config_single
