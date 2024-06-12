@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/11 17:14:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/12 13:42:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,10 +97,21 @@ void Server::getLocationStack(std::string locationContent)
 		_index = extractValue("index");
 		// std::cout << "index " << _index << std::endl;
 	}
+	
 	void Server::setMethods(void)
 	{
 		_methodsList = extractValue("methods");
 		// std::cout << "methods " << methodsList << std::endl;
+	}
+
+	void Server::setSockedFD(int fd)
+	{
+		this->_socketfd = fd;
+	}
+
+	int Server::getSocketFD(void)
+	{
+		return(this->_socketfd);
 	}
 
 	std::string Server::getServerName(void)

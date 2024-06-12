@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/11 17:11:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/12 13:25:52 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Locations;
 class Server
 {
   protected:
-	int socket;
+	int _socketfd;
 	std::string _serverContent;
 	std::string _serverName;
 	std::string _portString;
@@ -51,11 +51,13 @@ class Server
 	void setRoot(void);
 	void setIndex(void);
 	void setMethods(void);
+	void setSockedFD(int fd);
 	std::string getServerName(void);
 	std::string getPortString(void);
 	u_int16_t getPort(void);
 	std::string getRoot(void);
 	std::string getIndex(void);
+	int getSocketFD(void);
 	std::unordered_set<HttpMethod> getMethods(void);
 	std::string getMethodsList(void);
 	std::vector<Locations> getLocation(void);
