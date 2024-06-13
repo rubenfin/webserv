@@ -1,33 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.cpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/11 17:07:40 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/06/13 16:46:51 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Webserv.hpp"
 
-void	Webserv::printParsing(void)
+void Webserv::printParsing(void)
 {
 	std::cout << "Amount servers == " << _servers.size() << std::endl;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
-		std::cout << i << "<---- server index" << std::endl;
-		std::cout << "ServerName = " << _servers[i].getServerName() << std::endl;
-		std::cout << "Port = " << _servers[i].getPort() << std::endl;
-		std::cout << "Root = " << _servers[i].getRoot() << std::endl;
-		std::cout << "Index = " << _servers[i].getIndex() << std::endl;
-		std::cout << "Methods list = " << _servers[i].getMethodsList() << std::endl;
+		// std::cout << i << "<---- server index" << std::endl;
+		// std::cout << "ServerName = " << _servers[i].getServerName() << std::endl;
+		// std::cout << "Port = " << _servers[i].getPort() << std::endl;
+		// std::cout << "Root = " << _servers[i].getRoot() << std::endl;
+		// std::cout << "Index = " << _servers[i].getIndex() << std::endl;
+		// std::cout << "Methods list = " << _servers[i].getMethodsList() << std::endl;
+		// _servers[i].printMethods();
 		std::vector<Locations> tmp = _servers[i].getLocation();
 		for (size_t i = 0; i < tmp.size(); i++)
 		{
-			std::cout << "A location!! " << std::endl;
-			tmp[i].printLocationsContent();
+			std::cout << "Location -->" << i << std::endl;
+			// tmp[i].printLocationsContent();
+			std::cout << tmp[i].getLocationDirectory() << std::endl;
+			tmp[i].printMethods();
+			std::cout << "Root " << tmp[i].getRoot() << std::endl;
+			std::cout << "Index " << tmp[i].getIndex() << std::endl;
+			std::cout << "Cgi_pass " << tmp[i].getCgi_pass() << std::endl;
 		}
 	}
 }
@@ -77,8 +83,22 @@ Webserv::Webserv(std::string fileName)
 			_servers.emplace_back(serverString);
 		}
 	}
+	setResponse("files/response_files/test.html");
 }
 
+void Webserv::setResponse(const std::string &filePath)
+{
+	std::ifstream file(filePath);
+	if (!file.is_open())
+	{
+		std::cerr << "Error: Unable to open file " << filePath << std::endl;
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string response = buffer.str();
+	_response = "HTTP/1.1 200 OK\nContent-type: text/html\n\n" + response;
+}
 Webserv::~Webserv()
 {
 }

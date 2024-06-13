@@ -1,79 +1,56 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Locations.cpp                                      :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/11 17:09:39 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Locations.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:08:48 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/06/13 15:59:18 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Locations.hpp"
 
-std::string Locations::extractValue(const std::string &searchString)
+void Locations::printMethods(void)
 {
-	size_t	pos;
-	size_t	endPos;
-
-	pos = _locationContent.find(searchString);
-	if (pos != std::string::npos)
-	{
-		pos += searchString.length();
-		endPos = _locationContent.find('\n', pos);
-		if (endPos != std::string::npos)
-			return (_locationContent.substr(pos, endPos - pos));
-		else
-			return (_locationContent.substr(pos));
-	}
-	return ("");
+	std::cout << "GET Methods == " << _allowedMethods.GET << std::endl;
+	std::cout << "POST Methods == " << _allowedMethods.POST << std::endl;
+	std::cout << "DELETE Methods == " << _allowedMethods.DELETE << std::endl;
 }
-
 
 void Locations::printLocationsContent(void)
 {
 	std::cout << _locationContent << std::endl;
 }
-
-std::string Locations::extractDirectory(const std::string &line)
+void Locations::setMethods(void)
 {
-	std::string keyword = "location";
-	std::size_t keywordPos = line.find(keyword);
-	if (keywordPos != std::string::npos)
-	{
-		std::size_t beginLocation = keywordPos + keyword.size();
-		while (beginLocation < line.size() && std::isspace(line[beginLocation]))
-			++beginLocation;
-		std::size_t endLocation = beginLocation;
-		while (endLocation < line.size() && !std::isspace(line[endLocation]))
-			++endLocation;
-		std::string directory = line.substr(beginLocation, endLocation
-				- beginLocation);
-		return (directory);
-	}
-	return ("");
+	_methodsList = extractValue("methods");
+	_allowedMethods.GET = false;
+	_allowedMethods.POST = false;
+	_allowedMethods.DELETE = false;
+	if (_methodsList.find("GET") != std::string::npos)
+		_allowedMethods.GET = true;
+	if (_methodsList.find("POST") != std::string::npos)
+		_allowedMethods.POST = true;
+	if (_methodsList.find("DELETE") != std::string::npos)
+		_allowedMethods.DELETE = true;
+	// std::cout << "methods " << methodsList << std::endl;
 }
 
-std::vector<std::string> Locations::getLocationRegex(std::string locationContent)
+void Locations::getLocationRegex(std::string locationContent)
 {
-	int	index;
+	_locationDirectory = extractValue("location");
+	_methodsList = extractValue("allow_methods");
+	setRoot();
+	setIndex();
+	setCgi_pass();
+	setMethods();
+}
 
-	std::string line;
-	std::regex startPattern(R"(location)");
-	std::istringstream iss(locationContent);
-	std::vector<std::string> result;
-	index = 0;
-	while (std::getline(iss, line))
-	{
-		if (std::regex_search(line, startPattern))
-		{
-			result.push_back(extractDirectory(line));
-			// std::cout << "directory" << result[index] << std::endl;
-			index++;
-		}
-	}
-	return (result);
+std::string Locations::getLocationDirectory(void)
+{
+	return (_locationDirectory);
 }
 
 Locations::Locations(std::string locationContent)
@@ -82,11 +59,57 @@ Locations::Locations(std::string locationContent)
 	_locationContent = locationContent;
 	// std::cout << locationContent << std::endl;
 	// std::vector<std::string> content = getLocationStack(locationContent);
-	std::vector<std::string> content = getLocationRegex(locationContent);
+	getLocationRegex(locationContent);
 	// for (const std::string &line : content)
 	// {
 	// 	std::cout << "Location: " << line << std::endl;
 	// }
+}
+
+std::string Locations::extractValue(std::string toSearch)
+{
+	std::size_t keywordPos = _locationContent.find(toSearch);
+	if (keywordPos != std::string::npos)
+	{
+		std::size_t beginLocation = keywordPos + toSearch.size();
+		while (beginLocation < _locationContent.size()
+			&& std::isspace(_locationContent[beginLocation]))
+			++beginLocation;
+		std::size_t endLocation = beginLocation;
+		while (endLocation < _locationContent.size()
+			&& !std::isspace(_locationContent[endLocation]))
+			++endLocation;
+		std::string directory = _locationContent.substr(beginLocation,
+				endLocation - beginLocation);
+		return (directory);
+	}
+	return ("");
+}
+
+void Locations::setRoot(void)
+{
+	_root = extractValue("root");
+}
+void Locations::setIndex(void)
+{
+	_index = extractValue("index");
+}
+void Locations::setCgi_pass(void)
+{
+	_cgi_pass = extractValue("cgi_pass");
+}
+
+std::string Locations::getRoot(void)
+{
+	return(_root);
+}
+std::string Locations::getIndex(void)
+{
+	return(_index);
+}
+std::string Locations::getCgi_pass(void)
+{
+	return(_cgi_pass);
 }
 
 Locations::~Locations()

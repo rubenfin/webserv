@@ -1,0 +1,14 @@
+response vanaf een client request kunnen sturen
+
+- request parsen
+- url maken voor de server van de config file
+- zoek functie zodat je de request met response kan matchen
+- 
+
+
+
+
+voor morgen 
+- request parsen dus Methods Path en checken voor juiste protocol
+- config file gebruiken als URL gelijk is aan Locations root + index redirect naar die file
+- 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Example</title>
+</head>
+<body>
+    <h1>Delete Example</h1>
+    
+    <p>Enter ID of item to delete:</p>
+    <form id="deleteForm">
+        <label for="itemId">Item ID:</label>
+        <input type="text" id="itemId" name="itemId" required>
+        <button type="button" onclick="deleteItem()">Delete Item</button>
+    </form>
+
+    <div id="deleteResult"></div>
+
+    <script>
+        function deleteItem() {
+            var itemId = document.getElementById("itemId").value;
+
+            // Construct the URL for your DELETE request
+            var url = 'http://localhost:8080/delete-item/' + itemId;  // Replace with your server URL and endpoint
+
+            // Create a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+
+            // Open a DELETE request to the server
+            xhr.open('DELETE', url, true);
+
+            // Set the content type
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            // Define what happens on successful data submission
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    document.getElementById("deleteResult").innerHTML = "Item deleted successfully!";
+                } else {
+                    document.getElementById("deleteResult").innerHTML = "Failed to delete item.";
+                }
+            };
+
+            // Send the request
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-CC = c++
-CFLAGS = -g -Wall -Wextra -Werror
+CC = c++ -std=c++20
+CFLAGS = -g
 SRC_DIR = src
 SRC :=  $(wildcard $(SRC_DIR)/*.cpp)
 OBJS_DIR = objs
