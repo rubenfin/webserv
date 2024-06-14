@@ -7,8 +7,8 @@ server {
 
 	allow_methods GET
 
-	location /put_test {
-		allow_methods PUT
+	location /put_test.html {
+		allow_methods POST
 		root ./YoupiBanane/put_here
 		alias /other_dir
 	}
@@ -26,7 +26,7 @@ server {
 	}
 
 	location /test {
-		allow_methods POST
+		allow_methods DELETE
 		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 }

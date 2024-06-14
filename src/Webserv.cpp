@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/14 13:49:53 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.cpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/14 14:59:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,6 @@ void Webserv::setResponse(const std::string &filePath)
 	buffer << file.rdbuf();
 	std::string response = buffer.str();
 	_response = "HTTP/1.1 200 OK\nContent-type: text/html\n\n" + response;
-}
-
-Webserv::Webserv()
-{
-	
 }
 Webserv::~Webserv()
 {

@@ -81,7 +81,7 @@ server {
 	location /POST_test {
 		allow_methods POST
 		root ./YoupiBanane/POST_here
-		alias
+		alias /ditwel/
 	}
 
 	location /post_body {

@@ -1,5 +1,5 @@
 server {
-    listen                  3030;
+    listen                  8000;
     index                   index.html;
     allow_methods           GET;
     root                    root;
@@ -10,6 +10,10 @@ server {
         autoindex           on;
         allow_methods       GET POST;
         index               index.html;
+    }
+    location /test {
+        allow_methods GET POST DELETE
+        index put_test.html
     }
     location /about {
         autoindex           on;

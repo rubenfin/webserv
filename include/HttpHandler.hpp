@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpHandler.hpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 20:00:39 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/14 14:50:29 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   HttpHandler.hpp                                    :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/14 17:01:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,23 +14,25 @@
 #include "Webserv.hpp"
 #include <iostream>
 
-struct		MethodsReq
+struct			MethodsReq
 {
-	bool	GET;
-	bool	POST;
-	bool	DELETE;
+	bool		GET;
+	bool		POST;
+	bool		DELETE;
 } typedef MethodsReq;
 
-class Server;
+class			Server;
 
-class HttpHandler : public Webserv
+class HttpHandler
 {
   private:
 	std::string _responseContent;
 	std::string _requestContent;
 	std::string _request;
-	MethodsReq _allowedMethods;
+	std::string _response;
+	MethodsReq	_allowedMethods;
 	std::string _requestURL;
+	Server		*_server;
 
   public:
 	HttpHandler();
@@ -41,9 +43,10 @@ class HttpHandler : public Webserv
 	void setMethods(void);
 
 	void matchResponse(void);
-	void handleRequest(const std::string &content);
+	void handleRequest(const std::string &content, Server &serverAddress);
 	std::string getResponseContent(void);
+	std::string getResponseURL(void);
 	std::string setRequestContent(void);
 
-	const std::vector<Server>& getServers() const;
+	// const std::vector<Server>& getServers() const;
 };

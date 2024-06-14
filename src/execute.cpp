@@ -8,9 +8,9 @@ int Webserv::execute(void)
 	socklen_t	addrlen;
 
 	// struct sockaddr_in	*address;
-	_handler = new HttpHandler;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
+	
 	
 	while (true)
 	{
@@ -24,8 +24,8 @@ int Webserv::execute(void)
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
 		std::string content(buffer);
-		_handler->handleRequest(content);
-		if (send(client_socket, _response.c_str(), strlen(_response.c_str()),
+		_servers[0].getHttpHandler()->handleRequest(content, _servers[0]);
+		if (send(client_socket, _servers[0].getHttpHandler()->getResponseURL().c_str(), strlen( _servers[0].getHttpHandler()->getResponseURL().c_str()),
 				0) == -1)
 		{
 			perror("send");

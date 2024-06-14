@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/13 19:40:45 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.cpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/14 17:31:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void Server::setServer()
 	opt = 1;
 	this->_address = new struct sockaddr_in;
 	_addrlen = sizeof(*this->_address);
-		// Correctly set the size based on the allocated structure
+	// Correctly set the size based on the allocated structure
 	setSockedFD(socket(AF_INET, SOCK_STREAM, 0));
 	if (getSocketFD() < 0)
 	{
@@ -27,8 +27,8 @@ void Server::setServer()
 		delete this->_address; // Clean up allocated memory
 		exit(EXIT_FAILURE);
 	}
-	if (setsockopt(getSocketFD(), SOL_SOCKET,
-			SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
+			sizeof(opt)))
 	{
 		perror("setsockopt");
 		delete this->_address; // Clean up allocated memory
@@ -37,8 +37,7 @@ void Server::setServer()
 	this->_address->sin_family = AF_INET;
 	this->_address->sin_addr.s_addr = INADDR_ANY;
 	this->_address->sin_port = htons(getPort());
-	if (bind(getSocketFD(), (struct sockaddr *)_address,
-			sizeof(*_address)) < 0)
+	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
 	{
 		perror("bind failed");
 		delete _address; // Clean up allocated memory
@@ -50,6 +49,7 @@ void Server::setServer()
 		delete _address; // Clean up allocated memory
 		exit(EXIT_FAILURE);
 	}
+	_http_handler = new HttpHandler;
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -216,6 +216,11 @@ std::vector<Locations> Server::getLocation(void)
 	return (_locations);
 }
 
+HttpHandler *Server::getHttpHandler(void)
+{
+	return(_http_handler);
+}
+
 struct sockaddr_in *Server::getAddress(void)
 {
 	return (_address);
@@ -261,18 +266,18 @@ Server::Server(std::string serverContent)
 	// std::cout << "test1" << std::endl;
 	setPort();
 	// std::cout << "test2" << std::endl;
-
 	setRoot();
 	// std::cout << "test3" << std::endl;
-
 	setIndex();
 	// std::cout << "test4" << std::endl;
-
 	setMethods();
 	// std::cout << "test5" << std::endl;
-
 	setLocationsRegex(serverContent);
 	// std::cout << "test6" << std::endl;
-
 	// getLocationStack();
+}
+
+Server::~Server()
+{
+	delete	_http_handler;
 }

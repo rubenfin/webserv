@@ -1,18 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/14 13:36:05 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.hpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/14 16:24:02 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include "Locations.hpp"
 #include "Webserv.hpp"
+#include "HttpHandler.hpp"
 #include <iostream>
 #include <netinet/in.h>
 #include <regex>
@@ -32,10 +33,11 @@ struct					Methods
 
 class					Locations;
 
+class HttpHandler;
+
 class Server
 {
   protected:
-	HttpHandler			*_handler;
 	int					_socketfd;
 	std::string _serverContent;
 	std::string _portString;
@@ -50,6 +52,8 @@ class Server
 
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
+
+	HttpHandler			*_http_handler;
 
   public:
 	void getLocationStack(std::string locationContent);
@@ -73,6 +77,8 @@ class Server
 	std::string getMethodsList(void);
 	struct sockaddr_in *getAddress(void);
 	std::vector<Locations> getLocation(void);
+	HttpHandler *getHttpHandler(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
+	~Server();
 };

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/14 13:43:52 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   HttpHandler.cpp                                    :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/14 17:42:59 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,16 +67,33 @@ void HttpHandler::setMethods(void)
 
 void HttpHandler::matchResponse(void)
 {
-	
+	int	i;
+
+	std::vector<Locations> tmp = _server->getLocation();
+	i = 0;
+	for (const Locations &location : tmp)
+	{
+		std::cout << _requestURL << " | " << tmp[i].getLocationDirectory() << "|einde"<< std::endl;
+		if (_requestURL == tmp[i].getLocationDirectory())
+		{
+			_response = _requestURL;
+			std::cout << "dit is response" << _response << std::endl;
+			return ;
+		}
+		i++;
+	}
+	std::cout << "niks gematcht" << std::endl;
 }
 
-void HttpHandler::handleRequest(const std::string &content)
+void HttpHandler::handleRequest(const std::string &content,
+	Server &serverAddress)
 {
+	_server = &serverAddress;
 	_requestContent = content;
 	std::cout << _requestContent << std::endl;
 	setRequest();
 	setMethods();
-	_requestURL =  extractValue("/");
+	_requestURL = "/" + extractValue("/"); // TODO
 	matchResponse();
 }
 
@@ -89,8 +106,9 @@ std::string HttpHandler::getResponseContent(void)
 	return (_responseContent);
 }
 
-const std::vector<Server>& HttpHandler::getServers() const {
-    return _servers;
+std::string HttpHandler::getResponseURL(void)
+{
+	return(_requestURL);
 }
 
 HttpHandler::HttpHandler()

@@ -7,7 +7,7 @@ server {
 
 	allow_methods GET
 
-	location /put_test {
+	location /put_test.html {
 		allow_methods POST
 		root ./YoupiBanane/put_here
 		alias /other_dir
