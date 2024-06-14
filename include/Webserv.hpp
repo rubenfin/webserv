@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/13 20:21:53 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/14 13:49:33 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Webserv
 	void printParsing(void);
 	void printMethods(void);
 	void setResponse(const std::string &filePath);
+	Webserv();
 	Webserv(std::string fileName);
 	~Webserv();
 };

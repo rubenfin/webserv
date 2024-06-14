@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/13 21:32:37 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/14 13:43:52 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void HttpHandler::setResponseContent(std::string content)
 	_responseContent = content;
 }
 
-void HttpHandler::getRequest()
+void HttpHandler::setRequest()
 {
 	std::istringstream iss(_requestContent);
 	std::string line;
@@ -45,24 +45,52 @@ void HttpHandler::getRequest()
 	{
 		_request = line;
 	}
-    
 	std::cout << _request << std::endl;
+}
+
+void HttpHandler::setMethods(void)
+{
+	std::cout << _request << std::endl;
+	_allowedMethods.GET = false;
+	_allowedMethods.POST = false;
+	_allowedMethods.DELETE = false;
+	if (_request.find("GET") != std::string::npos)
+		_allowedMethods.GET = true;
+	if (_request.find("POST") != std::string::npos)
+		_allowedMethods.POST = true;
+	if (_request.find("DELETE") != std::string::npos)
+		_allowedMethods.DELETE = true;
+	std::cout << "GET " << _allowedMethods.GET << std::endl;
+	std::cout << "POST " << _allowedMethods.POST << std::endl;
+	std::cout << "DELETE " << _allowedMethods.DELETE << std::endl;
+}
+
+void HttpHandler::matchResponse(void)
+{
+	
 }
 
 void HttpHandler::handleRequest(const std::string &content)
 {
 	_requestContent = content;
-    getRequest();
-    
+	std::cout << _requestContent << std::endl;
+	setRequest();
+	setMethods();
+	_requestURL =  extractValue("/");
+	matchResponse();
 }
 
-std::string HttpHandler::getRequestContent(void)
+std::string HttpHandler::setRequestContent(void)
 {
 	return (_requestContent);
 }
 std::string HttpHandler::getResponseContent(void)
 {
 	return (_responseContent);
+}
+
+const std::vector<Server>& HttpHandler::getServers() const {
+    return _servers;
 }
 
 HttpHandler::HttpHandler()

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Methods Test</title>
+</head>
+<body>
+    <h1>Test HTTP Methods</h1>
+
+    <h2>GET Request</h2>
+    <form action="/hyperlink.html" method="get">
+        <label for="get-data">Enter some data for GET:</label>
+        <input type="text" id="get-data" name="get-data">
+        <button type="submit">Send GET Request</button>
+    </form>
+
+    <h2>POST Request</h2>
+    <form action="/hyperlink.html" method="post">
+        <label for="post-data">Enter some data for POST:</label>
+        <input type="text" id="post-data" name="post-data">
+        <button type="submit">Send POST Request</button>
+    </form>
+
+    <h2>DELETE Request</h2>
+    <form id="delete-form">
+        <label for="delete-data">Enter some data for DELETE:</label>
+        <input type="text" id="delete-data" name="delete-data">
+        <button type="button" onclick="sendDeleteRequest()">Send DELETE Request</button>
+    </form>
+
+    <script>
+        function sendDeleteRequest() {
+            const data = document.getElementById('delete-data').value;
+            fetch('/hyperlink.html', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'delete-data': data
+                })
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Response:', data);
+                alert('DELETE request sent successfully');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending DELETE request');
+            });
+        }
+    </script>
+</body>
+</html>

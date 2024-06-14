@@ -11,6 +11,7 @@ int Webserv::execute(void)
 	_handler = new HttpHandler;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
+	
 	while (true)
 	{
 		client_socket = accept(this->_servers[0].getSocketFD(),
@@ -22,7 +23,6 @@ int Webserv::execute(void)
 		}
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
-		printf("Buffer\n %s\n", buffer);
 		std::string content(buffer);
 		_handler->handleRequest(content);
 		if (send(client_socket, _response.c_str(), strlen(_response.c_str()),

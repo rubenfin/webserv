@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/13 19:49:06 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/14 13:36:05 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class					Locations;
 class Server
 {
   protected:
+	HttpHandler			*_handler;
 	int					_socketfd;
 	std::string _serverContent;
 	std::string _portString;
@@ -49,7 +50,6 @@ class Server
 
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
-	
 
   public:
 	void getLocationStack(std::string locationContent);

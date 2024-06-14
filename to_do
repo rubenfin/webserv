@@ -8,7 +8,7 @@ response vanaf een client request kunnen sturen
 
 
 
-voor morgen 
-- request parsen dus Methods Path en checken voor juiste protocol
+voor vandaag 
+- checken voor juiste protocol
 - config file gebruiken als URL gelijk is aan Locations root + index redirect naar die file
-- 
+- uitzoeken wat post en delete nog extra request parsen nodig heeft
