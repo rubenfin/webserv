@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/17 11:49:07 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 15:46:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <unordered_set>
+#include <fcntl.h>
 
 struct					Methods
 {
@@ -42,6 +43,7 @@ class Server
 	std::string _serverContent;
 	std::string _portString;
 	std::string _methodsList;
+	char * _stringFromFile;
 
 	std::string _serverName;
 	u_int16_t			_port;
@@ -66,6 +68,7 @@ class Server
 	void printMethods(void);
 	void setSockedFD(int fd);
 	void setServer();
+	char * getStringFromFile(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
 	u_int16_t getPort(void);
@@ -80,5 +83,7 @@ class Server
 	HttpHandler *getHttpHandler(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
+	Locations *findMatchingDirective(void);
+	void readFile(void);
 	~Server();
 };

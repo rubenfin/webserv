@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/17 13:37:34 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 16:42:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,8 @@ void HttpHandler::matchResponse(void)
 	i = 0;
 	for (const Locations &location : tmp)
 	{
-		std::cout << _requestURL << " | " << tmp[i].getLocationDirectory() << "|einde" << std::endl;
-		if (_requestURL == tmp[i].getLocationDirectory())
+		std::cout << _requestURL << " | " << tmp[i].getLocationDirective() << "|einde" << std::endl;
+		if (_requestURL == tmp[i].getLocationDirective())
 		{
 			_response = _requestURL;
 			std::cout << "dit is response" << _response << std::endl;
@@ -83,6 +83,17 @@ void HttpHandler::matchResponse(void)
 		i++;
 	}
 	std::cout << "niks gematcht" << std::endl;
+}
+
+Locations *HttpHandler::findMatchingDirective(void)
+{
+	for (size_t i = 0; i < _server->getLocation().size(); i++)
+	{
+		if (getResponseURL() == _server->getLocation()[i].getLocationDirective())
+			return (new Locations(_server->getLocation()[i]));
+	}
+	std::cout << "found nothing" << std::endl;
+	return (NULL);
 }
 
 std::string HttpHandler::findRequestedURL(const std::string &content)
@@ -118,8 +129,30 @@ void HttpHandler::handleRequest(const std::string &content,
 	setRequest();
 	setMethods();
 	_requestURL = findRequestedURL(content);
-	std::cout << "URL Found in request" << _requestURL << std::endl;
-	matchResponse();
+	_foundDirective = findMatchingDirective();
+	if (!_foundDirective)
+	{
+		_requestURL = "404";
+		std::cerr << "NOT FOUND 404, SEND RESPONSE BACK TODO" << std::endl;
+		return ;
+	}
+
+	if (_foundDirective->getRoot() != "")
+	{
+		std::cout << "eerste " << std::endl;
+		_requestURL = _foundDirective->getRoot() + _requestURL;
+	}
+	else if ( _foundDirective->getLocationDirective() == "/")
+	{
+		_requestURL = _server->getRoot() + _server->getIndex();
+		std::cout << "root = /" << _requestURL << std::endl;
+	}
+	else
+	{
+		std::cout << "laaste " << std::endl;
+		_requestURL = _server->getRoot() + _requestURL + "/" + _foundDirective->getIndex();
+	}
+	std::cout << "requestURL result --> " << _requestURL << std::endl;
 }
 
 std::string HttpHandler::setRequestContent(void)
@@ -133,9 +166,7 @@ std::string HttpHandler::getResponseContent(void)
 
 std::string HttpHandler::getResponseURL(void)
 {
-	if (_requestURL == "/")
-		_requestURL = _server->getIndex();
-	return (this->_server->getRoot() +_requestURL);
+	return (_requestURL);
 }
 
 HttpHandler::HttpHandler()

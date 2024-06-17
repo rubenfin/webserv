@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/14 14:59:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 16:07:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void Webserv::printParsing(void)
 		{
 			std::cout << "Location -->" << i << std::endl;
 			// tmp[i].printLocationsContent();
-			std::cout << tmp[i].getLocationDirectory() << std::endl;
+			std::cout << tmp[i].getLocationDirective() << std::endl;
 			tmp[i].printMethods();
 			std::cout << "Root " << tmp[i].getRoot() << std::endl;
 			std::cout << "Index " << tmp[i].getIndex() << std::endl;

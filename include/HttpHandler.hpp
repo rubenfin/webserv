@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/17 13:28:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 16:08:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ struct			MethodsReq
 	bool		DELETE;
 } typedef MethodsReq;
 
+class 	Locations;
+
 class			Server;
 
 class HttpHandler
@@ -32,6 +34,7 @@ class HttpHandler
 	std::string _response;
 	MethodsReq	_allowedMethods;
 	std::string _requestURL;
+	Locations	*_foundDirective;
 	Server		*_server;
 
   public:
@@ -48,5 +51,6 @@ class HttpHandler
 	std::string getResponseURL(void);
 	std::string setRequestContent(void);
 	std::string findRequestedURL(const std::string &content);
+	Locations *findMatchingDirective(void);
 	// const std::vector<Server>& getServers() const;
 };

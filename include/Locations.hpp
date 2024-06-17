@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/14 16:37:12 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 15:49:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Locations
 	std::string _locationContent;
 	std::string _methodsList;
 
-	std::string _locationDirectory;
+	std::string _locationDirective;
 	MethodsLoc	_allowedMethods;
 	std::string _root;
 	std::string _index;
@@ -44,7 +44,7 @@ class Locations
 
   public:
 	void printMethods(void);
-	std::string getLocationDirectory(void);
+	std::string getLocationDirective(void);
 	void setRoot(void);
 	void setIndex(void);
 	void setCgi_pass(void);

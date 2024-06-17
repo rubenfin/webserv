@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/17 13:42:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 16:01:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,12 @@ int Server::getSocketFD(void)
 	return (this->_socketfd);
 }
 
+char * Server::getStringFromFile(void)
+{
+	return (_stringFromFile);
+}
+
+
 std::string Server::getServerName(void)
 {
 	return (_serverName);
@@ -277,6 +283,24 @@ Server::Server(std::string serverContent)
 	setLocationsRegex(serverContent);
 	// std::cout << "test6" << std::endl;
 	// getLocationStack();
+}
+
+void Server::readFile(void)
+{
+	int file;
+	_stringFromFile = (char * )malloc(100000 * sizeof(char));
+	std::cout << "response url " << _http_handler->getResponseURL() << std::endl;
+	file = open(_http_handler->getResponseURL().c_str(), O_RDONLY);
+	if (file == -1)
+	{
+		perror("opening file of responseURL");
+		return;
+	}
+	int rdbytes = read(file, _stringFromFile, 100000);
+	_stringFromFile[rdbytes] = '\0';
+	close(file);
+	std::cout << "file In String: " << _stringFromFile << std::endl;
+	_stringFromFile = ft_strjoin("HTTP/1.1 200 OK\n\n",_stringFromFile);
 }
 
 Server::~Server()

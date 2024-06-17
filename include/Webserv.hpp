@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/17 13:31:45 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 15:42:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,10 @@
 #include <unistd.h>
 #include <vector>
 
+
 class	Server;
+
+class	Locations;
 
 class	HttpHandler;
 
@@ -45,3 +48,6 @@ class Webserv
 	Webserv(std::string fileName);
 	~Webserv();
 };
+
+size_t	ft_strlen(const char *s);
+char	*ft_strjoin(char const *s1, char const *s2);

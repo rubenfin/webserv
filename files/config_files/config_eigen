@@ -1,5 +1,5 @@
 server {
-	server_name youpi
+	server_name webserv
 	listen 8000
 
 	root files/response_files/
@@ -11,14 +11,22 @@ server {
 
 	}
 	location /put_test {
-		allow_methods POST
-		root ./YoupiBanane/put_here
-		alias /other_dir
+		index put_test.html
+		allow_methods GET
 	}
 
-	location /post_body {
-		allow_methods POST
-		client_body_buffer_size 100
+	location /foldertest {
+		index test.html
+	}
+
+	location /foldertest/dubbeletest {
+		index test.html
+	}
+
+	location /delete_test {
+		index delete.html
+		allow_methods POST DELETE
+		client_body_buffer_ size 100
 	}
 
 	location /directory {
