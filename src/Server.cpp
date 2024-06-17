@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/14 17:31:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 13:42:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,11 +134,13 @@ void Server::setPort(void)
 void Server::setRoot(void)
 {
 	_root = extractValue("root");
+	_root.erase(remove_if(_root.begin(), _root.end(), isspace), _root.end());
 	// std::cout << "root " << _root << std::endl;
 }
 void Server::setIndex(void)
 {
 	_index = extractValue("index");
+	_index.erase(remove_if(_index.begin(), _index.end(), isspace), _index.end());
 	// std::cout << "index " << _index << std::endl;
 }
 
@@ -261,7 +263,7 @@ Server::Server(std::string serverContent)
 {
 	_serverContent = serverContent;
 	// std::cout << "test0" << std::endl;
-	std::cout << serverContent << std::endl;
+	// std::cout << serverContent << std::endl;
 	setServerName();
 	// std::cout << "test1" << std::endl;
 	setPort();

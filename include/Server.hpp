@@ -6,14 +6,14 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/14 16:24:02 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 11:49:07 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+#include "HttpHandler.hpp"
 #include "Locations.hpp"
 #include "Webserv.hpp"
-#include "HttpHandler.hpp"
 #include <iostream>
 #include <netinet/in.h>
 #include <regex>
@@ -33,7 +33,7 @@ struct					Methods
 
 class					Locations;
 
-class HttpHandler;
+class					HttpHandler;
 
 class Server
 {

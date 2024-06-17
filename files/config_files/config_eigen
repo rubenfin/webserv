@@ -2,12 +2,15 @@ server {
 	server_name youpi
 	listen 8000
 
-	root ./YoupiBanane
+	root files/response_files/
 	index index.html
 
 	allow_methods GET
 
-	location /put_test.html {
+	location / {
+
+	}
+	location /put_test {
 		allow_methods POST
 		root ./YoupiBanane/put_here
 		alias /other_dir

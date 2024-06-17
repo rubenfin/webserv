@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/14 17:42:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 13:37:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-std::string HttpHandler::extractValue(std::string toSearch)
+std::string HttpHandler::extractValue(const std::string &toSearch)
 {
 	std::size_t keywordPos = _requestContent.find(toSearch);
 	if (keywordPos != std::string::npos)
@@ -73,7 +73,7 @@ void HttpHandler::matchResponse(void)
 	i = 0;
 	for (const Locations &location : tmp)
 	{
-		std::cout << _requestURL << " | " << tmp[i].getLocationDirectory() << "|einde"<< std::endl;
+		std::cout << _requestURL << " | " << tmp[i].getLocationDirectory() << "|einde" << std::endl;
 		if (_requestURL == tmp[i].getLocationDirectory())
 		{
 			_response = _requestURL;
@@ -85,6 +85,30 @@ void HttpHandler::matchResponse(void)
 	std::cout << "niks gematcht" << std::endl;
 }
 
+std::string HttpHandler::findRequestedURL(const std::string &content)
+{
+	int	i;
+
+	std::string foundRequestedURL;
+	i = 0;
+	while (content[i])
+	{
+		if (content[i] == '/')
+		{
+			foundRequestedURL += content[i];
+			i++;
+			while (content[i] && content[i] != ' ')
+			{
+				foundRequestedURL += content[i];
+				i++;
+			}
+			return (foundRequestedURL);
+		}
+		i++;
+	}
+	return (foundRequestedURL);
+}
+
 void HttpHandler::handleRequest(const std::string &content,
 	Server &serverAddress)
 {
@@ -93,7 +117,8 @@ void HttpHandler::handleRequest(const std::string &content,
 	std::cout << _requestContent << std::endl;
 	setRequest();
 	setMethods();
-	_requestURL = "/" + extractValue("/"); // TODO
+	_requestURL = findRequestedURL(content);
+	std::cout << "URL Found in request" << _requestURL << std::endl;
 	matchResponse();
 }
 
@@ -108,7 +133,9 @@ std::string HttpHandler::getResponseContent(void)
 
 std::string HttpHandler::getResponseURL(void)
 {
-	return(_requestURL);
+	if (_requestURL == "/")
+		_requestURL = _server->getIndex();
+	return (this->_server->getRoot() +_requestURL);
 }
 
 HttpHandler::HttpHandler()

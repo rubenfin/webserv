@@ -6,12 +6,14 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/14 14:53:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 13:31:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "HttpHandler.hpp"
+#include "Server.hpp"
 #include <fstream>
 #include <iostream>
 #include <netinet/in.h>
@@ -24,8 +26,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
-#include "HttpHandler.hpp"
-#include "Server.hpp"
 
 class	Server;
 
@@ -41,9 +41,7 @@ class Webserv
   public:
 	int execute(void);
 	void printParsing(void);
-	void printMethods(void);
 	void setResponse(const std::string &filePath);
-	Webserv();
 	Webserv(std::string fileName);
 	~Webserv();
 };

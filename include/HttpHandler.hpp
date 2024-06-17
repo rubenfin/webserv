@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/14 17:01:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/17 13:28:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class HttpHandler
   public:
 	HttpHandler();
 	~HttpHandler();
-	std::string extractValue(std::string toSearch);
+	std::string extractValue(const std::string &toSearch);
 	void setResponseContent(std::string content);
 	void setRequest();
 	void setMethods(void);
@@ -47,6 +47,6 @@ class HttpHandler
 	std::string getResponseContent(void);
 	std::string getResponseURL(void);
 	std::string setRequestContent(void);
-
+	std::string findRequestedURL(const std::string &content);
 	// const std::vector<Server>& getServers() const;
 };
