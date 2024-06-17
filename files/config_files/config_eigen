@@ -4,6 +4,7 @@ server {
 
 	root files/response_files/
 	index index.html
+	error_page 404 /404.html
 
 	allow_methods GET
 
@@ -15,17 +16,24 @@ server {
 		allow_methods GET
 	}
 
-	location /foldertest {
+	location /get_request {
+		allow_methods GET
 		index test.html
 	}
 
-	location /foldertest/dubbeletest {
+	location /get_request/GET_nested {
 		index test.html
+		allow_methods GET
+	}
+
+	location /post_test {
+		index test.html
+		allow_methods GET POST
 	}
 
 	location /delete_test {
 		index delete.html
-		allow_methods POST DELETE
+		allow_methods POST DELETE GET
 		client_body_buffer_ size 100
 	}
 

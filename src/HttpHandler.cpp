@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpHandler.cpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/17 16:42:31 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/06/17 19:18:27 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,10 @@ void HttpHandler::setRequest()
 	{
 		_request = line;
 	}
-	std::cout << _request << std::endl;
 }
 
 void HttpHandler::setMethods(void)
 {
-	std::cout << _request << std::endl;
 	_allowedMethods.GET = false;
 	_allowedMethods.POST = false;
 	_allowedMethods.DELETE = false;
@@ -63,26 +61,6 @@ void HttpHandler::setMethods(void)
 	std::cout << "GET " << _allowedMethods.GET << std::endl;
 	std::cout << "POST " << _allowedMethods.POST << std::endl;
 	std::cout << "DELETE " << _allowedMethods.DELETE << std::endl;
-}
-
-void HttpHandler::matchResponse(void)
-{
-	int	i;
-
-	std::vector<Locations> tmp = _server->getLocation();
-	i = 0;
-	for (const Locations &location : tmp)
-	{
-		std::cout << _requestURL << " | " << tmp[i].getLocationDirective() << "|einde" << std::endl;
-		if (_requestURL == tmp[i].getLocationDirective())
-		{
-			_response = _requestURL;
-			std::cout << "dit is response" << _response << std::endl;
-			return ;
-		}
-		i++;
-	}
-	std::cout << "niks gematcht" << std::endl;
 }
 
 Locations *HttpHandler::findMatchingDirective(void)
@@ -125,14 +103,13 @@ void HttpHandler::handleRequest(const std::string &content,
 {
 	_server = &serverAddress;
 	_requestContent = content;
-	std::cout << _requestContent << std::endl;
 	setRequest();
 	setMethods();
 	_requestURL = findRequestedURL(content);
 	_foundDirective = findMatchingDirective();
 	if (!_foundDirective)
 	{
-		_requestURL = "404";
+		_requestURL = _server->getRoot() + _server->getError404();
 		std::cerr << "NOT FOUND 404, SEND RESPONSE BACK TODO" << std::endl;
 		return ;
 	}
@@ -149,7 +126,7 @@ void HttpHandler::handleRequest(const std::string &content,
 	}
 	else
 	{
-		std::cout << "laaste " << std::endl;
+		std::cout << "laatste " << std::endl;
 		_requestURL = _server->getRoot() + _requestURL + "/" + _foundDirective->getIndex();
 	}
 	std::cout << "requestURL result --> " << _requestURL << std::endl;

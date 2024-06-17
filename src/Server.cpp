@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/17 16:01:12 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/06/17 19:16:13 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,12 @@ void Server::setMethods(void)
 	// std::cout << "methods " << methodsList << std::endl;
 }
 
+void Server::setError404(void)
+{
+	_error404 =  extractValue("error_page 404 ");
+	std::cout << "Error page 404" << _error404 << std::endl;
+}
+
 void Server::printMethods(void)
 {
 	std::cout << "GET Methods == " << _allowedMethods.GET << std::endl;
@@ -169,6 +175,11 @@ void Server::printMethods(void)
 void Server::setSockedFD(int fd)
 {
 	this->_socketfd = fd;
+}
+
+std::string Server::getError404(void)
+{
+	return(_error404);
 }
 
 int Server::getSocketFD(void)
@@ -279,6 +290,8 @@ Server::Server(std::string serverContent)
 	setIndex();
 	// std::cout << "test4" << std::endl;
 	setMethods();
+
+	setError404();
 	// std::cout << "test5" << std::endl;
 	setLocationsRegex(serverContent);
 	// std::cout << "test6" << std::endl;
@@ -299,7 +312,7 @@ void Server::readFile(void)
 	int rdbytes = read(file, _stringFromFile, 100000);
 	_stringFromFile[rdbytes] = '\0';
 	close(file);
-	std::cout << "file In String: " << _stringFromFile << std::endl;
+	// std::cout << "file In String: " << _stringFromFile << std::endl;
 	_stringFromFile = ft_strjoin("HTTP/1.1 200 OK\n\n",_stringFromFile);
 }
 

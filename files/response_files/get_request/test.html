@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test GET Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        p {
+            font-size: 1.5rem; /* Increased font size for "Not nested" */
+            color: #555;
+            margin-top: 40px; /* Increased margin top to separate it more */
+        }
+    </style>
+</head>
+<body>
+    <h1>Test GET Request</h1>
+    <button id="testButton">Send GET Request to /GET_nested</button>
+
+    <script>
+        document.getElementById('testButton').addEventListener('click', function() {
+            window.location.href = '/get_request/GET_nested';
+        });
+    </script>
+    <p>Not nested</p>
+</body>
+</html>

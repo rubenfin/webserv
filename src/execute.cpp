@@ -10,8 +10,6 @@ int Webserv::execute(void)
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
-	
-	std::cout << _servers[0].getRoot() << std::endl;
 	while (true)
 	{
 		client_socket = accept(_servers[0].getSocketFD(),
@@ -23,11 +21,12 @@ int Webserv::execute(void)
 		}
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
+		printf("%s\n", buffer);
 		std::string content(buffer);
 		_servers[0].getHttpHandler()->handleRequest(content, _servers[0]);
 		_servers[0].readFile();
-		if (send(client_socket, _servers[0].getStringFromFile(), strlen(_servers[0].getStringFromFile()),
-				0) == -1)
+		if (send(client_socket, _servers[0].getStringFromFile(),
+				strlen(_servers[0].getStringFromFile()), 0) == -1)
 		{
 			perror("send");
 		}

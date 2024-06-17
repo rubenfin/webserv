@@ -1,35 +1,107 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
-</head>
-
-<body>
-    <h1>This is the index</h1>
-    <meta http-equiv="refresh"
-    content="5; ./put_test.html" />
-</body>
-
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test GET Request</title>
+    <title>Test Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .error-message {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <button id="testButton">Send GET Request to /foldertest</button>
+    <div class="container">
+        <h1>Test Requests</h1>
+        <button id="testButtonGet">Send GET Request to /get_request</button>
+        <button id="testButtonDelete">Send DELETE Request to /delete_test</button>
+        <button id="testButtonPost">Send POST Request to /post_test</button>
+        <button id="testButtonInvalid">Invalid URL, should go to 404</button>
+        <p class="error-message" id="errorMessage"></p>
+    </div>
 
     <script>
-        document.getElementById('testButton').addEventListener('click', function() {
-            window.location.href = '/foldertest';
+        document.getElementById('testButtonGet').addEventListener('click', function() {
+            sendRequest('GET', '/get_request');
         });
+
+        document.getElementById('testButtonDelete').addEventListener('click', function() {
+            sendRequest('DELETE', '/delete_test');
+        });
+
+        document.getElementById('testButtonPost').addEventListener('click', function() {
+            sendRequest('POST', '/post_test');
+        });
+
+        document.getElementById('testButtonInvalid').addEventListener('click', function() {
+            sendRequest('GET', '/notworking');
+        });
+
+        function sendRequest(method, url) {
+            fetch(url, {
+                method: method
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Handle successful response
+                console.log('Success:', data);
+                window.location.href = url; // Redirect to the received URL
+            })
+            .catch(error => {
+                // Handle error gracefully
+                console.error('Error:', error.message);
+                document.getElementById('errorMessage').textContent = `Failed to fetch ${url}. Error: ${error.message}`;
+                setTimeout(() => {
+                    document.getElementById('errorMessage').textContent = '';
+                }, 3000); // Clear error message after 3 seconds
+            });
+        }
     </script>
 </body>
 </html>
-
