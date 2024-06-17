@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Locations.cpp                                      :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/17 15:49:52 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Locations.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:08:48 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/06/17 20:26:31 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,10 @@ std::string Locations::getLocationDirective(void)
 	return (_locationDirective);
 }
 
+MethodsLoc Locations::getMethods(void)
+{
+	return(_allowedMethods);
+}
 Locations::Locations(std::string locationContent)
 {
 	this->_url = "test";

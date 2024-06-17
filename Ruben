@@ -1,0 +1,37 @@
+POST /post_test HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: http://localhost:8000/post_test
+Content-Type: multipart/form-data; boundary=---------------------------373928451627218331141177118305
+Content-Length: 300
+Origin: http://localhost:8000
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=1
+
+-----------------------------373928451627218331141177118305
+Content-Disposition: form-data; name="name"
+
+asdfsadf
+-----------------------------373928451627218331141177118305
+Content-Disposition: form-data; name="email"
+
+asdfsadf
+-----------------------------373928451627218331141177118305--
+
+
+dit moet geparsed worden voor delete en post 
+
+die boundary bij content type is al geparsed en is wel handig om de rest te parsen
+met (boundary + --) is het einde van de data
+
+content-length is voor buffer size waarschijnlijk
+
+form data moeten we ook hebben want we moeten image en json speciaal handelen
+
+om het te handelen en naar een file te schrijven moeten we al cgi hebben denk ik

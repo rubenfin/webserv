@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpHandler.hpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/17 16:08:00 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 20:00:39 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/06/17 20:33:11 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ struct			MethodsReq
 	bool		DELETE;
 } typedef MethodsReq;
 
-class 	Locations;
+class			Locations;
 
 class			Server;
 
@@ -36,6 +36,7 @@ class HttpHandler
 	std::string _requestURL;
 	Locations	*_foundDirective;
 	Server		*_server;
+	std::string _boundary;
 
   public:
 	HttpHandler();
@@ -44,8 +45,11 @@ class HttpHandler
 	void setResponseContent(std::string content);
 	void setRequest();
 	void setMethods(void);
+	void setData(void);
+	void setDataContent(void);
+	void setBoundary(void);
 
-	void matchResponse(void);
+	void combineRightUrl(void);
 	void handleRequest(const std::string &content, Server &serverAddress);
 	std::string getResponseContent(void);
 	std::string getResponseURL(void);

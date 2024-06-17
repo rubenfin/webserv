@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/17 19:18:27 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/06/17 20:48:58 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,49 @@ std::string HttpHandler::findRequestedURL(const std::string &content)
 	return (foundRequestedURL);
 }
 
+void HttpHandler::combineRightUrl(void)
+{
+	if (!_foundDirective)
+	{
+		_requestURL = _server->getRoot() + _server->getError404();
+		std::cerr << "NOT FOUND 404, SEND RESPONSE BACK TODO" << std::endl;
+		return ;
+	}
+	if (_foundDirective->getRoot() != "")
+	{
+		std::cout << "eerste " << std::endl;
+		_requestURL = _foundDirective->getRoot() + _requestURL;
+	}
+	else if (_foundDirective->getLocationDirective() == "/")
+	{
+		_requestURL = _server->getRoot() + _server->getIndex();
+		std::cout << "root = /" << _requestURL << std::endl;
+	}
+	else
+	{
+		std::cout << "laatste " << std::endl;
+		_requestURL = _server->getRoot() + _requestURL + "/"
+			+ _foundDirective->getIndex();
+	}
+	std::cout << "requestURL result --> " << _requestURL << std::endl;
+}
+
+void HttpHandler::setBoundary(void)
+{
+	_boundary = extractValue("Content-Type: multipart/form-data; boundary=");
+	std::cout << "boundary" << _boundary << std::endl;
+}
+
+void HttpHandler::setDataContent(void)
+{
+}
+
+void HttpHandler::setData(void)
+{
+	setBoundary();
+	setDataContent();
+}
+
 void HttpHandler::handleRequest(const std::string &content,
 	Server &serverAddress)
 {
@@ -107,28 +150,8 @@ void HttpHandler::handleRequest(const std::string &content,
 	setMethods();
 	_requestURL = findRequestedURL(content);
 	_foundDirective = findMatchingDirective();
-	if (!_foundDirective)
-	{
-		_requestURL = _server->getRoot() + _server->getError404();
-		std::cerr << "NOT FOUND 404, SEND RESPONSE BACK TODO" << std::endl;
-		return ;
-	}
-
-	if (_foundDirective->getRoot() != "")
-	{
-		std::cout << "eerste " << std::endl;
-		_requestURL = _foundDirective->getRoot() + _requestURL;
-	}
-	else if ( _foundDirective->getLocationDirective() == "/")
-	{
-		_requestURL = _server->getRoot() + _server->getIndex();
-		std::cout << "root = /" << _requestURL << std::endl;
-	}
-	else
-	{
-		std::cout << "laatste " << std::endl;
-		_requestURL = _server->getRoot() + _requestURL + "/" + _foundDirective->getIndex();
-	}
+	combineRightUrl();
+	setData();
 	std::cout << "requestURL result --> " << _requestURL << std::endl;
 }
 
