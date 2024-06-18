@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/17 19:16:13 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.cpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/18 16:17:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,7 +301,12 @@ Server::Server(std::string serverContent)
 void Server::readFile(void)
 {
 	int file;
-	_stringFromFile = (char * )malloc(100000 * sizeof(char));
+	// uint64_t buffersize;
+	// if (_http_handler->getContentLength() != 0)
+	// 	buffersize = _http_handler->getContentLength();
+	// else
+	uint64_t buffersize = 100000;
+	_stringFromFile = (char * )malloc(buffersize * sizeof(char));
 	std::cout << "response url " << _http_handler->getResponseURL() << std::endl;
 	file = open(_http_handler->getResponseURL().c_str(), O_RDONLY);
 	if (file == -1)
@@ -309,11 +314,17 @@ void Server::readFile(void)
 		perror("opening file of responseURL");
 		return;
 	}
-	int rdbytes = read(file, _stringFromFile, 100000);
+	int rdbytes = read(file, _stringFromFile, buffersize);
 	_stringFromFile[rdbytes] = '\0';
 	close(file);
 	// std::cout << "file In String: " << _stringFromFile << std::endl;
-	_stringFromFile = ft_strjoin("HTTP/1.1 200 OK\n\n",_stringFromFile);
+
+
+	char * header;
+	std::string message = _http_handler->getHttpStatusMessage();
+	header = ft_strjoin("HTTP/1.1 ", message.c_str());
+	header = ft_strjoin(header, "\n\n");
+	_stringFromFile = ft_strjoin(header, _stringFromFile);
 }
 
 Server::~Server()

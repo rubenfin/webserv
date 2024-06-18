@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Locations.hpp                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 16:11:43 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/17 20:25:49 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Locations.hpp                                      :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/18 15:33:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Locations
 	std::string _root;
 	std::string _index;
 	std::string _cgi_pass;
+	std::string _alias;
 
 	std::string _url;
 
@@ -49,11 +50,13 @@ class Locations
 	void setIndex(void);
 	void setCgi_pass(void);
 	void setMethods(void);
+	void setAlias(void);
 
 	std::string getRoot(void);
 	std::string getIndex(void);
 	std::string getCgi_pass(void);
 	MethodsLoc getMethods(void);
+	std::string getAlias(void);
 	std::string extractValue(std::string toSearch);
 	void printLocationsContent(void);
 	std::string extractDirectory(const std::string &line);

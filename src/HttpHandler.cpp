@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/06/17 20:48:58 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   HttpHandler.cpp                                    :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/06/18 16:05:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,13 +103,17 @@ void HttpHandler::combineRightUrl(void)
 	if (!_foundDirective)
 	{
 		_requestURL = _server->getRoot() + _server->getError404();
-		std::cerr << "NOT FOUND 404, SEND RESPONSE BACK TODO" << std::endl;
+		// std::cout << _requestURL << std::endl;
+		setHttpStatusCode(httpStatusCode::NotFound); //TODO, BUG WHEN WANTING TO ACCESS 404 PAGE ON PURPOSE
 		return ;
 	}
-	if (_foundDirective->getRoot() != "")
+	else if (_foundDirective->getRoot() != "")
 	{
 		std::cout << "eerste " << std::endl;
+		// if (_foundDirective->getAlias() == "")
 		_requestURL = _foundDirective->getRoot() + _requestURL;
+		// else
+		// 	_requestURL = _foundDirective->getRoot() + _foundDirective->getAlias();
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 	{
@@ -124,11 +128,63 @@ void HttpHandler::combineRightUrl(void)
 	}
 	std::cout << "requestURL result --> " << _requestURL << std::endl;
 }
+std::string HttpHandler::getHttpStatusMessage() const {
+
+switch (_statusCode)
+	{
+		case httpStatusCode::OK: return "200 OK";
+		case httpStatusCode::Created: return "201 Created";
+		case httpStatusCode::Accepted: return "202 Accepted";
+		case httpStatusCode::NoContent: return "204 No Content";
+		case httpStatusCode::MovedPermanently: return "301 Moved Permanently";
+		case httpStatusCode::Found: return "302 Found";
+		case httpStatusCode::NotModified: return "304 Not Modified";
+		case httpStatusCode::BadRequest: return "400 Bad Request";
+		case httpStatusCode::Unauthorized: return "401 Unauthorized";
+		case httpStatusCode::Forbidden: return "403 Forbidden";
+		case httpStatusCode::NotFound: return "404 Not Found";
+		case httpStatusCode::InternalServerError: return "500 Internal Server Error";
+		case httpStatusCode::NotImplemented: return "501 Not Implemented";
+		case httpStatusCode::BadGateway: return "502 Bad Gateway";
+		case httpStatusCode::ServiceUnavailable: return "503 Service Unavailable";
+		case httpStatusCode::httpVersionNotSupported: return "505 HTTP Version Not Supported";
+		default: return "500 Internal Server Error";
+	}
+}
+
+
+void HttpHandler::setHttpVersion(void)
+{
+	_httpVersion = extractValue("HTTP/");
+	if (_httpVersion != "1.1")
+		setHttpStatusCode(httpStatusCode::httpVersionNotSupported);
+	else 
+		setHttpStatusCode(httpStatusCode::OK);
+}
+
+void HttpHandler::setHttpStatusCode(httpStatusCode code)
+{
+	_statusCode = code;
+}
 
 void HttpHandler::setBoundary(void)
 {
 	_boundary = extractValue("Content-Type: multipart/form-data; boundary=");
 	std::cout << "boundary" << _boundary << std::endl;
+}
+
+void HttpHandler::setContentType(void)
+{
+	_contentType = extractValue("Content-Type: ");
+	std::cout << "my content type " << _contentType << std::endl;
+}
+void HttpHandler::setContentLength(void)
+{
+	std::string stringContentLength = extractValue("Content-Length: ");
+	if (stringContentLength == "")
+		return ;
+	_contentLength = std::stoul(stringContentLength);
+	std::cout << "my content length " << _contentLength << std::endl;
 }
 
 void HttpHandler::setDataContent(void)
@@ -137,28 +193,57 @@ void HttpHandler::setDataContent(void)
 
 void HttpHandler::setData(void)
 {
-	setBoundary();
-	setDataContent();
+	try
+	{
+		setHttpVersion();
+		setContentType();
+		setBoundary();
+		setContentLength();
+		setDataContent();
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+}
+void deleteFoundDirective(Locations *_foundDirective)
+{
+	delete _foundDirective;
 }
 
 void HttpHandler::handleRequest(const std::string &content,
 	Server &serverAddress)
 {
+	
+
 	_server = &serverAddress;
 	_requestContent = content;
 	setRequest();
 	setMethods();
+	setData();
 	_requestURL = findRequestedURL(content);
 	_foundDirective = findMatchingDirective();
 	combineRightUrl();
-	setData();
+	
 	std::cout << "requestURL result --> " << _requestURL << std::endl;
+	
+	deleteFoundDirective(_foundDirective);
 }
 
 std::string HttpHandler::setRequestContent(void)
 {
 	return (_requestContent);
 }
+std::string HttpHandler::getHttpVersion(void)
+{
+	return(_httpVersion);
+}
+
+httpStatusCode HttpHandler::getHttpStatusCode(void) const
+{
+	return (_statusCode);
+}
+
 std::string HttpHandler::getResponseContent(void)
 {
 	return (_responseContent);
@@ -169,9 +254,19 @@ std::string HttpHandler::getResponseURL(void)
 	return (_requestURL);
 }
 
-HttpHandler::HttpHandler()
+std::string HttpHandler::getContentType(void)
+{
+	return (_contentType);
+}
+uint64_t HttpHandler::getContentLength(void)
+{
+	return (_contentLength);
+}
+
+HttpHandler::HttpHandler() : _contentLength(0), _statusCode(httpStatusCode::OK)
 {
 }
+
 HttpHandler::~HttpHandler()
 {
 }

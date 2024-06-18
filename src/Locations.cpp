@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Locations.cpp                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 17:08:48 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/06/17 20:26:31 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Locations.cpp                                      :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/18 16:28:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,11 @@ void Locations::setMethods(void)
 	// std::cout << "methods " << methodsList << std::endl;
 }
 
+void Locations::setAlias(void)
+{
+	_alias = extractValue("alias ");
+}
+
 void Locations::getLocationRegex(std::string locationContent)
 {
 	_locationDirective = extractValue("location");
@@ -57,7 +62,13 @@ MethodsLoc Locations::getMethods(void)
 {
 	return(_allowedMethods);
 }
-Locations::Locations(std::string locationContent)
+
+std::string Locations::getAlias(void)
+{
+	return (_alias);
+}
+
+Locations::Locations(std::string locationContent)  : _alias("")
 {
 	this->_url = "test";
 	_locationContent = locationContent;

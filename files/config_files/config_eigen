@@ -11,6 +11,7 @@ server {
 	location / {
 
 	}
+
 	location /put_test {
 		index put_test.html
 		allow_methods GET
@@ -38,7 +39,6 @@ server {
 	}
 
 	location /directory {
-		alias
 		allow_methods GET
 		root YoupiBanane/
 		index youpi.bad_extension
