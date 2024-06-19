@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/18 16:28:45 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/19 11:11:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ std::string Locations::getAlias(void)
 	return (_alias);
 }
 
-Locations::Locations(std::string locationContent)  : _alias("")
+Locations::Locations(std::string locationContent)
 {
 	this->_url = "test";
 	_locationContent = locationContent;

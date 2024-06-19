@@ -3,46 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test POST Request</title>
+    <title>Post Request Form</title>
 </head>
 <body>
-    <h1>Test POST Request</h1>
-    <form id="postForm" action="/post_test" method="POST">
+    <h1>Submit Your Information</h1>
+    <form action="/post_test" method="post">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
-        <label >Email:</label><br>
-        <input  id="email" name="email" required><br><br>
-        <button type="submit">Submit</button>
+        
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <input type="submit" value="Submit">
     </form>
-
-    <script>
-        document.getElementById('postForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            const formData = new FormData(this); // Create a FormData object from the form
-            const url = this.action; // Get the form's action URL
-
-            fetch(url, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(data => {
-                // Handle successful response
-                console.log('Success:', data);
-                alert('POST request sent successfully!');
-            })
-            .catch(error => {
-                // Handle error gracefully
-                console.error('Error:', error.message);
-                alert(`Failed to send POST request. Error: ${error.message}`);
-            });
-        });
-    </script>
 </body>
 </html>

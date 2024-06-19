@@ -19,6 +19,7 @@ server {
 
 	location /get_request {
 		allow_methods GET
+		alias /hallo
 		index test.html
 	}
 

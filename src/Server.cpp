@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/18 16:17:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/19 11:30:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,6 +325,7 @@ void Server::readFile(void)
 	header = ft_strjoin("HTTP/1.1 ", message.c_str());
 	header = ft_strjoin(header, "\n\n");
 	_stringFromFile = ft_strjoin(header, _stringFromFile);
+	std::cout << "\n\n\n\nRESPONSE\n"<<_stringFromFile << "\n--------------------------------" << std::endl;
 }
 
 Server::~Server()

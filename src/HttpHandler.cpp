@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/18 16:05:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/19 12:58:17 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,10 +110,7 @@ void HttpHandler::combineRightUrl(void)
 	else if (_foundDirective->getRoot() != "")
 	{
 		std::cout << "eerste " << std::endl;
-		// if (_foundDirective->getAlias() == "")
 		_requestURL = _foundDirective->getRoot() + _requestURL;
-		// else
-		// 	_requestURL = _foundDirective->getRoot() + _foundDirective->getAlias();
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 	{
@@ -123,8 +120,8 @@ void HttpHandler::combineRightUrl(void)
 	else
 	{
 		std::cout << "laatste " << std::endl;
-		_requestURL = _server->getRoot() + _requestURL + "/"
-			+ _foundDirective->getIndex();
+			_requestURL = _server->getRoot() + _requestURL + "/"
+				+ _foundDirective->getIndex();
 	}
 	std::cout << "requestURL result --> " << _requestURL << std::endl;
 }
