@@ -47,6 +47,11 @@ void HttpHandler::setRequest()
 	}
 }
 
+void HttpHandler::setRequestBody(void)
+{
+	_requestBody = extractValue("\n\n");
+}
+
 void HttpHandler::setMethods(void)
 {
 	_allowedMethods.GET = false;
@@ -231,6 +236,12 @@ std::string HttpHandler::setRequestContent(void)
 {
 	return (_requestContent);
 }
+
+std::string HttpHandler::getRequestBody(void)
+{
+	return (_requestBody);
+}
+
 std::string HttpHandler::getHttpVersion(void)
 {
 	return(_httpVersion);

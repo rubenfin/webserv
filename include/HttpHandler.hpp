@@ -35,6 +35,7 @@ class HttpHandler
 	std::string _httpVersion;
 	std::string _responseContent;
 	std::string _requestContent;
+	std::string _requestBody;
 	std::string _request;
 	std::string _response;
 	MethodsReq	_allowedMethods;
@@ -51,6 +52,7 @@ class HttpHandler
 	std::string extractValue(const std::string &toSearch);
 	void setResponseContent(std::string content);
 	void setRequest();
+	void setRequestBody(void);
 	void setMethods(void);
 	void setData(void);
 	void setDataContent(void);
@@ -65,6 +67,7 @@ class HttpHandler
 	std::string getHttpStatusMessage() const;
 	std::string getHttpVersion(void);
 	httpStatusCode getHttpStatusCode(void) const;
+	std::string getRequestBody(void);
 	std::string getResponseContent(void);
 	std::string getResponseURL(void);
 	std::string getContentType(void);

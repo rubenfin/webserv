@@ -30,7 +30,7 @@ library: $(LIBS_TARGET)
 re: fclean all
 
 $(NAME): $(OBJS_DIR) $(OBJ) $(LIBS_TARGET)
-	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LINKERFLAGS) $(LIBS_TARGET) $(LIBS_TARGET) -lreadline
+	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LINKERFLAGS) $(LIBS_TARGET) $(LIBS_TARGET)
 	@echo "$(GREEN)Compiled webserv!$(DEFAULT)"
 
 $(OBJS_DIR)/%.o: $(SRC_DIR)/%.cpp
