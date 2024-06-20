@@ -49,7 +49,19 @@ void HttpHandler::setRequest()
 
 void HttpHandler::setRequestBody(void)
 {
-	_requestBody = extractValue("\n\n");
+	std::size_t foundBody = 0;
+	foundBody = _requestContent.find("\n\n");
+	if (foundBody == 0)
+	{
+		_requestBody = "";
+		return;
+	}
+	while (_requestContent[foundBody])
+	{
+		_requestBody += _requestContent;
+		foundBody++;
+	}
+	
 }
 
 void HttpHandler::setMethods(void)
@@ -202,6 +214,7 @@ void HttpHandler::setData(void)
 		setBoundary();
 		setContentLength();
 		setDataContent();
+		setRequestBody();
 	}
 	catch (const std::exception &e)
 	{
