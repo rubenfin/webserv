@@ -51,11 +51,11 @@ void HttpHandler::setRequestBody(void)
 {
 	std::size_t foundBody = 0;
 	foundBody = _requestContent.find("\n\n");
-	if (foundBody == 0)
-	{
-		_requestBody = "";
-		return;
-	}
+	// if (foundBody == 0)
+	// {
+	// 	_requestBody = "";
+	// 	return;
+	// }
 	while (_requestContent[foundBody])
 	{
 		_requestBody += _requestContent;
@@ -209,6 +209,7 @@ void HttpHandler::setData(void)
 {
 	try
 	{
+		setRequestContent();
 		setHttpVersion();
 		setContentType();
 		setBoundary();
@@ -247,7 +248,12 @@ void HttpHandler::handleRequest(const std::string &content,
 
 std::string HttpHandler::setRequestContent(void)
 {
-	return (_requestContent);
+	_requestContent << _responseConten
+}
+
+Locations *HttpHandler::getFoundDirective(void)
+{
+	return(_foundDirective);
 }
 
 std::string HttpHandler::getRequestBody(void)

@@ -24,7 +24,11 @@ int Webserv::execute(void)
 		printf("%s\n", buffer);
 		std::string content(buffer);
 		_servers[0].getHttpHandler()->handleRequest(content, _servers[0]);
-		_servers[0].readFile();
+		if (_servers[0].getHttpHandler()->getFoundDirective()->getLocationDirective() == "/cgi-bin/")
+			std::cout << "CGI NEEDS TO BE CALLED" << std::endl;
+		else
+			_servers[0].readFile();
+		std::cout << "\n\n\n\n\n\n\n MY REQUEST BODY"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
 		if (send(client_socket, _servers[0].getStringFromFile(),
 				strlen(_servers[0].getStringFromFile()), 0) == -1)
 		{

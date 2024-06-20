@@ -71,6 +71,7 @@ class HttpHandler
 	std::string getResponseContent(void);
 	std::string getResponseURL(void);
 	std::string getContentType(void);
+	Locations *getFoundDirective(void);
 	uint64_t getContentLength(void);
 	std::string setRequestContent(void);
 	std::string findRequestedURL(const std::string &content);
