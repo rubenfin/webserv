@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-print("Content-type: text/html")
-print()
+
 print("<html>")
 print("<head>")
 print("<title>CGI Script Test</title>")

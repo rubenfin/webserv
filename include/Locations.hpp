@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/18 15:33:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/21 11:32:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,14 +33,12 @@ class Locations
   private:
 	std::string _locationContent;
 	std::string _methodsList;
-
 	std::string _locationDirective;
 	MethodsLoc	_allowedMethods;
 	std::string _root;
 	std::string _index;
 	std::string _cgi_pass;
 	std::string _alias;
-
 	std::string _url;
 
   public:

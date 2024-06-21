@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/17 16:07:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/21 14:05:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,11 @@ Webserv::Webserv(std::string fileName)
 		}
 	}
 	setResponse("files/response_files/test.html");
+}
+
+void Webserv::setEnv(char **env)
+{
+	_environmentVariables = env;
 }
 
 void Webserv::setResponse(const std::string &filePath)

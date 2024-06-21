@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/19 11:30:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/21 15:03:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ void Server::setMethods(void)
 void Server::setError404(void)
 {
 	_error404 =  extractValue("error_page 404 ");
-	std::cout << "Error page 404" << _error404 << std::endl;
+	// std::cout << "Error page 404" << _error404 << std::endl;
 }
 
 void Server::printMethods(void)
@@ -323,7 +323,7 @@ void Server::readFile(void)
 	char * header;
 	std::string message = _http_handler->getHttpStatusMessage();
 	header = ft_strjoin("HTTP/1.1 ", message.c_str());
-	header = ft_strjoin(header, "\n\n");
+	header = ft_strjoin(header, "\r\n\r\n");
 	_stringFromFile = ft_strjoin(header, _stringFromFile);
 	std::cout << "\n\n\n\nRESPONSE\n"<<_stringFromFile << "\n--------------------------------" << std::endl;
 }

@@ -13,7 +13,7 @@ server {
 	}
 
 	location /cgi-bin/ {
-		
+		index test_cgi.py
 	}
 
 	location /put_test {

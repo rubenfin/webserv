@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/18 11:58:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/21 14:59:42 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ class Server
 	HttpHandler			*_http_handler;
 
   public:
+  	char *cgi(char **env);
 	void getLocationStack(std::string locationContent);
 	std::string extractValue(const std::string &searchString);
 	void setServerName(void);

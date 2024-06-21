@@ -6,45 +6,44 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/18 14:36:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/21 17:10:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+#include "HttpStatusCodes.hpp"
 #include "Webserv.hpp"
 #include <iostream>
-#include "HttpStatusCodes.hpp"
 #include <string>
 
-
-struct			MethodsReq
+struct				MethodsReq
 {
-	bool		GET;
-	bool		POST;
-	bool		DELETE;
+	bool			GET;
+	bool			POST;
+	bool			DELETE;
 } typedef MethodsReq;
 
-class			Locations;
-class			Server;
-
+class				Locations;
+class				Server;
 
 class HttpHandler
 {
   private:
-	httpStatusCode _statusCode;
-	std::string _httpVersion;
-	std::string _responseContent;
-	std::string _requestContent;
-	std::string _requestBody;
-	std::string _request;
-	std::string _response;
-	MethodsReq	_allowedMethods;
-	std::string _requestURL;
-	Locations	*_foundDirective;
-	Server		*_server;
-	std::string _contentType;
-	std::string _boundary;
-	uint64_t	_contentLength;
+	httpStatusCode	_statusCode;
+	std::string 	_httpVersion;
+	std::string 	_responseContent;
+	std::string		_requestContent;
+	std::string 	_requestBody;
+	std::string		_request;
+	std::string 	_response;
+	MethodsReq		_allowedMethods;
+	std::string 	_requestURL;
+	Locations		*_foundDirective;
+	Server			*_server;
+	std::string 	_contentType;
+	std::string 	_boundary;
+	uint64_t		_contentLength;
+	bool			_isCgi;
 
   public:
 	HttpHandler();
@@ -53,6 +52,7 @@ class HttpHandler
 	void setResponseContent(std::string content);
 	void setRequest();
 	void setRequestBody(void);
+	void storeRequestBody(void);
 	void setMethods(void);
 	void setData(void);
 	void setDataContent(void);
@@ -73,7 +73,8 @@ class HttpHandler
 	std::string getContentType(void);
 	Locations *getFoundDirective(void);
 	uint64_t getContentLength(void);
-	std::string setRequestContent(void);
+	bool 	getCgi(void);
+	// std::string setRequestContent(void);
 	std::string findRequestedURL(const std::string &content);
 	Locations *findMatchingDirective(void);
 
