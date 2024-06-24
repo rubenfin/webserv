@@ -1,11 +1,16 @@
 CC = c++ -std=c++11
 CFLAGS = -g
 SRC_DIR = src
+SERVER_DIR = server
 UTILS_DIR = utils
-CGI_DIR = cgi
+REQUEST_DIR = request
+RESPONSE_DIR = response
+
 SRC :=  $(wildcard $(SRC_DIR)/*.cpp) \
+		$(wildcard $(SRC_DIR)/$(SERVER_DIR)/*.cpp) \
 		$(wildcard $(SRC_DIR)/$(UTILS_DIR)/*.cpp) \
-		$(wildcard $(SRC_DIR)/$(CGI_DIR)/*.cpp) 
+		$(wildcard $(SRC_DIR)/$(REQUEST_DIR)/*.cpp) \
+		$(wildcard $(SRC_DIR)/$(RESPONSE_DIR)/*.cpp) 
 OBJS_DIR = objs
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJS_DIR)/%.o)
 NAME = webserv

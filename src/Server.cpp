@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 12:11:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 18:24:02 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void Server::setServer()
 		exit(EXIT_FAILURE);
 	}
 	_http_handler = new HttpHandler;
-	_buffer = (char *)malloc(9999999 * sizeof(char));
+	_buffer = (char *)malloc(999999 * sizeof(char));
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -286,7 +286,7 @@ void Server::makeResponse(char *buffer)
 	char	*header;
 	char	*header_nl;
 
-	std::string message = _http_handler->getHttpStatusMessage();
+	std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
 	header = ft_strjoin("HTTP/1.1 ", message.c_str());
 	header_nl = ft_strjoin(header, "\r\n\r\n");
 	free(header);
@@ -299,8 +299,8 @@ void Server::readFile(void)
 	int	file;
 	int	rdbytes;
 
-	std::cout << "response url " << _http_handler->getResponseURL() << std::endl;
-	file = open(_http_handler->getResponseURL().c_str(), O_RDONLY);
+	std::cout << "response url " << _http_handler->getRequest()->requestURL << std::endl;
+	file = open(_http_handler->getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
 		perror("opening file of responseURL");
@@ -310,7 +310,7 @@ void Server::readFile(void)
 	_buffer[rdbytes] = '\0';
 	close(file);
 	makeResponse(_buffer);
-	std::cout << "\n\n\n\nRESPONSE\n" << _response << "\n--------------------------------" << std::endl;
+	// std::cout << "\n\n\n\nRESPONSE\n" << _response << "\n--------------------------------" << std::endl;
 }
 
 Server::~Server()

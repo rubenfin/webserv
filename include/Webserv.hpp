@@ -6,16 +6,19 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 11:20:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 18:44:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "HttpHandler.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 #include "Server.hpp"
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <regex>
 #include <sstream>
@@ -26,6 +29,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+
+// need to check this might be only for GET and not POST and DELETE
+#define MAX_LENGTH_HTTP_REQ 8192
 
 class	Logger;
 class	Server;
@@ -51,3 +57,4 @@ class Webserv
 
 size_t	ft_strlen(const char *s);
 char	*ft_strjoin(char const *s1, char const *s2);
+void	resetRequestResponse(request_t &request, response_t &response);

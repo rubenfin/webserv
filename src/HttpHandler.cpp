@@ -6,229 +6,87 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/24 12:14:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 19:03:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-std::string HttpHandler::extractValue(const std::string &toSearch)
+HttpHandler::HttpHandler() : _request(nullptr), _foundDirective(nullptr),
+	_server(nullptr), _isCgi(false)
 {
-	std::size_t keywordPos = _requestContent.find(toSearch);
-	if (keywordPos != std::string::npos)
-	{
-		std::size_t beginLocation = keywordPos + toSearch.size();
-		while (beginLocation < _requestContent.size()
-			&& std::isspace(_requestContent[beginLocation]))
-			++beginLocation;
-		std::size_t endLocation = beginLocation;
-		while (endLocation < _requestContent.size()
-			&& !std::isspace(_requestContent[endLocation]))
-			++endLocation;
-		std::string directory = _requestContent.substr(beginLocation,
-				endLocation - beginLocation);
-		return (directory);
-	}
-	return ("");
 }
 
-void HttpHandler::setResponseContent(std::string content)
+HttpHandler::~HttpHandler()
 {
-	_responseContent = content;
 }
 
-void HttpHandler::setRequest()
-{
-	std::istringstream iss(_requestContent);
-	std::string line;
-	if (std::getline(iss, line))
-	{
-		_request = line;
-	}
-}
-
-void HttpHandler::storeRequestBody(void)
+void HttpHandler::handleRequestBody(void)
 {
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
-	
-}
-
-void HttpHandler::setRequestBody(void)
-{
-	std::size_t foundBody = _requestContent.find("\r\n\r\n");
-	if (foundBody == std::string::npos)
-	{
-		_requestBody = "";
-		return ;
-	}
-	foundBody += 4;
-	_requestBody = _requestContent.substr(foundBody);
-	if (_requestBody != "")
-		storeRequestBody();
-}
-
-void HttpHandler::setMethods(void)
-{
-	_allowedMethods.GET = false;
-	_allowedMethods.POST = false;
-	_allowedMethods.DELETE = false;
-	if (_request.find("GET") != std::string::npos)
-		_allowedMethods.GET = true;
-	if (_request.find("POST") != std::string::npos)
-		_allowedMethods.POST = true;
-	if (_request.find("DELETE") != std::string::npos)
-		_allowedMethods.DELETE = true;
 }
 
 Locations *HttpHandler::findMatchingDirective(void)
 {
+	// TODO: we're checking if the directive is equal,
+	// but it should be longest one not equal
 	for (size_t i = 0; i < _server->getLocation().size(); i++)
 	{
-		if (getResponseURL() == _server->getLocation()[i].getLocationDirective())
+		if (getRequest()->requestURL == _server->getLocation()[i].getLocationDirective())
 		{
-			std::cout << getResponseURL() << "|" << _server->getLocation()[i].getLocationDirective() << std::endl;
+			std::cout << getRequest()->requestURL << "|" << _server->getLocation()[i].getLocationDirective() << std::endl;
 			return (new Locations(_server->getLocation()[i]));
 		}
 	}
 	std::cout << "Found no matching directive" << std::endl;
 	return (NULL);
 }
+// 404 Not Found
+// header: content
 
-std::string HttpHandler::findRequestedURL(const std::string &content)
-{
-	int	i;
-
-	std::string foundRequestedURL;
-	i = 0;
-	while (content[i])
-	{
-		if (content[i] == '/')
-		{
-			foundRequestedURL += content[i];
-			i++;
-			while (content[i] && content[i] != ' ')
-			{
-				foundRequestedURL += content[i];
-				i++;
-			}
-			return (foundRequestedURL);
-		}
-		i++;
-	}
-	return (foundRequestedURL);
-}
+// <h1>Error 404: Page not found</h1>
 
 void HttpHandler::combineRightUrl(void)
 {
 	if (!_foundDirective)
 	{
-		_requestURL = _server->getRoot() + _server->getError404();
-		setHttpStatusCode(httpStatusCode::NotFound);
+		getRequest()->requestURL = _server->getRoot() + _server->getError404();
+		getResponse()->status = httpStatusCode::NotFound;
 		return ;
 	}
 	else if (_foundDirective->getRoot() != "")
-		_requestURL = _foundDirective->getRoot() + _requestURL;
+		getRequest()->requestURL = _foundDirective->getRoot()
+			+ getRequest()->requestURL;
 	else if (_foundDirective->getLocationDirective() == "/")
-		_requestURL = _server->getRoot() + _server->getIndex();
+		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
 	else
 	{
-		_requestURL = _server->getRoot() + _requestURL + "/"
-			+ _foundDirective->getIndex();
+		getRequest()->requestURL = _server->getRoot() + getRequest()->requestURL
+			+ "/" + _foundDirective->getIndex();
 	}
-	if (_foundDirective->getLocationDirective() == "/cgi-bin/")
+	if (_foundDirective->getLocationDirective() == "/cgi-bin")
 	{
 		_isCgi = true;
 		std::cout << "CGI IS NOW SET TO TRUE" << std::endl;
 	}
-	std::cout << "requestURL result --> " << _requestURL << std::endl;
-}
-std::string HttpHandler::getHttpStatusMessage() const
-{
-	switch (_statusCode)
-	{
-	case httpStatusCode::OK:
-		return ("200 OK");
-	case httpStatusCode::Created:
-		return ("201 Created");
-	case httpStatusCode::Accepted:
-		return ("202 Accepted");
-	case httpStatusCode::NoContent:
-		return ("204 No Content");
-	case httpStatusCode::MovedPermanently:
-		return ("301 Moved Permanently");
-	case httpStatusCode::Found:
-		return ("302 Found");
-	case httpStatusCode::NotModified:
-		return ("304 Not Modified");
-	case httpStatusCode::BadRequest:
-		return ("400 Bad Request");
-	case httpStatusCode::Unauthorized:
-		return ("401 Unauthorized");
-	case httpStatusCode::Forbidden:
-		return ("403 Forbidden");
-	case httpStatusCode::NotFound:
-		return ("404 Not Found");
-	case httpStatusCode::InternalServerError:
-		return ("500 Internal Server Error");
-	case httpStatusCode::NotImplemented:
-		return ("501 Not Implemented");
-	case httpStatusCode::BadGateway:
-		return ("502 Bad Gateway");
-	case httpStatusCode::ServiceUnavailable:
-		return ("503 Service Unavailable");
-	case httpStatusCode::httpVersionNotSupported:
-		return ("505 HTTP Version Not Supported");
-	default:
-		return "500 Internal Server Error";
-	}
+	std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
 }
 
-void HttpHandler::setHttpVersion(void)
+request_t *HttpHandler::getRequest(void)
 {
-	_httpVersion = extractValue("HTTP/");
-	if (_httpVersion != "1.1")
-		setHttpStatusCode(httpStatusCode::httpVersionNotSupported);
-	else
-		setHttpStatusCode(httpStatusCode::OK);
+	return (_request);
 }
 
-void HttpHandler::setHttpStatusCode(httpStatusCode code)
+response_t *HttpHandler::getResponse(void)
 {
-	_statusCode = code;
+	return (_response);
 }
 
-void HttpHandler::setBoundary(void)
-{
-	_boundary = extractValue("Content-Type: multipart/form-data; boundary=");
-}
-
-void HttpHandler::setContentType(void)
-{
-	_contentType = extractValue("Content-Type: ");
-}
-void HttpHandler::setContentLength(void)
-{
-	std::string stringContentLength = extractValue("Content-Length: ");
-	if (stringContentLength == "")
-		return ;
-	_contentLength = std::stoul(stringContentLength);
-}
-
-void HttpHandler::setDataContent(void)
-{
-}
-
-void HttpHandler::setData(void)
+void HttpHandler::checkRequestData(void)
 {
 	try
 	{
-		_isCgi = false;
-		setHttpVersion();
-		setRequestBody();
-		setContentType();
-		setBoundary();
-		setContentLength();
-		setDataContent();
+		getResponse()->status = httpStatusCode::OK;
 	}
 	catch (const std::exception &e)
 	{
@@ -240,19 +98,14 @@ void	deleteFoundDirective(Locations *_foundDirective)
 	delete	_foundDirective;
 }
 
-void HttpHandler::handleRequest(const std::string &content,
-	Server &serverAddress)
+void HttpHandler::handleRequest(Server &serverAddress, request_t *request, response_t *response)
 {
 	_server = &serverAddress;
-	_requestContent = content;
-	std::cout << _requestContent << std::endl;
-	setRequest();
-	setMethods();
-	setData();
-	_requestURL = findRequestedURL(content);
+	_request = request;
+	_response = response;
+	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	combineRightUrl();
-	std::cout << "requestURL result --> " << _requestURL << std::endl;
 	deleteFoundDirective(_foundDirective);
 }
 
@@ -261,50 +114,8 @@ Locations *HttpHandler::getFoundDirective(void)
 	return (_foundDirective);
 }
 
-std::string HttpHandler::getRequestBody(void)
-{
-	return (_requestBody);
-}
-
-std::string HttpHandler::getHttpVersion(void)
-{
-	return (_httpVersion);
-}
-
-httpStatusCode HttpHandler::getHttpStatusCode(void) const
-{
-	return (_statusCode);
-}
-
-std::string HttpHandler::getResponseContent(void)
-{
-	return (_responseContent);
-}
-
-std::string HttpHandler::getResponseURL(void)
-{
-	return (_requestURL);
-}
-
-std::string HttpHandler::getContentType(void)
-{
-	return (_contentType);
-}
-uint64_t HttpHandler::getContentLength(void)
-{
-	return (_contentLength);
-}
 
 bool HttpHandler::getCgi(void)
 {
 	return (_isCgi);
-}
-
-HttpHandler::HttpHandler() : _statusCode(httpStatusCode::OK), _contentLength(0),
-	_isCgi(false)
-{
-}
-
-HttpHandler::~HttpHandler()
-{
 }
