@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/21 17:15:06 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 12:14:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void HttpHandler::setRequest()
 void HttpHandler::storeRequestBody(void)
 {
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
+	
 }
 
 void HttpHandler::setRequestBody(void)
@@ -64,7 +65,6 @@ void HttpHandler::setRequestBody(void)
 	_requestBody = _requestContent.substr(foundBody);
 	if (_requestBody != "")
 		storeRequestBody();
-	
 }
 
 void HttpHandler::setMethods(void)
@@ -78,9 +78,6 @@ void HttpHandler::setMethods(void)
 		_allowedMethods.POST = true;
 	if (_request.find("DELETE") != std::string::npos)
 		_allowedMethods.DELETE = true;
-	// std::cout << "GET " << _allowedMethods.GET << std::endl;
-	// std::cout << "POST " << _allowedMethods.POST << std::endl;
-	// std::cout << "DELETE " << _allowedMethods.DELETE << std::endl;
 }
 
 Locations *HttpHandler::findMatchingDirective(void)
@@ -126,31 +123,21 @@ void HttpHandler::combineRightUrl(void)
 	if (!_foundDirective)
 	{
 		_requestURL = _server->getRoot() + _server->getError404();
-		// std::cout << _requestURL << std::endl;
-		setHttpStatusCode(httpStatusCode::NotFound); // TODO,
-		// 	BUG WHEN WANTING TO ACCESS 404 PAGE ON PURPOSE
+		setHttpStatusCode(httpStatusCode::NotFound);
 		return ;
 	}
 	else if (_foundDirective->getRoot() != "")
-	{
-		// std::cout << "eerste " << std::endl;
 		_requestURL = _foundDirective->getRoot() + _requestURL;
-	}
 	else if (_foundDirective->getLocationDirective() == "/")
-	{
 		_requestURL = _server->getRoot() + _server->getIndex();
-		// std::cout << "root = /" << _requestURL << std::endl;
-	}
 	else
 	{
-		// std::cout << "laatste " << std::endl;
 		_requestURL = _server->getRoot() + _requestURL + "/"
 			+ _foundDirective->getIndex();
 	}
 	if (_foundDirective->getLocationDirective() == "/cgi-bin/")
 	{
 		_isCgi = true;
-		// _requestURL += _foundDirective->
 		std::cout << "CGI IS NOW SET TO TRUE" << std::endl;
 	}
 	std::cout << "requestURL result --> " << _requestURL << std::endl;
@@ -213,13 +200,11 @@ void HttpHandler::setHttpStatusCode(httpStatusCode code)
 void HttpHandler::setBoundary(void)
 {
 	_boundary = extractValue("Content-Type: multipart/form-data; boundary=");
-	// std::cout << "boundary" << _boundary << std::endl;
 }
 
 void HttpHandler::setContentType(void)
 {
 	_contentType = extractValue("Content-Type: ");
-	// std::cout << "my content type " << _contentType << std::endl;
 }
 void HttpHandler::setContentLength(void)
 {
@@ -227,7 +212,6 @@ void HttpHandler::setContentLength(void)
 	if (stringContentLength == "")
 		return ;
 	_contentLength = std::stoul(stringContentLength);
-	// std::cout << "my content length " << _contentLength << std::endl;
 }
 
 void HttpHandler::setDataContent(void)

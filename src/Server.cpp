@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/21 15:03:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 12:11:20 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,19 +19,18 @@ void Server::setServer()
 	opt = 1;
 	this->_address = new struct sockaddr_in;
 	_addrlen = sizeof(*this->_address);
-	// Correctly set the size based on the allocated structure
 	setSockedFD(socket(AF_INET, SOCK_STREAM, 0));
 	if (getSocketFD() < 0)
 	{
 		perror("socket failed");
-		delete this->_address; // Clean up allocated memory
+		delete this->_address;
 		exit(EXIT_FAILURE);
 	}
 	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
 			sizeof(opt)))
 	{
 		perror("setsockopt");
-		delete this->_address; // Clean up allocated memory
+		delete this->_address;
 		exit(EXIT_FAILURE);
 	}
 	this->_address->sin_family = AF_INET;
@@ -40,16 +39,17 @@ void Server::setServer()
 	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
 	{
 		perror("bind failed");
-		delete _address; // Clean up allocated memory
+		delete _address;
 		exit(EXIT_FAILURE);
 	}
 	if (listen(getSocketFD(), 5) < 0)
 	{
 		perror("listen");
-		delete _address; // Clean up allocated memory
+		delete _address;
 		exit(EXIT_FAILURE);
 	}
 	_http_handler = new HttpHandler;
+	_buffer = (char *)malloc(9999999 * sizeof(char));
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -100,7 +100,6 @@ void Server::getLocationStack(std::string locationContent)
 	for (const auto &line : result)
 	{
 		_locations.emplace_back(line);
-		// std::cout << "Location" << line << std::endl;
 	}
 }
 std::string Server::extractValue(const std::string &searchString)
@@ -123,25 +122,22 @@ std::string Server::extractValue(const std::string &searchString)
 void Server::setServerName(void)
 {
 	_serverName = extractValue("server_name");
-	// std::cout << "serverName " << _serverName << std::endl;
 }
 void Server::setPort(void)
 {
 	_portString = extractValue("listen");
 	_port = std::stoi(_portString);
-	// std::cout << "port " << _port << std::endl;
 }
 void Server::setRoot(void)
 {
 	_root = extractValue("root");
 	_root.erase(remove_if(_root.begin(), _root.end(), isspace), _root.end());
-	// std::cout << "root " << _root << std::endl;
 }
 void Server::setIndex(void)
 {
 	_index = extractValue("index");
-	_index.erase(remove_if(_index.begin(), _index.end(), isspace), _index.end());
-	// std::cout << "index " << _index << std::endl;
+	_index.erase(remove_if(_index.begin(), _index.end(), isspace),
+		_index.end());
 }
 
 void Server::setMethods(void)
@@ -156,13 +152,11 @@ void Server::setMethods(void)
 		_allowedMethods.POST = true;
 	if (_methodsList.find("DELETE") != std::string::npos)
 		_allowedMethods.DELETE = true;
-	// std::cout << "methods " << methodsList << std::endl;
 }
 
 void Server::setError404(void)
 {
-	_error404 =  extractValue("error_page 404 ");
-	// std::cout << "Error page 404" << _error404 << std::endl;
+	_error404 = extractValue("error_page 404 ");
 }
 
 void Server::printMethods(void)
@@ -179,7 +173,7 @@ void Server::setSockedFD(int fd)
 
 std::string Server::getError404(void)
 {
-	return(_error404);
+	return (_error404);
 }
 
 int Server::getSocketFD(void)
@@ -187,11 +181,10 @@ int Server::getSocketFD(void)
 	return (this->_socketfd);
 }
 
-char * Server::getStringFromFile(void)
+char *Server::getResponse(void)
 {
-	return (_stringFromFile);
+	return (_response);
 }
-
 
 std::string Server::getServerName(void)
 {
@@ -237,7 +230,7 @@ std::vector<Locations> Server::getLocation(void)
 
 HttpHandler *Server::getHttpHandler(void)
 {
-	return(_http_handler);
+	return (_http_handler);
 }
 
 struct sockaddr_in *Server::getAddress(void)
@@ -279,56 +272,49 @@ void Server::setLocationsRegex(std::string serverContent)
 Server::Server(std::string serverContent)
 {
 	_serverContent = serverContent;
-	// std::cout << "test0" << std::endl;
-	// std::cout << serverContent << std::endl;
 	setServerName();
-	// std::cout << "test1" << std::endl;
 	setPort();
-	// std::cout << "test2" << std::endl;
 	setRoot();
-	// std::cout << "test3" << std::endl;
 	setIndex();
-	// std::cout << "test4" << std::endl;
 	setMethods();
-
 	setError404();
-	// std::cout << "test5" << std::endl;
 	setLocationsRegex(serverContent);
-	// std::cout << "test6" << std::endl;
-	// getLocationStack();
+}
+
+void Server::makeResponse(char *buffer)
+{
+	char	*header;
+	char	*header_nl;
+
+	std::string message = _http_handler->getHttpStatusMessage();
+	header = ft_strjoin("HTTP/1.1 ", message.c_str());
+	header_nl = ft_strjoin(header, "\r\n\r\n");
+	free(header);
+	_response = ft_strjoin(header_nl, buffer);
+	free(header_nl);
 }
 
 void Server::readFile(void)
 {
-	int file;
-	// uint64_t buffersize;
-	// if (_http_handler->getContentLength() != 0)
-	// 	buffersize = _http_handler->getContentLength();
-	// else
-	uint64_t buffersize = 100000;
-	_stringFromFile = (char * )malloc(buffersize * sizeof(char));
+	int	file;
+	int	rdbytes;
+
 	std::cout << "response url " << _http_handler->getResponseURL() << std::endl;
 	file = open(_http_handler->getResponseURL().c_str(), O_RDONLY);
 	if (file == -1)
 	{
 		perror("opening file of responseURL");
-		return;
+		return ;
 	}
-	int rdbytes = read(file, _stringFromFile, buffersize);
-	_stringFromFile[rdbytes] = '\0';
+	rdbytes = read(file, _buffer, 9999999);
+	_buffer[rdbytes] = '\0';
 	close(file);
-	// std::cout << "file In String: " << _stringFromFile << std::endl;
-
-
-	char * header;
-	std::string message = _http_handler->getHttpStatusMessage();
-	header = ft_strjoin("HTTP/1.1 ", message.c_str());
-	header = ft_strjoin(header, "\r\n\r\n");
-	_stringFromFile = ft_strjoin(header, _stringFromFile);
-	std::cout << "\n\n\n\nRESPONSE\n"<<_stringFromFile << "\n--------------------------------" << std::endl;
+	makeResponse(_buffer);
+	std::cout << "\n\n\n\nRESPONSE\n" << _response << "\n--------------------------------" << std::endl;
 }
 
 Server::~Server()
 {
 	delete	_http_handler;
+	free(_buffer);
 }

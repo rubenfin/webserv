@@ -6,14 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/21 14:05:17 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 11:20:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "HttpHandler.hpp"
-#include "Logger.hpp"
 #include "Server.hpp"
 #include <fstream>
 #include <iostream>

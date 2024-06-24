@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/21 14:59:42 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 12:20:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,13 @@ class					HttpHandler;
 class Server
 {
   protected:
-	int					_socketfd;
 	std::string _error404;
 	std::string _serverContent;
 	std::string _portString;
 	std::string _methodsList;
-	char				*_stringFromFile;
-
+	char				*_buffer;
+	char				*_response;
+	int					_socketfd;
 	std::string _serverName;
 	u_int16_t			_port;
 	std::string _root;
@@ -59,7 +59,9 @@ class Server
 	HttpHandler			*_http_handler;
 
   public:
-  	char *cgi(char **env);
+	char *cgi(char **env);
+	void execute_CGI_script(pid_t pid, int *fds, const char *script,
+		char **env);
 	void getLocationStack(std::string locationContent);
 	std::string extractValue(const std::string &searchString);
 	void setServerName(void);
@@ -71,7 +73,7 @@ class Server
 	void printMethods(void);
 	void setSockedFD(int fd);
 	void setServer();
-	char *getStringFromFile(void);
+	char *getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
 	u_int16_t getPort(void);
@@ -87,6 +89,7 @@ class Server
 	std::string getError404(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
+	void makeResponse(char *buffer);
 	void readFile(void);
 	~Server();
 };
