@@ -6,13 +6,13 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 18:37:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 19:25:48 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
 
-void	setHttpVersion(request_t *r)
+static void	setHttpVersion(request_t *r)
 {
 	std::size_t firstSpace = r->firstLine.find(" ");
 	if (firstSpace == std::string::npos)
@@ -38,7 +38,7 @@ void	setHttpVersion(request_t *r)
 	}
 }
 
-void	setMethod(request_t *r)
+static void	setMethod(request_t *r)
 {
 	if (r->firstLine.find("GET") != std::string::npos)
 		r->method = GET;
@@ -51,7 +51,7 @@ void	setMethod(request_t *r)
 	// TODO: Throw an exception if no method found?
 }
 
-void	setRequestURL(request_t *r)
+static void	setRequestURL(request_t *r)
 {
 	std::size_t startPos = r->firstLine.find(" ");
 	if (startPos == std::string::npos)
@@ -72,7 +72,7 @@ void	setRequestURL(request_t *r)
 		r->requestURL = r->firstLine.substr(startPos, endPos - startPos);
 }
 
-void	setRequestHeader(request_t *r)
+static void	setRequestHeader(request_t *r)
 {
 	std::size_t startPos = r->requestContent.find("\n") + 1;
 	std::size_t endPos;
@@ -97,7 +97,7 @@ void	setRequestHeader(request_t *r)
 	}
 }
 
-void	setRequestBody(request_t *r)
+static void	setRequestBody(request_t *r)
 {
 	std::size_t foundBody = r->requestContent.find("\r\n\r\n");
 	if (foundBody == std::string::npos)

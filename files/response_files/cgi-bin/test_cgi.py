@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 print("<html>")
 print("<head>")
 print("<title>CGI Script Test</title>")
