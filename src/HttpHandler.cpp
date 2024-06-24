@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/24 19:03:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/24 19:13:08 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-HttpHandler::HttpHandler() : _request(nullptr), _foundDirective(nullptr),
+HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr), _foundDirective(nullptr),
 	_server(nullptr), _isCgi(false)
 {
 }
@@ -41,10 +41,6 @@ Locations *HttpHandler::findMatchingDirective(void)
 	std::cout << "Found no matching directive" << std::endl;
 	return (NULL);
 }
-// 404 Not Found
-// header: content
-
-// <h1>Error 404: Page not found</h1>
 
 void HttpHandler::combineRightUrl(void)
 {
@@ -86,7 +82,7 @@ void HttpHandler::checkRequestData(void)
 {
 	try
 	{
-		getResponse()->status = httpStatusCode::OK;
+		_isCgi = false;
 	}
 	catch (const std::exception &e)
 	{
@@ -113,7 +109,6 @@ Locations *HttpHandler::getFoundDirective(void)
 {
 	return (_foundDirective);
 }
-
 
 bool HttpHandler::getCgi(void)
 {
