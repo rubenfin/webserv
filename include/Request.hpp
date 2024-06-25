@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 17:36:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 18:43:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 12:28:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <map>
 #include <string.h>
 #include <string>
+#include <sys/stat.h>
+
 
 typedef enum METHODS
 {
@@ -32,6 +34,8 @@ typedef struct request_t
 	std::string requestContent;
 	std::string requestBody;
 	std::string requestURL;
+	std::string requestDirectory;
+	std::string requestFile;
 	METHODS	method;
 	std::map<std::string, std::string> header;
 }			request_t;

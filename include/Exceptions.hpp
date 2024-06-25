@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   serverUtils.cpp                                    :+:    :+:            */
+/*   Exceptions.hpp                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2024/06/24 18:40:58 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/25 12:32:36 by rfinneru      ########   odam.nl         */
+/*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/06/25 11:39:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/Webserv.hpp"
+#ifndef EXCEPTIONS_HPP
+# define EXCEPTIONS_HPP
 
-void	resetRequestResponse(request_t &request, response_t &response)
-{
-	resetRequest(request);
-	resetResponse(response);
-}
+# include <stdexcept>
 
-int	checkIfDir(const std::string &pathname)
+struct runTimeExceptions : public std::runtime_error
 {
-	struct stat s;
-	if (stat(pathname.c_str(), &s) == 0)
-	{
-		if (s.st_mode & S_IFDIR)
-            return (1);
-	}
-    return (0);
-}
+   runTimeExceptions() 
+        : std::runtime_error("Standard runtime Exception") {}
+};
+
+#endif

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 19:25:48 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 15:47:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,21 @@ static void	setRequestURL(request_t *r)
 		r->requestURL = r->firstLine.substr(startPos, endPos - startPos);
 }
 
+static void setRequestDirFile(request_t *r)
+{
+	if (r->requestURL.find(".") == std::string::npos)
+		r->requestDirectory = r->requestURL;
+	else
+	{
+		auto lastSlash = r->requestURL.rfind("/");
+		if (lastSlash != std::string::npos)
+		{
+			r->requestFile = r->requestURL.substr(lastSlash);
+			r->requestDirectory = r->requestURL.substr(0, lastSlash);
+		}
+	}
+}
+
 static void	setRequestHeader(request_t *r)
 {
 	std::size_t startPos = r->requestContent.find("\n") + 1;
@@ -116,6 +131,7 @@ void	parse_request(request_t *r, char *buffer)
 	setHttpVersion(r);
 	setMethod(r);
 	setRequestURL(r);
+	setRequestDirFile(r);
 	setRequestHeader(r);
 	setRequestBody(r);
 	printRequestStruct(r);

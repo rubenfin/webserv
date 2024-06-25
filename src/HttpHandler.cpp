@@ -6,14 +6,14 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/24 19:13:08 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 11:41:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr), _foundDirective(nullptr),
-	_server(nullptr), _isCgi(false)
+HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr),
+	_foundDirective(nullptr), _server(nullptr), _isCgi(false)
 {
 }
 
@@ -82,7 +82,6 @@ void HttpHandler::checkRequestData(void)
 {
 	try
 	{
-		_isCgi = false;
 	}
 	catch (const std::exception &e)
 	{
@@ -94,11 +93,13 @@ void	deleteFoundDirective(Locations *_foundDirective)
 	delete	_foundDirective;
 }
 
-void HttpHandler::handleRequest(Server &serverAddress, request_t *request, response_t *response)
+void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
+	response_t *response)
 {
 	_server = &serverAddress;
 	_request = request;
 	_response = response;
+	_isCgi = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	combineRightUrl();

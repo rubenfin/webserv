@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 18:50:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 12:14:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ void	resetRequest(request_t &request)
 	request.requestContent = "";
 	request.requestBody = "";
 	request.requestURL = "";
+	request.requestDirectory = "";
+	request.requestFile = "";
 }
 
 void	printRequestStruct(request_t *r)
@@ -40,11 +42,13 @@ void	printRequestStruct(request_t *r)
 	std::cout << "requestBody: " << r->requestBody << std::endl;
 	std::cout << "requestURL: " << r->requestURL << std::endl;
 	std::cout << "method: " << r->method << std::endl;
-	std::cout << "_header: " << std::endl;
-	for (const auto &header : r->header)
-	{
-		std::cout << header.first << ": " << header.second << std::endl;
-	}
+	std::cout << "requestDirectory: " << r->requestDirectory << std::endl;
+	std::cout << "requestFile: " << r->requestFile << std::endl;
+	// std::cout << "_header: " << std::endl;
+	// for (const auto &header : r->header)
+	// {
+	// 	std::cout << header.first << ": " << header.second << std::endl;
+	// }
     std::cout << "----------------------------------" << std::endl;
     std::cout << RESET << std::endl;;
 }
