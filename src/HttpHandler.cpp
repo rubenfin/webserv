@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/25 11:41:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 15:53:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,11 @@ void HttpHandler::combineRightUrl(void)
 	std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
 }
 
+Server *HttpHandler::getServer(void)
+{
+	return (_server);
+}
+
 request_t *HttpHandler::getRequest(void)
 {
 	return (_request);
@@ -82,6 +87,8 @@ void HttpHandler::checkRequestData(void)
 {
 	try
 	{
+		if (!checkIfDir(getServer()->getRoot() + getRequest()->requestDirectory))
+			std::cout << "Not a dir" << std::endl;
 	}
 	catch (const std::exception &e)
 	{
