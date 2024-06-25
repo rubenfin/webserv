@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/21 11:32:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 17:29:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,5 +60,6 @@ class Locations
 	std::string extractDirectory(const std::string &line);
 	void getLocationRegex(std::string locationContent);
 	Locations(std::string locationContent);
+	Locations(const Locations *other);
 	~Locations();
 };

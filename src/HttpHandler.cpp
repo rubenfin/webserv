@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/25 15:53:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 17:29:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,31 +28,40 @@ void HttpHandler::handleRequestBody(void)
 
 Locations *HttpHandler::findMatchingDirective(void)
 {
-	// TODO: we're checking if the directive is equal,
-	// but it should be longest one not equal
+	Locations	*currLongestLocation;
+
+	currLongestLocation = nullptr;
 	for (size_t i = 0; i < _server->getLocation().size(); i++)
 	{
-		if (getRequest()->requestURL == _server->getLocation()[i].getLocationDirective())
+		const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
+		if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
 		{
-			std::cout << getRequest()->requestURL << "|" << _server->getLocation()[i].getLocationDirective() << std::endl;
-			return (new Locations(_server->getLocation()[i]));
+			if (currLongestLocation == nullptr
+				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
+				currLongestLocation = &_server->getLocation()[i];
+			std::cout << locationDirective << "|" << currLongestLocation->getLocationDirective() << std::endl;
 		}
 	}
-	std::cout << "Found no matching directive" << std::endl;
-	return (NULL);
+
+	if (currLongestLocation)
+		return (new Locations(currLongestLocation));
+	return (nullptr);
 }
 
 void HttpHandler::combineRightUrl(void)
 {
 	if (!_foundDirective)
 	{
+		// There is no directive found so we return an error.
 		getRequest()->requestURL = _server->getRoot() + _server->getError404();
 		getResponse()->status = httpStatusCode::NotFound;
 		return ;
 	}
 	else if (_foundDirective->getRoot() != "")
+	{
 		getRequest()->requestURL = _foundDirective->getRoot()
 			+ getRequest()->requestURL;
+	}
 	else if (_foundDirective->getLocationDirective() == "/")
 		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
 	else
@@ -87,8 +96,16 @@ void HttpHandler::checkRequestData(void)
 {
 	try
 	{
-		if (!checkIfDir(getServer()->getRoot() + getRequest()->requestDirectory))
+		if (!checkIfDir(getServer()->getRoot()
+				+ getRequest()->requestDirectory))
 			std::cout << "Not a dir" << std::endl;
+		if (getRequest()->requestFile != "")
+		{
+			if (!checkIfFile(getServer()->getRoot()
+					+ getRequest()->requestDirectory
+					+ getRequest()->requestFile))
+				std::cout << "Not a file" << std::endl;
+		}
 	}
 	catch (const std::exception &e)
 	{

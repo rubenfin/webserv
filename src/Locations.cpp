@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/19 11:11:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 17:29:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,21 @@ Locations::Locations(std::string locationContent)
 	// 	std::cout << "Location: " << line << std::endl;
 	// }
 }
+
+Locations::Locations(const Locations *other)
+{
+	this->_locationContent = other->_locationContent;
+	this->_methodsList = other->_methodsList;
+	this->_locationDirective = other->_locationDirective;
+	this->_allowedMethods = other->_allowedMethods;
+	this->_root = other->_root;
+	this->_index = other->_index;
+	this->_cgi_pass = other->_cgi_pass;
+	this->_alias = other->_alias;
+	this->_url = other->_url;
+}
+
+
 
 std::string Locations::extractValue(std::string toSearch)
 {

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/25 12:14:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/25 15:55:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	resetRequest(request_t &request)
 
 void	printRequestStruct(request_t *r)
 {
-    std::cout << RED << "REQUEST" <<std::endl;
+    std::cout << BLUE << "REQUEST" <<std::endl;
     std::cout << "----------------------------------" << std::endl;
 	std::cout << "http_v: " << r->http_v << std::endl;
 	std::cout << "firstLine: " << r->firstLine << std::endl;
