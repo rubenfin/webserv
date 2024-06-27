@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/27 14:27:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/27 15:19:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,35 +26,32 @@ void HttpHandler::handleRequestBody(void)
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
 }
 
-Locations* HttpHandler::findMatchingDirective(void)
+Locations *HttpHandler::findMatchingDirective(void)
 {
-    Locations *currLongestLocation = nullptr;
+	Locations	*currLongestLocation;
 
-    for (size_t i = 0; i < _server->getLocation().size(); i++)
-    {
-        const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
-        if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
-        {
-            if (currLongestLocation == nullptr
-                || locationDirective.size() > currLongestLocation->getLocationDirective().size())
-            {
-                currLongestLocation = &_server->getLocation()[i];
-            }
-            std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
-        }
-    }
-
-    if (currLongestLocation)
-    {
-        return currLongestLocation;
-    }
-    return nullptr;
+	currLongestLocation = nullptr;
+	for (size_t i = 0; i < _server->getLocation().size(); i++)
+	{
+		const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
+		if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
+		{
+			if (currLongestLocation == nullptr
+				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
+				currLongestLocation = &_server->getLocation()[i];
+			std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
+		}
+	}
+	if (currLongestLocation)
+	{
+		return (currLongestLocation);
+	}
+	return (nullptr);
 }
-
 
 void HttpHandler::combineRightUrl(void)
 {
-	if (!_foundDirective)
+	if (!_foundDirective || getResponse()->status == httpStatusCode::NotFound)
 	{
 		// There is no directive found so we return an error.
 		getRequest()->requestURL = _server->getRoot() + _server->getError404();
@@ -70,8 +67,17 @@ void HttpHandler::combineRightUrl(void)
 		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
 	else
 	{
-		getRequest()->requestURL = _server->getRoot() + getRequest()->requestURL
-			+ "/" + _foundDirective->getIndex();
+		if (getRequest()->requestFile != ""
+			&& getResponse()->status != httpStatusCode::NotFound)
+		{
+			getRequest()->requestURL = _server->getRoot()
+				+ getRequest()->requestDirectory + getRequest()->requestFile;
+		}
+		else
+		{
+			getRequest()->requestURL = _server->getRoot()
+				+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
+		}
 	}
 	if (_foundDirective->getLocationDirective() == "/cgi-bin")
 	{
@@ -102,13 +108,13 @@ void HttpHandler::checkRequestData(void)
 	{
 		if (!checkIfDir(getServer()->getRoot()
 				+ getRequest()->requestDirectory))
-			std::cout << "Not a dir" << std::endl;
+			getResponse()->status = httpStatusCode::NotFound;
 		if (getRequest()->requestFile != "")
 		{
 			if (!checkIfFile(getServer()->getRoot()
 					+ getRequest()->requestDirectory
 					+ getRequest()->requestFile))
-				std::cout << "Not a file" << std::endl;
+				getResponse()->status = httpStatusCode::NotFound;
 		}
 	}
 	catch (const std::exception &e)
