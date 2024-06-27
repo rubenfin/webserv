@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/25 17:29:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/27 14:27:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,27 +26,31 @@ void HttpHandler::handleRequestBody(void)
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
 }
 
-Locations *HttpHandler::findMatchingDirective(void)
+Locations* HttpHandler::findMatchingDirective(void)
 {
-	Locations	*currLongestLocation;
+    Locations *currLongestLocation = nullptr;
 
-	currLongestLocation = nullptr;
-	for (size_t i = 0; i < _server->getLocation().size(); i++)
-	{
-		const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
-		if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
-		{
-			if (currLongestLocation == nullptr
-				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
-				currLongestLocation = &_server->getLocation()[i];
-			std::cout << locationDirective << "|" << currLongestLocation->getLocationDirective() << std::endl;
-		}
-	}
+    for (size_t i = 0; i < _server->getLocation().size(); i++)
+    {
+        const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
+        if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
+        {
+            if (currLongestLocation == nullptr
+                || locationDirective.size() > currLongestLocation->getLocationDirective().size())
+            {
+                currLongestLocation = &_server->getLocation()[i];
+            }
+            std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
+        }
+    }
 
-	if (currLongestLocation)
-		return (new Locations(currLongestLocation));
-	return (nullptr);
+    if (currLongestLocation)
+    {
+        return currLongestLocation;
+    }
+    return nullptr;
 }
+
 
 void HttpHandler::combineRightUrl(void)
 {
@@ -127,7 +131,7 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	combineRightUrl();
-	deleteFoundDirective(_foundDirective);
+	// deleteFoundDirective(_foundDirective);
 }
 
 Locations *HttpHandler::getFoundDirective(void)

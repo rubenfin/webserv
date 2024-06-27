@@ -9,15 +9,12 @@ server {
 	allow_methods GET
 
 	location / {
-
 	}
 
 	location /cgi-bin {
 		index test_cgi.py
 	}
 	
-	GET /put_test/text.html
-
 	location /put_test {
 		index put_test.html
 		allow_methods GET

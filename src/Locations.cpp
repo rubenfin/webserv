@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/25 17:29:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/27 14:25:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,10 @@ std::string Locations::getIndex(void)
 std::string Locations::getCgi_pass(void)
 {
 	return(_cgi_pass);
+}
+
+Locations::Locations()
+{
 }
 
 Locations::~Locations()
