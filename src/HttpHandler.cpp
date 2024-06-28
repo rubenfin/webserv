@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/27 15:19:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/28 15:09:47 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,13 +58,13 @@ void HttpHandler::combineRightUrl(void)
 		getResponse()->status = httpStatusCode::NotFound;
 		return ;
 	}
+	else if (_foundDirective->getLocationDirective() == "/")
+		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
 	else if (_foundDirective->getRoot() != "")
 	{
 		getRequest()->requestURL = _foundDirective->getRoot()
 			+ getRequest()->requestURL;
 	}
-	else if (_foundDirective->getLocationDirective() == "/")
-		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
 	else
 	{
 		if (getRequest()->requestFile != ""
