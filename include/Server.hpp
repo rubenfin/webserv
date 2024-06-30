@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/24 16:53:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/28 15:38:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ class Server
 	char				*_buffer;
 	char				*_response;
 	int					_socketfd;
-	std::string _serverName;
-	u_int16_t			_port;
-	std::string _root;
-	std::string _index;
+	std::string 		_serverName;
+	int					_port;
+	std::string 		_root;
+	std::string 		_index;
 	Methods				_allowedMethods;
 	std::vector<Locations> _locations;
 

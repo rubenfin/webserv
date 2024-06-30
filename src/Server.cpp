@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/27 15:06:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/28 15:37:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ void Server::setServer()
 	this->_address->sin_family = AF_INET;
 	this->_address->sin_addr.s_addr = INADDR_ANY;
 	this->_address->sin_port = htons(getPort());
+	if (_port <= 0)
+	{
+		std::cerr << "Not available port" << std::endl;
+		delete _address;
+		exit(EXIT_FAILURE);
+	}
 	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
 	{
 		perror("bind failed");
@@ -279,6 +285,7 @@ Server::Server(std::string serverContent)
 	setMethods();
 	setError404();
 	setLocationsRegex(serverContent);
+	std::cout << _port << std::endl;
 }
 
 void Server::makeResponse(char *buffer)

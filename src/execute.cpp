@@ -6,17 +6,18 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+
+
+
 void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	char **env)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
-	char	*envp[] = {(char *)0};
 
-	(void)env;
 	close(fds[0]);
 	dup2(fds[1], STDOUT_FILENO);
 	close(fds[1]);
-	execve(script, exec_args, envp);
+	execve(script, exec_args, env);
 	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
 	exit(EXIT_FAILURE);
 }

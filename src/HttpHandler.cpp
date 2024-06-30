@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/28 15:09:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 14:10:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,7 @@ Locations *HttpHandler::findMatchingDirective(void)
 		}
 	}
 	if (currLongestLocation)
-	{
 		return (currLongestLocation);
-	}
 	return (nullptr);
 }
 
@@ -102,20 +100,31 @@ response_t *HttpHandler::getResponse(void)
 	return (_response);
 }
 
+void HttpHandler::httpVersionCheck(void)
+{
+	if (getRequest()->http_v != "1.1")
+		getResponse()->status = httpStatusCode::httpVersionNotSupported;
+}
+
+int HttpHandler::pathCheck(void)
+{
+	if (!checkIfDir(getServer()->getRoot() + getRequest()->requestDirectory))
+		getResponse()->status = httpStatusCode::NotFound;
+	if (getRequest()->requestFile != "")
+	{
+		if (!checkIfFile(getServer()->getRoot() + getRequest()->requestDirectory
+				+ getRequest()->requestFile))
+			getResponse()->status = httpStatusCode::NotFound;
+	}
+	return (1);
+}
+
 void HttpHandler::checkRequestData(void)
 {
 	try
 	{
-		if (!checkIfDir(getServer()->getRoot()
-				+ getRequest()->requestDirectory))
-			getResponse()->status = httpStatusCode::NotFound;
-		if (getRequest()->requestFile != "")
-		{
-			if (!checkIfFile(getServer()->getRoot()
-					+ getRequest()->requestDirectory
-					+ getRequest()->requestFile))
-				getResponse()->status = httpStatusCode::NotFound;
-		}
+		httpVersionCheck();
+		pathCheck();
 	}
 	catch (const std::exception &e)
 	{
