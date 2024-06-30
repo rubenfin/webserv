@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/28 15:38:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 14:48:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ class Server
 	void printMethods(void);
 	void setSockedFD(int fd);
 	void setServer();
+	void setEnv(char **&env);
 	char *getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);

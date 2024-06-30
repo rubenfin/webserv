@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/28 15:18:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 14:57:48 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class HttpHandler
 	void handleRequest(Server &serverAddresss, request_t *request, response_t *response);
 	void httpVersionCheck(void);
 	int pathCheck(void);
+	void methodCheck(void);
 	Locations	*getFoundDirective(void);
 	request_t	*getRequest(void);
 	response_t	*getResponse(void);

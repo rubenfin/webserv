@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/30 14:10:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 14:58:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,15 +108,25 @@ void HttpHandler::httpVersionCheck(void)
 
 int HttpHandler::pathCheck(void)
 {
-	if (!checkIfDir(getServer()->getRoot() + getRequest()->requestDirectory))
+	std::string dir = getServer()->getRoot() + getRequest()->requestDirectory;
+	std::string file = getServer()->getRoot() + getRequest()->requestDirectory
+		+ getRequest()->requestFile;
+	if (!checkIfDir(dir))
 		getResponse()->status = httpStatusCode::NotFound;
 	if (getRequest()->requestFile != "")
 	{
-		if (!checkIfFile(getServer()->getRoot() + getRequest()->requestDirectory
-				+ getRequest()->requestFile))
+		if (!checkIfFile(file))
+			getResponse()->status = httpStatusCode::NotFound;
+		if (access(file.c_str(), X_OK) == -1)
 			getResponse()->status = httpStatusCode::NotFound;
 	}
 	return (1);
+}
+
+void HttpHandler::methodCheck(void)
+{
+	if (getRequest()->method == ERROR)
+		getResponse()->status = httpStatusCode::NotFound;
 }
 
 void HttpHandler::checkRequestData(void)
@@ -125,6 +135,7 @@ void HttpHandler::checkRequestData(void)
 	{
 		httpVersionCheck();
 		pathCheck();
+		methodCheck();
 	}
 	catch (const std::exception &e)
 	{

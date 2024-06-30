@@ -6,9 +6,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
-
-
+void Server::setEnv(char **&env)
+{
+	
+}
 void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	char **env)
 {
@@ -17,6 +18,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	close(fds[0]);
 	dup2(fds[1], STDOUT_FILENO);
 	close(fds[1]);
+	setEnv(env);
 	execve(script, exec_args, env);
 	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
 	exit(EXIT_FAILURE);
@@ -55,7 +57,7 @@ int Webserv::execute(void)
 	ssize_t		valread;
 	socklen_t	addrlen;
 	request_t	request;
-	response_t 	response;
+	response_t	response;
 
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
@@ -74,7 +76,8 @@ int Webserv::execute(void)
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);
 		// printf("%s\n", buffer);
-		_servers[0].getHttpHandler()->handleRequest(_servers[0], &request, &response);
+		_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
+			&response);
 		std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
