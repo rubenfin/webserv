@@ -8,17 +8,51 @@
 
 void Server::setEnv(char **&env)
 {
-	
+	char	**savedEnv;
+	int		existingEnvCount;
+
+	std::vector<std::string> addedEnv;
+	std::string currMethod;
+	savedEnv = env;
+	// Determine the current method
+	if (getHttpHandler()->getRequest()->method == GET)
+		currMethod = "GET";
+	else if (getHttpHandler()->getRequest()->method == POST)
+		currMethod = "POST";
+	else if (getHttpHandler()->getRequest()->method == DELETE)
+		currMethod = "DELETE";
+	// Add new environment variables
+	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
+	addedEnv.push_back("SERVER_NAME=" + getServerName());
+	addedEnv.push_back("SERVER_PORT=" + std::to_string(getPort()));
+	addedEnv.push_back("SCRIPT_NAME="
+		+ getHttpHandler()->getRequest()->requestFile);
+	addedEnv.push_back("PATH_INFO="
+		+ getHttpHandler()->getRequest()->requestURL);
+	existingEnvCount = 0;
+	while (savedEnv[existingEnvCount] != nullptr)
+		existingEnvCount++;
+	env = new char *[existingEnvCount + addedEnv.size() + 1];
+	for (size_t i = 0; i < addedEnv.size(); ++i)
+		env[i] = strdup(addedEnv[i].c_str());
+	for (int i = 0; i < existingEnvCount; ++i)
+		env[addedEnv.size() + i] = strdup(savedEnv[i]);
+	env[addedEnv.size() + existingEnvCount] = nullptr;
 }
+
 void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	char **env)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
 
 	close(fds[0]);
+	setEnv(env);
+	for (size_t i = 0; env[i]; i++)
+	{
+		std::cout << env[i] << std::endl;
+	}
 	dup2(fds[1], STDOUT_FILENO);
 	close(fds[1]);
-	setEnv(env);
 	execve(script, exec_args, env);
 	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
 	exit(EXIT_FAILURE);
@@ -39,9 +73,10 @@ char *Server::cgi(char **env)
 	else
 	{
 		close(fds[1]);
-		bytesRead = read(fds[0], _buffer, 10000);
-		std::cout << bytesRead << std::endl;
-		_buffer[bytesRead] = '\0';
+		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer,
+				10000);
+		std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
+		_buffer[getHttpHandler()->getResponse()->contentLength] = '\0';
 		std::cout << "STRING FROM CGI SCRIPT\n" << _buffer << std::endl;
 		close(fds[0]);
 		makeResponse(_buffer);

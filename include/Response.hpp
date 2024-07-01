@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:06:37 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/24 18:47:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 15:56:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ typedef struct response_t
 {
 	httpStatusCode	status;
 	std::string response;
+	int contentLength; 
 
 }					response_t;
 

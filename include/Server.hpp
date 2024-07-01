@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/30 14:48:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 15:45:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class Server
 	char *getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
-	u_int16_t getPort(void);
+	int getPort(void);
 	std::string getRoot(void);
 	std::string getIndex(void);
 	int getSocketFD(void);

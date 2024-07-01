@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/28 15:37:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/06/30 15:45:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,7 @@ socklen_t Server::getAddrlen(void)
 	return (_addrlen);
 }
 
-u_int16_t Server::getPort(void)
+int Server::getPort(void)
 {
 	return (_port);
 }
