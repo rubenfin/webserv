@@ -11,6 +11,7 @@ void Server::setEnv(char **&env)
 	char	**savedEnv;
 	int		existingEnvCount;
 
+
 	std::vector<std::string> addedEnv;
 	std::string currMethod;
 	savedEnv = env;
@@ -23,6 +24,14 @@ void Server::setEnv(char **&env)
 		currMethod = "DELETE";
 	// Add new environment variables
 	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
+	addedEnv.push_back("QUERY_STRING="
+		+ getHttpHandler()->getRequest()->requestBody);
+	auto contentTypeIt = getHttpHandler()->getRequest()->header.find("Content-Type");
+	if (contentTypeIt != getHttpHandler()->getRequest()->header.end())
+		addedEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
+	auto contentLengthIt = getHttpHandler()->getRequest()->header.find("Content-Length");
+	if (contentLengthIt != getHttpHandler()->getRequest()->header.end())
+		addedEnv.push_back("CONTENT_LENGTH=" + contentLengthIt->second);
 	addedEnv.push_back("SERVER_NAME=" + getServerName());
 	addedEnv.push_back("SERVER_PORT=" + std::to_string(getPort()));
 	addedEnv.push_back("SCRIPT_NAME="
