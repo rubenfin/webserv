@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/03 12:54:12 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 13:42:48 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ std::string Locations::extractValue(std::string toSearch)
 			++endLocation;
 		std::string directory = _locationContent.substr(beginLocation,
 				endLocation - beginLocation);
-		return (directory);
+		return (trim(directory));
 	}
 	return ("");
 }

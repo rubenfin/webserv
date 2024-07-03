@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/03 13:28:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 14:47:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,14 @@ void Server::setServer()
 		exit(EXIT_FAILURE);
 	}
 	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-			sizeof(opt)))
+			sizeof(opt)) < 0 )
 	{
 		perror("setsockopt");
 		delete this->_address;
 		exit(EXIT_FAILURE);
 	}
 	this->_address->sin_family = AF_INET;
-	this->_address->sin_addr.s_addr = INADDR_ANY;
+	this->_address->sin_addr.s_addr = INADDR_ANY; // autofills ip address with current host
 	this->_address->sin_port = htons(getPort());
 	if (_port <= 0)
 	{
@@ -119,9 +119,9 @@ std::string Server::extractValue(const std::string &searchString)
 		pos += searchString.length();
 		endPos = _serverContent.find('\n', pos);
 		if (endPos != std::string::npos)
-			return (_serverContent.substr(pos, endPos - pos));
+			return (trim(_serverContent.substr(pos, endPos - pos)));
 		else
-			return (_serverContent.substr(pos));
+			return (trim(_serverContent.substr(pos)));
 	}
 	return ("");
 }

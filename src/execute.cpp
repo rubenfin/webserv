@@ -119,18 +119,16 @@ int Webserv::execute(void)
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);
-		if (request.http_v == "invalid" && request.firstLine == "" || request.firstLine == "GET /favicon.ico HTTP/1.1")
-			continue;
 		// printf("%s\n", buffer);
 		_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
 			&response);
 		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
-		else if(!_servers[0].getHttpHandler()->getRedirect())
-			_servers[0].readFile();
-		else 
+		else if(_servers[0].getHttpHandler()->getRedirect())
 			_servers[0].makeResponse(NULL);
+		else 
+			_servers[0].readFile();
 		// if (_servers[0].getHttpHandler()->getRequestBody() != "")
 		// 	std::cout << "\n\n MY REQUEST BODY\n"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
 		std::cout << "RESPONSE\n" << _servers[0].getResponse().c_str() << std::endl;

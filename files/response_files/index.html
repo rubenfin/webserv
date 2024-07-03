@@ -58,6 +58,7 @@
         <button id="testButtonDelete">Send DELETE Request to /delete_test</button>
         <button id="testButtonPost">Send POST Request to /post_test</button>
         <button id="testButtonInvalid">Invalid URL, should go to 404</button>
+        <button id="testButtonRedirect">Redirect to YouTube</button>
         <p class="error-message" id="errorMessage"></p>
     </div>
 
@@ -65,41 +66,56 @@
         document.getElementById('testButtonGet').addEventListener('click', function() {
             sendRequest('GET', '/get_request');
         });
-
+    
         document.getElementById('testButtonDelete').addEventListener('click', function() {
             sendRequest('DELETE', '/delete_test');
         });
-
+    
         document.getElementById('testButtonPost').addEventListener('click', function() {
             sendRequest('POST', '/post_test');
         });
-
+    
         document.getElementById('testButtonInvalid').addEventListener('click', function() {
             sendRequest('GET', '/notworking');
         });
-
+    
+        document.getElementById('testButtonRedirect').addEventListener('click', function() {
+            sendRequest('GET', '/redirect');
+        });
+    
         function sendRequest(method, url) {
             fetch(url, {
-                method: method
+                method: method,
+                redirect: 'manual' // This prevents automatic redirect following
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+    
+                if (response.status >= 300 && response.status < 400) {
+                    // If it's a redirect, get the Location header
+                    const redirectUrl = response.headers.get('Location');
+                    if (redirectUrl) {
+                        console.log('Redirecting to:', redirectUrl);
+                        window.location.href = redirectUrl;
+                        return;
+                    }
                 }
-                return response.text();
-            })
-            .then(data => {
-                // Handle successful response
-                console.log('Success:', data);
-                window.location.href = url; // Redirect to the received URL
+                
+                // For all other cases, including errors, navigate to the original URL
+                console.log('Navigating to:', url);
+                window.location.href = url;
             })
             .catch(error => {
-                // Handle error gracefully
                 console.error('Error:', error.message);
                 document.getElementById('errorMessage').textContent = `Failed to fetch ${url}. Error: ${error.message}`;
                 setTimeout(() => {
                     document.getElementById('errorMessage').textContent = '';
-                }, 3000); // Clear error message after 3 seconds
+                }, 3000);
+                
+                // Even on error, navigate to the URL
+                console.log('Navigating to:', url);
+                window.location.href = url;
             });
         }
     </script>
