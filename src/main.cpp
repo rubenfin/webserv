@@ -18,6 +18,9 @@ int	main(int argc, char **argv, char **env)
 		return (std::cerr << "usage: ./webserv [configuration_file]" << std::endl,
 			EXIT_FAILURE);
 	std::string filename = argv[1];
+	if (checkIfDir(filename))
+		return (std::cerr << "The configuration filepath is a directory" << std::endl,
+			EXIT_FAILURE);
 	if (!checkIfFile(filename))
 		return (std::cerr << "The configuration filepath is not correct" << std::endl,
 			EXIT_FAILURE);
