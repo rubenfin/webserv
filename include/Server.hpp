@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/30 15:45:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 12:52:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Server
 	std::string _portString;
 	std::string _methodsList;
 	char				*_buffer;
-	char				*_response;
+	std::string			_response;
 	int					_socketfd;
 	std::string 		_serverName;
 	int					_port;
@@ -74,7 +74,7 @@ class Server
 	void setSockedFD(int fd);
 	void setServer();
 	void setEnv(char **&env);
-	char *getResponse(void);
+	std::string getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
 	int getPort(void);

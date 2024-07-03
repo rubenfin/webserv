@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/27 15:09:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 12:54:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ void Locations::getLocationRegex(std::string locationContent)
 	setIndex();
 	setCgi_pass();
 	setMethods();
+	setReturn();
 }
 
 std::string Locations::getLocationDirective(void)
@@ -66,6 +67,11 @@ MethodsLoc Locations::getMethods(void)
 std::string Locations::getAlias(void)
 {
 	return (_alias);
+}
+
+std::string Locations::getReturn(void)
+{
+	return (_return);
 }
 
 Locations::Locations(std::string locationContent)
@@ -92,8 +98,8 @@ Locations::Locations(const Locations *other)
 	this->_cgi_pass = other->_cgi_pass;
 	this->_alias = other->_alias;
 	this->_url = other->_url;
+	this->_return = other->_return;
 }
-
 
 
 std::string Locations::extractValue(std::string toSearch)
@@ -130,6 +136,11 @@ void Locations::setIndex(void)
 void Locations::setCgi_pass(void)
 {
 	_cgi_pass = extractValue("cgi_pass");
+}
+
+void Locations::setReturn(void)
+{
+	_return = extractValue("return");
 }
 
 std::string Locations::getRoot(void)

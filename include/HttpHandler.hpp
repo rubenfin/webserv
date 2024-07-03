@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/30 14:57:48 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 12:49:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class HttpHandler
 	Locations		*_foundDirective;
 	Server			*_server;
 	bool			_isCgi;
+	bool			_hasRedirect;
 
   public:
 	HttpHandler();
@@ -47,4 +48,5 @@ class HttpHandler
 	Server		*getServer(void);
 	Locations	*findMatchingDirective(void);
 	bool		getCgi(void);
+	bool		getRedirect(void);
 };

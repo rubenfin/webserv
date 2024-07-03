@@ -15,9 +15,8 @@ server {
 		index test_cgi.py
 	}
 	
-	location /put_test {
-		index put_test.html
-		allow_methods GET
+	location /redirect {
+		return www.youtube.com
 	}
 
 	location /get_request {

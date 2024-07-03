@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/30 15:45:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 13:28:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,7 @@ int Server::getSocketFD(void)
 	return (this->_socketfd);
 }
 
-char *Server::getResponse(void)
+std::string Server::getResponse(void)
 {
 	return (_response);
 }
@@ -287,18 +287,40 @@ Server::Server(std::string serverContent)
 	setLocationsRegex(serverContent);
 	std::cout << _port << std::endl;
 }
+void Server::makeResponse(char *buffer) {
+    std::string header;
+    std::string body;
 
-void Server::makeResponse(char *buffer)
-{
-	char	*header;
-	char	*header_nl;
+    if (getHttpHandler()->getRedirect()) {
+        // Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
+        getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
+        std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+        header = "HTTP/1.1 " + message + "\r\n";
+        
+        std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
+        if (redirectUrl.substr(0, 4) != "http") {
+            redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
+        }
+        
+        header += "Location: " + redirectUrl + "\r\n";
+        
+        header += "Content-Type: text/html\r\n";
+        header += "Content-Length: 0" "\r\n";
+    } else {
+        std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+        header = "HTTP/1.1 " + message + "\r\n";
+        
+        if (buffer) {
+            body = buffer;
+            header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
+        } else {
+            header += "Content-Length: 0\r\n";
+        }
+    }
 
-	std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
-	header = ft_strjoin("HTTP/1.1 ", message.c_str());
-	header_nl = ft_strjoin(header, "\r\n\r\n");
-	free(header);
-	_response = ft_strjoin(header_nl, buffer);
-	free(header_nl);
+    header += "\r\n"; // End of headers
+
+    _response = header + body;
 }
 
 void Server::readFile(void)

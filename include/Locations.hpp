@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/06/27 14:25:12 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/03 12:54:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Locations
 	std::string _cgi_pass;
 	std::string _alias;
 	std::string _url;
+	std::string _return;
 
   public:
 	void printMethods(void);
@@ -49,15 +50,16 @@ class Locations
 	void setCgi_pass(void);
 	void setMethods(void);
 	void setAlias(void);
+	void setReturn(void);
 
 	std::string getRoot(void);
 	std::string getIndex(void);
 	std::string getCgi_pass(void);
 	MethodsLoc getMethods(void);
 	std::string getAlias(void);
+	std::string getReturn(void);
 	std::string extractValue(std::string toSearch);
 	void printLocationsContent(void);
-	std::string extractDirectory(const std::string &line);
 	void getLocationRegex(std::string locationContent);
 	Locations(std::string locationContent);
 	Locations(const Locations *other);

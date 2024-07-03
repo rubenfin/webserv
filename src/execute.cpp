@@ -119,18 +119,23 @@ int Webserv::execute(void)
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);
+		if (request.http_v == "invalid" && request.firstLine == "" || request.firstLine == "GET /favicon.ico HTTP/1.1")
+			continue;
 		// printf("%s\n", buffer);
 		_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
 			&response);
-		std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
+		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
-		else
+		else if(!_servers[0].getHttpHandler()->getRedirect())
 			_servers[0].readFile();
+		else 
+			_servers[0].makeResponse(NULL);
 		// if (_servers[0].getHttpHandler()->getRequestBody() != "")
 		// 	std::cout << "\n\n MY REQUEST BODY\n"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
-		if (send(client_socket, _servers[0].getResponse(),
-				strlen(_servers[0].getResponse()), 0) == -1)
+		std::cout << "RESPONSE\n" << _servers[0].getResponse().c_str() << std::endl;
+		if (send(client_socket, _servers[0].getResponse().c_str(),
+				strlen(_servers[0].getResponse().c_str()), 0) == -1)
 			perror("send");
 		close(client_socket);
 	}
