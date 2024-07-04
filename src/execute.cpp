@@ -26,7 +26,6 @@ void Server::setEnv(char **&env)
 	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
 	addedEnv.push_back("QUERY_STRING="
 		+ getHttpHandler()->getRequest()->requestBody);
-	
 	auto contentTypeIt = getHttpHandler()->getRequest()->header.find("Content-Type");
 	if (contentTypeIt != getHttpHandler()->getRequest()->header.end())
 		addedEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
@@ -50,22 +49,23 @@ void Server::setEnv(char **&env)
 	env[addedEnv.size() + existingEnvCount] = nullptr;
 }
 
-void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
-	char **env)
-{
-	char	*exec_args[] = {(char *)script, nullptr};
+void Server::execute_CGI_script(pid_t pid, int *fds, const char *script, char **env) {
+    char *exec_args[] = {(char *)script, nullptr};
 
-	close(fds[0]);
-	// setEnv(env);
-	for (size_t i = 0; env[i]; i++)
-	{
-		std::cout << env[i] << std::endl;
-	}
-	dup2(fds[1], STDOUT_FILENO);
-	close(fds[1]);
-	execve(script, exec_args, env);
-	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-	exit(EXIT_FAILURE);
+    close(fds[0]);
+    setEnv(env);
+
+    dup2(fds[1], STDOUT_FILENO);
+    close(fds[1]);
+
+    if (getHttpHandler()->getRequest()->method == POST) {
+        int content_length = std::stoi(getHttpHandler()->getRequest()->header["Content-Length"]);
+        write(STDIN_FILENO,getHttpHandler()->getRequest()->requestBody.c_str(), content_length);
+    }
+
+    execve(script, exec_args, env);
+    getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
+    exit(EXIT_FAILURE);
 }
 
 char *Server::cgi(char **env)

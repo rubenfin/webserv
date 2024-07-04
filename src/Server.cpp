@@ -287,6 +287,7 @@ Server::Server(std::string serverContent)
 	setLocationsRegex(serverContent);
 	std::cout << _port << std::endl;
 }
+
 void Server::makeResponse(char *buffer) {
     std::string header;
     std::string body;
@@ -300,10 +301,8 @@ void Server::makeResponse(char *buffer) {
         std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
         if (redirectUrl.substr(0, 4) != "http") {
             redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
-        }
-        
+        }        
         header += "Location: " + redirectUrl + "\r\n";
-        
         header += "Content-Type: text/html\r\n";
         header += "Content-Length: 0" "\r\n";
     } else {
@@ -318,7 +317,7 @@ void Server::makeResponse(char *buffer) {
         }
     }
 
-    header += "\r\n"; // End of headers
+    header += "\r\n";
 
     _response = header + body;
 }
