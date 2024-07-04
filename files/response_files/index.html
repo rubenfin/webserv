@@ -59,6 +59,11 @@
         <button id="testButtonPost">Send POST Request to /post_test</button>
         <button id="testButtonInvalid">Invalid URL, should go to 404</button>
         <button id="testButtonRedirect">Redirect to YouTube</button>
+        <form action="/cgi-bin" method="post">
+            Name: <input type="text" name="name"><br>
+            Email: <input type="text" name="email"><br>
+            <input type="submit" value="Submit">
+        </form>
         <p class="error-message" id="errorMessage"></p>
     </div>
 

@@ -12,7 +12,7 @@ server {
 	}
 
 	location /cgi-bin {
-		index test_cgi.py
+		index form_handler.py
 	}
 	
 	location /redirect {

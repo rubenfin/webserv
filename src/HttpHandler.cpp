@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/03 16:38:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/04 12:40:47 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,9 +158,12 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	if (_foundDirective && _foundDirective->getReturn() != "")
+	{
 		_hasRedirect = true;
-	if (_foundDirective)
-		std::cout << "returnvalue: " << _foundDirective->getReturn() << std::endl;
+		std::cout << _foundDirective << _foundDirective->getReturn() << std::endl;
+	}
+	if(_foundDirective)
+		std::cout << "FoundDirective= " <<  _foundDirective->getLocationDirective() << std::endl; 
 	combineRightUrl();
 	// deleteFoundDirective(_foundDirective);
 }

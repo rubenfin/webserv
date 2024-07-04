@@ -26,6 +26,7 @@ void Server::setEnv(char **&env)
 	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
 	addedEnv.push_back("QUERY_STRING="
 		+ getHttpHandler()->getRequest()->requestBody);
+	
 	auto contentTypeIt = getHttpHandler()->getRequest()->header.find("Content-Type");
 	if (contentTypeIt != getHttpHandler()->getRequest()->header.end())
 		addedEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
@@ -55,7 +56,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	char	*exec_args[] = {(char *)script, nullptr};
 
 	close(fds[0]);
-	setEnv(env);
+	// setEnv(env);
 	for (size_t i = 0; env[i]; i++)
 	{
 		std::cout << env[i] << std::endl;
