@@ -55,15 +55,21 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script, char **
     close(fds[0]);
     setEnv(env);
 
+    // Redirect both STDOUT and STDERR
     dup2(fds[1], STDOUT_FILENO);
+    dup2(fds[1], STDERR_FILENO);
     close(fds[1]);
 
     if (getHttpHandler()->getRequest()->method == POST) {
         int content_length = std::stoi(getHttpHandler()->getRequest()->header["Content-Length"]);
-        write(STDIN_FILENO,getHttpHandler()->getRequest()->requestBody.c_str(), content_length);
+        write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(), content_length);
+        close(STDIN_FILENO);  // Close STDIN after writing
     }
 
     execve(script, exec_args, env);
+
+    // If execve returns, it failed
+    perror("execve failed");
     getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
     exit(EXIT_FAILURE);
 }
