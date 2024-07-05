@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/03 16:27:34 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/05 13:58:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <sys/epoll.h>
 
 // need to check this might be only for GET and not POST and DELETE
 #define MAX_LENGTH_HTTP_REQ 8192

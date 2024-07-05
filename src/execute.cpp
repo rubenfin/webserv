@@ -62,7 +62,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script, char **
 
     if (getHttpHandler()->getRequest()->method == POST) {
         write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(), getHttpHandler()->getRequest()->requestBody.size());
-        close(STDIN_FILENO);  // Close STDIN after writing
+        // close(STDIN_FILENO);  // Close STDIN after writing
     }
 
     execve(script, exec_args, env);
