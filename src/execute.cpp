@@ -61,8 +61,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script, char **
     close(fds[1]);
 
     if (getHttpHandler()->getRequest()->method == POST) {
-        int content_length = std::stoi(getHttpHandler()->getRequest()->header["Content-Length"]);
-        write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(), content_length);
+        write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(), getHttpHandler()->getRequest()->requestBody.size());
         close(STDIN_FILENO);  // Close STDIN after writing
     }
 
