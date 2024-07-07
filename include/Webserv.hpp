@@ -44,6 +44,7 @@ class	HttpHandler;
 class Webserv
 {
   private:
+	epoll_event ev;
 	std::string _response;
 	HttpHandler *_handler;
 	std::vector<Server> _servers;

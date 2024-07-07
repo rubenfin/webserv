@@ -25,6 +25,7 @@ int	main(int argc, char **argv, char **env)
 		return (std::cerr << "The configuration filepath is not correct" << std::endl,
 			EXIT_FAILURE);
 	Webserv webserv(filename, env);
+	// webserv.printParsing();
 	webserv.execute();
 	return (EXIT_SUCCESS);
 }
