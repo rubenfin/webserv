@@ -100,6 +100,16 @@ char *Server::cgi(char **env)
 	return (0);
 }
 
+void handleSigInt(int signal)
+{
+	if (signal == SIGINT)
+	{
+		std::cerr << "Closed webserv with SIGINT | control + c" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+
 int Webserv::execute(void)
 {
 	int			client_socket;
@@ -108,6 +118,8 @@ int Webserv::execute(void)
 	socklen_t	addrlen;
 	request_t	request;
 	response_t	response;
+
+	signal(SIGINT, handleSigInt);
 
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
@@ -122,6 +134,7 @@ int Webserv::execute(void)
 			perror("accept");
 			exit(EXIT_FAILURE);
 		}
+		// setNonBlocking(&client_socket);
 		valread = read(client_socket, buffer, 1024 - 1);
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);

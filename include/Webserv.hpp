@@ -34,6 +34,7 @@
 
 // need to check this might be only for GET and not POST and DELETE
 #define MAX_LENGTH_HTTP_REQ 8192
+#define MAX_EVENTS 16
 
 class	Logger;
 class	Server;
@@ -62,4 +63,4 @@ char	*ft_strjoin(char const *s1, char const *s2);
 void	resetRequestResponse(request_t &request, response_t &response);
 int		checkIfDir(const std::string &pathname);
 int		checkIfFile(const std::string &pathname);
-
+void	setNonBlocking(int *fd);
