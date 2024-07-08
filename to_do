@@ -9,7 +9,14 @@ toekomst
 - cgi handlen
 
 
-
-
+- GET POST DELETE
+{
+    POST zonder CGI: post een file op bepaalde directory
+    DELETE: delete een file op bepaalde directory
+    Je kan geen file posten in de cgi-bin maar wel post gebruiken met CGI
+    Je kan waarschijnlijk geen file delten in CGI-BIN
+    GET: gebruik de URI
+    alias: directory wordt vervangen door alias, als je gelijk naar een directory gaat zonder alias werkt ook.
+}
 
 Wat is een MIME type?

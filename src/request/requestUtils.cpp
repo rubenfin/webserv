@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/01 11:43:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/08 13:11:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	resetRequest(request_t &request)
 
 void	printRequestStruct(request_t *r)
 {
-    std::cout << BLUE << "REQUEST" <<std::endl;
+    std::cout << BLUE << "PARSED REQUEST" <<std::endl;
     std::cout << "----------------------------------" << std::endl;
 	std::cout << "http_v: " << r->http_v << std::endl;
 	std::cout << "firstLine: " << r->firstLine << std::endl;
@@ -44,11 +44,11 @@ void	printRequestStruct(request_t *r)
 	std::cout << "method: " << r->method << std::endl;
 	std::cout << "requestDirectory: " << r->requestDirectory << std::endl;
 	std::cout << "requestFile: " << r->requestFile << std::endl;
-	std::cout << "_header: " << std::endl;
-	for (const auto &header : r->header)
-	{
-		std::cout << header.first << ": " << header.second << std::endl;
-	}
+	// std::cout << "_header: " << std::endl;
+	// for (const auto &header : r->header)
+	// {
+	// 	std::cout << header.first << ": " << header.second << std::endl;
+	// }
     std::cout << "----------------------------------" << std::endl;
     std::cout << RESET << std::endl;;
 }

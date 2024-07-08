@@ -6,14 +6,15 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/04 12:40:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/08 14:22:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
 HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr),
-	_foundDirective(nullptr), _server(nullptr), _isCgi(false), _hasRedirect(false)
+	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
+	_hasRedirect(false)
 {
 }
 
@@ -39,7 +40,7 @@ Locations *HttpHandler::findMatchingDirective(void)
 			if (currLongestLocation == nullptr
 				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
 				currLongestLocation = &_server->getLocation()[i];
-			std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
+			// std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
 		}
 	}
 	if (currLongestLocation)
@@ -76,11 +77,6 @@ void HttpHandler::combineRightUrl(void)
 			getRequest()->requestURL = _server->getRoot()
 				+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
 		}
-	}
-	if (_foundDirective->getLocationDirective() == "/cgi-bin")
-	{
-		_isCgi = true;
-		std::cout << "CGI IS NOW SET TO TRUE" << std::endl;
 	}
 	std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
 }
@@ -120,6 +116,8 @@ int HttpHandler::pathCheck(void)
 		if (access(file.c_str(), X_OK) == -1)
 			getResponse()->status = httpStatusCode::NotFound;
 	}
+	if (getResponse()->status == httpStatusCode::NotFound)
+		throw std::exception();
 	return (1);
 }
 
@@ -127,24 +125,69 @@ void HttpHandler::methodCheck(void)
 {
 	if (getRequest()->method == ERROR)
 		getResponse()->status = httpStatusCode::NotFound;
+	if (getResponse()->status == httpStatusCode::NotFound)
+		throw std::exception();
 }
 
 void HttpHandler::checkRequestData(void)
 {
-	try
-	{
-		httpVersionCheck();
-		pathCheck();
-		methodCheck();
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << '\n';
-	}
+	httpVersionCheck();
+	pathCheck();
+	methodCheck();
 }
 void	deleteFoundDirective(Locations *_foundDirective)
 {
 	delete	_foundDirective;
+}
+
+void HttpHandler::setBooleans(void)
+{
+	if (_foundDirective && _foundDirective->getReturn() != "")
+	{
+		_hasRedirect = true;
+		// std::cout << _foundDirective << _foundDirective->getReturn() << std::endl;
+	}
+	else if (_foundDirective
+		&& _foundDirective->getLocationDirective() == "/cgi-bin")
+	{
+		_isCgi = true;
+		// std::cout << "CGI IS NOW SET TO TRUE" << std::endl;
+	}
+}
+
+void HttpHandler::checkLocationMethod(void)
+{
+	std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
+	std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
+	std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
+
+
+	if (getRequest()->method == GET)
+	{
+		if (!_foundDirective->getMethods().GET)
+		{
+			std::cerr << "Method not allowed in location" << std::endl;
+			getResponse()->status = httpStatusCode::MethodNotAllowed;
+		}
+	}
+	else if (getRequest()->method == POST)
+	{	
+		if (!_foundDirective->getMethods().POST)
+		{
+			std::cerr << "Method not allowed in location" << std::endl;
+			getResponse()->status = httpStatusCode::MethodNotAllowed;
+		}
+	}
+	else if (getRequest()->method == DELETE)
+	{
+		if (!_foundDirective->getMethods().DELETE)
+		{
+			std::cerr << "Method not allowed in location" << std::endl;
+			getResponse()->status = httpStatusCode::MethodNotAllowed;
+		}
+	}
+	if (getResponse()->status == httpStatusCode::MethodNotAllowed)
+		throw std::exception();
 }
 
 void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
@@ -157,13 +200,10 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	_hasRedirect = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
-	if (_foundDirective && _foundDirective->getReturn() != "")
-	{
-		_hasRedirect = true;
-		std::cout << _foundDirective << _foundDirective->getReturn() << std::endl;
-	}
-	if(_foundDirective)
-		std::cout << "FoundDirective= " <<  _foundDirective->getLocationDirective() << std::endl; 
+	if (_foundDirective)
+		std::cout << "FoundDirective= " << _foundDirective->getLocationDirective() << std::endl;
+	checkLocationMethod();
+	setBooleans();
 	combineRightUrl();
 	// deleteFoundDirective(_foundDirective);
 }
@@ -178,7 +218,7 @@ bool HttpHandler::getCgi(void)
 	return (_isCgi);
 }
 
-bool		HttpHandler::getRedirect(void)
+bool HttpHandler::getRedirect(void)
 {
 	return (_hasRedirect);
 }

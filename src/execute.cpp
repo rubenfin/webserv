@@ -11,7 +11,6 @@ void Server::setEnv(char **&env)
 	char	**savedEnv;
 	int		existingEnvCount;
 
-
 	std::vector<std::string> addedEnv;
 	std::string currMethod;
 	savedEnv = env;
@@ -49,28 +48,28 @@ void Server::setEnv(char **&env)
 	env[addedEnv.size() + existingEnvCount] = nullptr;
 }
 
-void Server::execute_CGI_script(pid_t pid, int *fds, const char *script, char **env) {
-    char *exec_args[] = {(char *)script, nullptr};
+void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
+	char **env)
+{
+	char	*exec_args[] = {(char *)script, nullptr};
 
-    close(fds[0]);
-    setEnv(env);
-
-    // Redirect both STDOUT and STDERR
-    dup2(fds[1], STDOUT_FILENO);
-    dup2(fds[1], STDERR_FILENO);
-    close(fds[1]);
-
-    if (getHttpHandler()->getRequest()->method == POST) {
-        write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(), getHttpHandler()->getRequest()->requestBody.size());
-        // close(STDIN_FILENO);  // Close STDIN after writing
-    }
-
-    execve(script, exec_args, env);
-
-    // If execve returns, it failed
-    perror("execve failed");
-    getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-    exit(EXIT_FAILURE);
+	close(fds[0]);
+	setEnv(env);
+	// Redirect both STDOUT and STDERR
+	dup2(fds[1], STDOUT_FILENO);
+	dup2(fds[1], STDERR_FILENO);
+	close(fds[1]);
+	if (getHttpHandler()->getRequest()->method == POST)
+	{
+		write(STDIN_FILENO, getHttpHandler()->getRequest()->requestBody.c_str(),
+			getHttpHandler()->getRequest()->requestBody.size());
+		// close(STDIN_FILENO);  // Close STDIN after writing
+	}
+	execve(script, exec_args, env);
+	// If execve returns, it failed
+	perror("execve failed");
+	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
+	exit(EXIT_FAILURE);
 }
 
 char *Server::cgi(char **env)
@@ -100,7 +99,7 @@ char *Server::cgi(char **env)
 	return (0);
 }
 
-void handleSigInt(int signal)
+void	handleSigInt(int signal)
 {
 	if (signal == SIGINT)
 	{
@@ -108,7 +107,6 @@ void handleSigInt(int signal)
 		exit(EXIT_FAILURE);
 	}
 }
-
 
 int Webserv::execute(void)
 {
@@ -120,7 +118,6 @@ int Webserv::execute(void)
 	response_t	response;
 
 	signal(SIGINT, handleSigInt);
-
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
@@ -139,15 +136,26 @@ int Webserv::execute(void)
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);
 		// printf("%s\n", buffer);
-		_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
-			&response);
-		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
+		try
+		{
+			_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
+				&response);
+		}
+		catch (const std::exception &e)
+		{
+			if (_servers[0].getHttpHandler()->getResponse()->status == httpStatusCode::NotFound && _servers[0].getRoot() != "")
+				_servers[0].getHttpHandler()->getRequest()->requestURL = _servers[0].getRoot()
+					+ _servers[0].getError404();
+			else
+				_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
+		}
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
-		else if(_servers[0].getHttpHandler()->getRedirect())
+		else if (_servers[0].getHttpHandler()->getRedirect())
 			_servers[0].makeResponse(NULL);
-		else 
+		else
 			_servers[0].readFile();
+		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
 		// if (_servers[0].getHttpHandler()->getRequestBody() != "")
 		// 	std::cout << "\n\n MY REQUEST BODY\n"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
 		std::cout << "RESPONSE\n" << _servers[0].getResponse().c_str() << std::endl;

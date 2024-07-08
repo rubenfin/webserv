@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/03 13:40:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/08 12:39:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,7 @@ struct			MethodsLoc
 {
 	bool		GET;
 	bool		POST;
-	bool		PUT;
 	bool		DELETE;
-	bool		PATCH;
 } typedef MethodsLoc;
 
 class Locations

@@ -9,13 +9,16 @@ server {
 	allow_methods GET
 
 	location / {
+		allow_methods GET POST
 	}
 
 	location /cgi-bin {
+		allow_methods POST GET
 		index test_cgi.py
 	}
 	
 	location /redirect {
+		allow_methods GET
 		return www.youtube.com
 	}
 
