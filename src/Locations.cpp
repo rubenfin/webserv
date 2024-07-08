@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/08 14:26:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/08 16:15:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void Locations::printLocationsContent(void)
 }
 void Locations::setMethods(void)
 {
-	_methodsList = extractValue("methods");
+	_methodsList = extractValueUntilNL("allow_methods");
 	std::cout << RED << _methodsList << RESET << std::endl;
 	_allowedMethods.GET = false;
 	_allowedMethods.POST = false;
@@ -47,7 +47,6 @@ void Locations::setAlias(void)
 void Locations::getLocationRegex(std::string locationContent)
 {
 	_locationDirective = extractValue("location");
-	_methodsList = extractValue("allow_methods");
 	setRoot();
 	setIndex();
 	setCgi_pass();
@@ -100,6 +99,23 @@ Locations::Locations(const Locations *other)
 	this->_alias = other->_alias;
 	this->_url = other->_url;
 	this->_return = other->_return;
+}
+
+std::string Locations::extractValueUntilNL(std::string toSearch)
+{
+    std::size_t keywordPos = _locationContent.find(toSearch);
+    if (keywordPos != std::string::npos)
+    {
+        std::size_t beginLocation = keywordPos + toSearch.size();
+        while (beginLocation < _locationContent.size() && std::isspace(_locationContent[beginLocation]) && _locationContent[beginLocation] != '\n')
+            ++beginLocation;
+        std::size_t endLocation = beginLocation;
+        while (endLocation < _locationContent.size() && _locationContent[endLocation] != '\n')
+            ++endLocation;
+        std::string directory = _locationContent.substr(beginLocation, endLocation - beginLocation);
+        return directory;
+    }
+    return "";
 }
 
 
