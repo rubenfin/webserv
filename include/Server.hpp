@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #pragma once
+
 #include "HttpHandler.hpp"
 #include "Locations.hpp"
 #include "Webserv.hpp"
@@ -23,6 +24,9 @@
 #include <sys/socket.h>
 #include <unordered_set>
 
+class					Locations;
+class					HttpHandler;
+
 struct					Methods
 {
 	bool				GET;
@@ -30,17 +34,13 @@ struct					Methods
 	bool				DELETE;
 } typedef Methods;
 
-class					Locations;
-
-class					HttpHandler;
-
 class Server
 {
   protected:
-	std::string _error404;
-	std::string _serverContent;
-	std::string _portString;
-	std::string _methodsList;
+	std::string 		_error404;
+	std::string 		_serverContent;
+	std::string 		_portString;
+	std::string 		_methodsList;
 	char				*_buffer;
 	std::string			_response;
 	int					_socketfd;
@@ -50,10 +50,8 @@ class Server
 	std::string 		_index;
 	Methods				_allowedMethods;
 	std::vector<Locations> _locations;
-
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
-
 	HttpHandler			*_http_handler;
 
   public:

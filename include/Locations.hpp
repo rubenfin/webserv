@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #pragma once
+
 #include "Server.hpp"
 #include "Webserv.hpp"
 #include <iostream>
@@ -49,7 +50,6 @@ class Locations
 	void setMethods(void);
 	void setAlias(void);
 	void setReturn(void);
-
 	std::string getRoot(void);
 	std::string getIndex(void);
 	std::string getCgi_pass(void);

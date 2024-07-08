@@ -18,7 +18,6 @@
 #include <string>
 #include <sys/stat.h>
 
-
 typedef enum METHODS
 {
 	GET,

@@ -25,5 +25,5 @@ typedef struct response_t
 }					response_t;
 
 void				resetResponse(response_t &response);
-std::string getHttpStatusMessage(httpStatusCode _statusCode);
-char * getHttpStatusHTML(httpStatusCode _statusCode);
+std::string			getHttpStatusMessage(httpStatusCode _statusCode);
+char *				getHttpStatusHTML(httpStatusCode _statusCode);

@@ -45,6 +45,4 @@ enum class httpStatusCode {
     httpVersionNotSupported = 505
 };
 
-
-
 #endif
