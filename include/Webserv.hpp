@@ -34,6 +34,7 @@
 
 // need to check this might be only for GET and not POST and DELETE
 #define MAX_LENGTH_HTTP_REQ 8192
+#define MAX_FDS 1024
 #define MAX_EVENTS 16
 
 class	Logger;
@@ -44,7 +45,7 @@ class	HttpHandler;
 class Webserv
 {
   private:
-	epoll_event ev;
+	epoll_event _event;
 	std::string _response;
 	HttpHandler *_handler;
 	std::vector<Server> _servers;
