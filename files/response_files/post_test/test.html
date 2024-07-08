@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Request Form</title>
+    <title>Post Request Form with CGI</title>
 </head>
 <body>
     <h1>Submit Your Information</h1>
-    <form action="/post_test" method="post">
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
-        
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
-        
+    <form action="/cgi-bin/form_handler.py" method="post">
+        Name: <input type="text" name="name"><br>
+        Email: <input type="text" name="email"><br>
         <input type="submit" value="Submit">
+    </form>
     </form>
 </body>
 </html>

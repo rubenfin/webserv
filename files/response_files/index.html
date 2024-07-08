@@ -27,7 +27,7 @@
             background-color: #45a049;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
             background-color: #fff;
             border-radius: 8px;
@@ -56,14 +56,10 @@
         <h1>Test Requests</h1>
         <button id="testButtonGet">Send GET Request to /get_request</button>
         <button id="testButtonDelete">Send DELETE Request to /delete_test</button>
-        <button id="testButtonPost">Send POST Request to /post_test</button>
+        <button id="testButtonPost">Get request to POST CGI</button>
         <button id="testButtonInvalid">Invalid URL, should go to 404</button>
         <button id="testButtonRedirect">Redirect to YouTube</button>
-            <form action="/cgi-bin/form_handler.py" method="post">
-                Name: <input type="text" name="name"><br>
-                Email: <input type="text" name="email"><br>
-                <input type="submit" value="Submit">
-            </form>
+        <button id="testUploadFile">Upload a file</button>
         <p class="error-message" id="errorMessage"></p>
     </div>
 
@@ -86,6 +82,9 @@
     
         document.getElementById('testButtonRedirect').addEventListener('click', function() {
             sendRequest('GET', '/redirect');
+        });
+        document.getElementById('testUploadFile').addEventListener('click', function() {
+            sendRequest('GET', '/upload_file');
         });
     
         function sendRequest(method, url) {

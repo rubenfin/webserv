@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/08 14:22:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/08 16:31:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,6 @@ void HttpHandler::checkLocationMethod(void)
 	std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
 	std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
 	std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
-
 
 	if (getRequest()->method == GET)
 	{
