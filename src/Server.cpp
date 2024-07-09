@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/08 14:07:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 12:58:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,13 @@ void Server::setIndex(void)
 		_index.end());
 }
 
+void Server::setUpload(void)
+{
+	_upload = getRoot() + trim(extractValue("upload"));
+	std::cout << "curr upload directory: " << _upload << std::endl;
+}
+
+
 void Server::setMethods(void)
 {
 	_methodsList = extractValue("methods");
@@ -215,6 +222,12 @@ std::string Server::getRoot(void)
 {
 	return (_root);
 }
+
+std::string Server::getUpload(void)
+{
+	return (_upload);
+}
+
 std::string Server::getIndex(void)
 {
 	return (_index);
@@ -282,6 +295,7 @@ Server::Server(std::string serverContent)
 	setPort();
 	setRoot();
 	setIndex();
+	setUpload();
 	setMethods();
 	setError404();
 	setLocationsRegex(serverContent);

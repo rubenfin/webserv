@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/08 16:31:05 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 14:16:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void HttpHandler::combineRightUrl(void)
 				+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
 		}
 	}
-	std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
+	// std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
 }
 
 Server *HttpHandler::getServer(void)
@@ -142,7 +142,7 @@ void	deleteFoundDirective(Locations *_foundDirective)
 
 void HttpHandler::setBooleans(void)
 {
-	if (_foundDirective && _foundDirective->getReturn() != "")
+	if (_foundDirective && !_foundDirective->getReturn().empty())
 	{
 		_hasRedirect = true;
 		// std::cout << _foundDirective << _foundDirective->getReturn() << std::endl;
@@ -157,9 +157,9 @@ void HttpHandler::setBooleans(void)
 
 void HttpHandler::checkLocationMethod(void)
 {
-	std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
-	std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
-	std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
+	// std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
+	// std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
+	// std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
 
 	if (getRequest()->method == GET)
 	{
@@ -199,8 +199,8 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	_hasRedirect = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
-	if (_foundDirective)
-		std::cout << "FoundDirective= " << _foundDirective->getLocationDirective() << std::endl;
+	// if (_foundDirective)
+	// 	std::cout << "FoundDirective= " << _foundDirective->getLocationDirective() << std::endl;
 	checkLocationMethod();
 	setBooleans();
 	combineRightUrl();

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/08 13:11:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 14:22:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,23 +32,27 @@ void	resetRequest(request_t &request)
 	request.requestFile = "";
 }
 
-void	printRequestStruct(request_t *r)
+void	printRequestStruct(request_t *req)
 {
     std::cout << BLUE << "PARSED REQUEST" <<std::endl;
     std::cout << "----------------------------------" << std::endl;
-	std::cout << "http_v: " << r->http_v << std::endl;
-	std::cout << "firstLine: " << r->firstLine << std::endl;
-	std::cout << "requestContent: " << r->requestContent << std::endl;
-	std::cout << "requestBody: " << r->requestBody << std::endl;
-	std::cout << "requestURL: " << r->requestURL << std::endl;
-	std::cout << "method: " << r->method << std::endl;
-	std::cout << "requestDirectory: " << r->requestDirectory << std::endl;
-	std::cout << "requestFile: " << r->requestFile << std::endl;
+	// std::cout << "requestContent: " << r->requestContent << std::endl;
+	std::cout << "http_v: " << req->http_v << std::endl;
+	std::cout << "firstLine: " << req->firstLine << std::endl;
+	std::cout << "requestBody: " << req->requestBody << std::endl;
+	std::cout << "requestURL: " << req->requestURL << std::endl;
+	std::cout << "method: " << req->method << std::endl;
+	std::cout << "requestDirectory: " << req->requestDirectory << std::endl;
+	std::cout << "requestFile: " << req->requestFile << std::endl;
+	std::cout << "contentLength: " << req->contentLength << std::endl;
+	std::cout << "contentType: " << req->contentType << std::endl;
+	std::cout << "boundary: " << req->boundary << std::endl;
+	std::cout << "fileContent: " << req->fileContent << std::endl;
 	// std::cout << "_header: " << std::endl;
 	// for (const auto &header : r->header)
 	// {
 	// 	std::cout << header.first << ": " << header.second << std::endl;
 	// }
-    std::cout << "----------------------------------" << std::endl;
+    std::cout << "\nEND PR ---------------------------------- END PR" << std::endl;
     std::cout << RESET << std::endl;;
 }

@@ -6,95 +6,115 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/25 15:47:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 14:28:32 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
 
-static void	setHttpVersion(request_t *r)
+std::string extractValue(request_t *req, const std::string &toSearch)
 {
-	std::size_t firstSpace = r->firstLine.find(" ");
+	std::size_t keywordPos = req->requestContent.find(toSearch);
+	if (keywordPos != std::string::npos)
+	{
+		std::size_t beginLocation = keywordPos + toSearch.size();
+		while (beginLocation < req->requestContent.size()
+			&& std::isspace(req->requestContent[beginLocation]))
+			++beginLocation;
+		std::size_t endLocation = beginLocation;
+		while (endLocation < req->requestContent.size()
+			&& !std::isspace(req->requestContent[endLocation]))
+			++endLocation;
+		std::string directory = req->requestContent.substr(beginLocation,
+				endLocation - beginLocation);
+		return (directory);
+	}
+	return ("");
+}
+
+static void	setHttpVersion(request_t *req)
+{
+	std::size_t firstSpace = req->firstLine.find(" ");
 	if (firstSpace == std::string::npos)
 	{
-		r->http_v = "invalid";
+		req->http_v = "invalid";
 		return ;
 	}
-	std::size_t secondSpace = r->firstLine.find(" ", firstSpace + 1);
+	std::size_t secondSpace = req->firstLine.find(" ", firstSpace + 1);
 	if (secondSpace == std::string::npos)
 	{
-		r->http_v = "invalid";
+		req->http_v = "invalid";
 		return ;
 	}
-	std::string httpVersion = r->firstLine.substr(secondSpace + 1);
+	std::string httpVersion = req->firstLine.substr(secondSpace + 1);
 	httpVersion = trim(httpVersion);
 	if (httpVersion == "HTTP/1.1")
 	{
-		r->http_v = "1.1";
+		req->http_v = "1.1";
 	}
 	else
 	{
-		r->http_v = "invalid";
+		req->http_v = "invalid";
 	}
 }
 
-static void	setMethod(request_t *r)
+static void	setMethod(request_t *req)
 {
-	if (r->firstLine.find("GET") != std::string::npos)
-		r->method = GET;
-	else if (r->firstLine.find("POST") != std::string::npos)
-		r->method = POST;
-	else if (r->firstLine.find("DELETE") != std::string::npos)
-		r->method = DELETE;
+	if (req->firstLine.find("GET") != std::string::npos)
+		req->method = GET;
+	else if (req->firstLine.find("POST") != std::string::npos)
+		req->method = POST;
+	else if (req->firstLine.find("DELETE") != std::string::npos)
+		req->method = DELETE;
 	else
-		r->method = ERROR;
+		req->method = ERROR;
 	// TODO: Throw an exception if no method found?
 }
 
-static void	setRequestURL(request_t *r)
+static void	setRequestURL(request_t *req)
 {
-	std::size_t startPos = r->firstLine.find(" ");
+	std::size_t startPos = req->firstLine.find(" ");
 	if (startPos == std::string::npos)
 	{
-		r->requestURL = "";
+		req->requestURL = "";
 		return ;
 	}
-	startPos = r->firstLine.find("/", startPos);
+	startPos = req->firstLine.find("/", startPos);
 	if (startPos == std::string::npos)
 	{
-		r->requestURL = "";
+		req->requestURL = "";
 		return ;
 	}
-	std::size_t endPos = r->firstLine.find(" ", startPos);
+	std::size_t endPos = req->firstLine.find(" ", startPos);
 	if (endPos == std::string::npos)
-		r->requestURL = r->firstLine.substr(startPos);
+		req->requestURL = req->firstLine.substr(startPos);
 	else
-		r->requestURL = r->firstLine.substr(startPos, endPos - startPos);
+		req->requestURL = req->firstLine.substr(startPos, endPos - startPos);
 }
 
-static void setRequestDirFile(request_t *r)
+static void setRequestDirFile(request_t *req)
 {
-	if (r->requestURL.find(".") == std::string::npos)
-		r->requestDirectory = r->requestURL;
+	if (req->requestURL.find(".") == std::string::npos)
+		req->requestDirectory = req->requestURL;
 	else
 	{
-		auto lastSlash = r->requestURL.rfind("/");
+		auto lastSlash = req->requestURL.rfind("/");
 		if (lastSlash != std::string::npos)
 		{
-			r->requestFile = r->requestURL.substr(lastSlash);
-			r->requestDirectory = r->requestURL.substr(0, lastSlash);
+			req->requestFile = req->requestURL.substr(lastSlash);
+			req->requestDirectory = req->requestURL.substr(0, lastSlash);
 		}
 	}
 }
 
-static void	setRequestHeader(request_t *r)
+static void	setRequestHeader(request_t *req)
 {
-	std::size_t startPos = r->requestContent.find("\n") + 1;
+	std::size_t startPos = req->requestContent.find("\n") + 1;
 	std::size_t endPos;
-	while ((endPos = r->requestContent.find("\n",
+	while ((endPos = req->requestContent.find("\n",
 				startPos)) != std::string::npos)
 	{
-		std::string headerLine = r->requestContent.substr(startPos, endPos
+		std::string headerLine = req->requestContent.substr(startPos, endPos
 				- startPos);
 		if (headerLine.find(":") == std::string::npos)
 		{
@@ -107,32 +127,52 @@ static void	setRequestHeader(request_t *r)
 		key.erase(key.find_last_not_of(" \t") + 1);
 		value.erase(0, value.find_first_not_of(" \t"));
 		value.erase(value.find_last_not_of(" \t") + 1);
-		r->header[key] = value;
+		req->header[key] = value;
 		startPos = endPos + 1;
 	}
 }
 
-static void	setRequestBody(request_t *r)
+static void	setRequestBody(request_t *req)
 {
-	std::size_t foundBody = r->requestContent.find("\r\n\r\n");
+	std::size_t foundBody = req->requestContent.find("\r\n\r\n");
 	if (foundBody == std::string::npos)
 	{
-		r->requestBody = "";
+		req->requestBody = "";
 		return ;
 	}
 	foundBody += 4;
-	r->requestBody = r->requestContent.substr(foundBody);
+	req->requestBody = req->requestContent.substr(foundBody);
 }
 
-void	parse_request(request_t *r, char *buffer)
+static void setContentTypeBoundary(request_t *req)
 {
-	r->requestContent = buffer;
-	r->firstLine = r->requestContent.substr(0, r->requestContent.find("\n"));
-	setHttpVersion(r);
-	setMethod(r);
-	setRequestURL(r);
-	setRequestDirFile(r);
-	setRequestHeader(r);
-	setRequestBody(r);
-	printRequestStruct(r);
+	std::string cLength;
+	std::string totalFileContent;
+
+	cLength = trim(extractValue(req, "Content-Length: "));
+	if (!cLength.empty())
+		req->contentLength = std::stoi(cLength);
+	req->contentType = trim(extractValue(req, "Content-Type: "));
+	req->contentType = req->contentType.substr(0, req->contentType.size()-1);
+	if (req->contentType == "multipart/form-data")
+	req->boundary = trim(extractValue(req, "Content-Type: multipart/form-data; boundary="));
+	if (!req->boundary.empty())
+	{
+		
+	}
+}
+
+void	parse_request(request_t *req, char *buffer)
+{
+	// printf("THE REQUEST\n%s\n", buffer);
+	req->requestContent = buffer;
+	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
+	setHttpVersion(req);
+	setMethod(req);
+	setRequestURL(req);
+	setRequestDirFile(req);
+	setRequestHeader(req);
+	setContentTypeBoundary(req);
+	setRequestBody(req);
+	printRequestStruct(req);
 }

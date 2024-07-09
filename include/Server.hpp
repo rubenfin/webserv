@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/08 14:07:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 12:56:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Server
 	int					_port;
 	std::string 		_root;
 	std::string 		_index;
+	std::string			_upload;
 	Methods				_allowedMethods;
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
@@ -65,6 +66,7 @@ class Server
 	void setRoot(void);
 	void setIndex(void);
 	void setMethods(void);
+	void setUpload(void);
 	void setError404(void);
 	void printMethods(void);
 	void setSockedFD(int fd);
@@ -76,6 +78,7 @@ class Server
 	int getPort(void);
 	std::string getRoot(void);
 	std::string getIndex(void);
+	std::string getUpload(void);
 	int getSocketFD(void);
 	Methods getMethods(void);
 	socklen_t getAddrlen(void);
