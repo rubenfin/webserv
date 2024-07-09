@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/09 14:22:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 15:10:42 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,8 @@ void	printRequestStruct(request_t *req)
 	std::cout << "requestURL: " << req->requestURL << std::endl;
 	std::cout << "method: " << req->method << std::endl;
 	std::cout << "requestDirectory: " << req->requestDirectory << std::endl;
-	std::cout << "requestFile: " << req->requestFile << std::endl;
 	std::cout << "contentLength: " << req->contentLength << std::endl;
 	std::cout << "contentType: " << req->contentType << std::endl;
-	std::cout << "boundary: " << req->boundary << std::endl;
-	std::cout << "fileContent: " << req->fileContent << std::endl;
 	// std::cout << "_header: " << std::endl;
 	// for (const auto &header : r->header)
 	// {

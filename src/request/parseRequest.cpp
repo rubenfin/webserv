@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/09 14:28:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 15:54:42 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,24 +144,6 @@ static void	setRequestBody(request_t *req)
 	req->requestBody = req->requestContent.substr(foundBody);
 }
 
-static void setContentTypeBoundary(request_t *req)
-{
-	std::string cLength;
-	std::string totalFileContent;
-
-	cLength = trim(extractValue(req, "Content-Length: "));
-	if (!cLength.empty())
-		req->contentLength = std::stoi(cLength);
-	req->contentType = trim(extractValue(req, "Content-Type: "));
-	req->contentType = req->contentType.substr(0, req->contentType.size()-1);
-	if (req->contentType == "multipart/form-data")
-	req->boundary = trim(extractValue(req, "Content-Type: multipart/form-data; boundary="));
-	if (!req->boundary.empty())
-	{
-		
-	}
-}
-
 void	parse_request(request_t *req, char *buffer)
 {
 	// printf("THE REQUEST\n%s\n", buffer);
@@ -172,7 +154,7 @@ void	parse_request(request_t *req, char *buffer)
 	setRequestURL(req);
 	setRequestDirFile(req);
 	setRequestHeader(req);
-	setContentTypeBoundary(req);
 	setRequestBody(req);
+	setFile(req, req->file);
 	printRequestStruct(req);
 }

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 17:36:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/09 14:34:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/09 15:54:09 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,15 @@ typedef struct request_t
 	std::string requestBody;
 	std::string requestURL;
 	std::string requestDirectory;
+	std::string requestFile;
 	std::string contentType;
+	int 		contentLength;
 	file_t 		*file;
-	int contentLength;
 	METHODS	method;
 	std::map<std::string, std::string> header;
 }			request_t;
 
+void 			setFile(request_t *req, file_t *requestFile);
 void			parse_request(request_t *req, char *buffer);
 void			resetRequest(request_t &request);
 void			printRequestStruct(request_t *req);
