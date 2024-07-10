@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 14:31:14 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/09 15:09:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/10 11:28:36 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,4 +21,8 @@ typedef struct file_t
     std::string fileContentType;
     std::string fileContentDisposition;
     std::string fileBoundary;
-}   file_t;
+} file_t;
+
+void printFileStruct(file_t *file);
+void trimFirstChar(std::string &str);
+void trimLastChar(std::string &str);
