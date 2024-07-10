@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/09 12:58:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/10 16:42:14 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,6 +290,7 @@ void Server::setLocationsRegex(std::string serverContent)
 
 Server::Server(std::string serverContent)
 {
+	Logger& logger = Logger::getInstance();
 	_serverContent = serverContent;
 	setServerName();
 	setPort();
@@ -299,7 +300,7 @@ Server::Server(std::string serverContent)
 	setMethods();
 	setError404();
 	setLocationsRegex(serverContent);
-	std::cout << _port << std::endl;
+	logger.log(DEBUG, "Server port: " + std::to_string(_port));
 }
 
 void Server::makeResponse(char *buffer) {
@@ -340,8 +341,8 @@ void Server::readFile(void)
 {
 	int	file;
 	int	rdbytes;
-
-	std::cout << "response url " << _http_handler->getRequest()->requestURL << std::endl;
+	Logger& logger = Logger::getInstance();
+	logger.log(DEBUG, "Request URL in readFile() " + _http_handler->getRequest()->requestURL);
 	file = open(_http_handler->getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{

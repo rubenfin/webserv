@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/09 14:16:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/10 16:38:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,12 +160,13 @@ void HttpHandler::checkLocationMethod(void)
 	// std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
 	// std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
 	// std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
+	Logger& logger = Logger::getInstance();
 
 	if (getRequest()->method == GET)
 	{
 		if (!_foundDirective->getMethods().GET)
-		{
-			std::cerr << "Method not allowed in location" << std::endl;
+		{	
+			logger.log(ERR, "Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}
@@ -173,7 +174,7 @@ void HttpHandler::checkLocationMethod(void)
 	{	
 		if (!_foundDirective->getMethods().POST)
 		{
-			std::cerr << "Method not allowed in location" << std::endl;
+			logger.log(ERR, "Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}
@@ -181,7 +182,7 @@ void HttpHandler::checkLocationMethod(void)
 	{
 		if (!_foundDirective->getMethods().DELETE)
 		{
-			std::cerr << "Method not allowed in location" << std::endl;
+			logger.log(ERR, "Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/08 16:15:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/10 16:40:49 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,14 @@ void Locations::printMethods(void)
 
 void Locations::printLocationsContent(void)
 {
-	std::cout << _locationContent << std::endl;
+	Logger& logger = Logger::getInstance();
+	logger.log(DEBUG, _locationContent);
 }
 void Locations::setMethods(void)
 {
+	Logger& logger = Logger::getInstance();
 	_methodsList = extractValueUntilNL("allow_methods");
-	std::cout << RED << _methodsList << RESET << std::endl;
+	logger.log(DEBUG, _methodsList);
 	_allowedMethods.GET = false;
 	_allowedMethods.POST = false;
 	_allowedMethods.DELETE = false;

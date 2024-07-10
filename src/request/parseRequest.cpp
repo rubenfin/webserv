@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 11:19:02 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/10 16:24:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,5 +157,6 @@ void	parse_request(request_t *req, char *buffer)
 	setRequestBody(req);
 	setFile(req, &req->file);
 	printRequestStruct(req);
-	printFileStruct(&req->file);
+	if (req->contentLength)
+		printFileStruct(&req->file);
 }
