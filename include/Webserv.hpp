@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 15:58:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/11 09:00:57 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,15 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/epoll.h>
+#include <signal.h>
 #include "Logger.hpp"
 
 // need to check this might be only for GET and not POST and DELETE
 #define MAX_LENGTH_HTTP_REQ 8192
 #define MAX_FDS 1024
 #define MAX_EVENTS 16
+
+extern volatile sig_atomic_t	interrupted;
 
 class	Logger;
 class	Server;

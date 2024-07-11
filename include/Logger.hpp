@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:30 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:47:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/11 09:05:49 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ enum level
     ERR,
     WARNING,
     DEBUG,
-    LOG,
+    INFO,
     REQUEST,
     RESPONSE
 };

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:40:49 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/11 09:09:49 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,8 +143,9 @@ std::string Locations::extractValue(std::string toSearch)
 
 void Locations::setRoot(void)
 {
+	Logger& logger = Logger::getInstance();
 	_root = extractValue("root");
-	std::cout << _locationDirective << std::endl;
+	logger.log(DEBUG, _locationDirective);
 	if (_locationDirective == "/")
 		_root = "files/response_files/";
 }

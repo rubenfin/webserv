@@ -6,6 +6,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+volatile sig_atomic_t interrupted;
+
 void Server::setEnv(char **&env)
 {
 	char	**savedEnv;
@@ -105,7 +107,7 @@ void	handleSigInt(int signal)
 	if (signal == SIGINT)
 	{
 		logger.log(ERR, "closed Webserv with SIGINT");
-		exit(EXIT_FAILURE);
+		interrupted = 1;
 	}
 }
 
@@ -123,7 +125,9 @@ int Webserv::execute(void)
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
-	while (true)
+	logger.log(INFO, "Server started");
+	interrupted = 0;
+	while (!interrupted)
 	{
 		resetRequestResponse(request, response);
 		client_socket = accept(_servers[0].getSocketFD(),
@@ -162,9 +166,10 @@ int Webserv::execute(void)
 		logger.log(RESPONSE, _servers[0].getResponse());
 		if (send(client_socket, _servers[0].getResponse().c_str(),
 				strlen(_servers[0].getResponse().c_str()), 0) == -1)
-			perror("send");
+			logger.log(ERR, "Failed to send response to client, send()");
 		close(client_socket);
 	}
 	close(_servers[0].getSocketFD());
+	logger.log(INFO, "Server shut down");
 	return (0);
 }

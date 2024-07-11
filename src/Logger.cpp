@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/11 08:43:29 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/11 09:07:12 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,8 @@ void Logger::log(level lvl, const std::string &message)
         case DEBUG:
             std::cout << BRIGHT_GREEN << getCurrTime() << " [DEBUG]: " << message << RESET << std::endl;
             break;
-        case LOG:
-            std::cout << BRIGHT_WHITE << getCurrTime() << " [LOG]: " << message << RESET << std::endl;
+        case INFO:
+            std::cout << BRIGHT_WHITE << getCurrTime() << " [INFO]: " << message << RESET << std::endl;
             break;
         case REQUEST:
             std::cout << BRIGHT_BLUE << getCurrTime() << " [REQUEST]: " << message << RESET << std::endl;
