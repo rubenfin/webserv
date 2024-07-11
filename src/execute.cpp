@@ -108,6 +108,7 @@ void	handleSigInt(int signal)
 	{
 		logger.log(ERR, "closed Webserv with SIGINT");
 		interrupted = 1;
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -134,8 +135,8 @@ int Webserv::execute(void)
 				(struct sockaddr *)_servers[0].getAddress(), &addrlen);
 		if (client_socket == -1)
 		{
-			perror("accept");
-			exit(EXIT_FAILURE);
+			logger.log(ERR, "Error in accept()");
+			continue;
 		}
 		valread = read(client_socket, buffer, MAX_LENGTH_HTTP_REQ - 1);
 		buffer[valread] = '\0';
