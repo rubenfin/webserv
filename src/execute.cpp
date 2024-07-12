@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-volatile sig_atomic_t interrupted;
+volatile sig_atomic_t	interrupted;
 
 void Server::setEnv(char **&env)
 {
@@ -103,21 +103,36 @@ char *Server::cgi(char **env)
 
 void Server::setFileInServer()
 {
-	if(_upload.empty())
+	Logger &logger = Logger::getInstance();
+	if (_upload.empty())
 	{
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		makeResponse((char *)PAGE_403);
-		return;
+		return ;
 	}
 	else
 	{
-		std::ofstream File(getUpload() + getHttpHandler()->getRequest()->file.fileName);
-		File << getHttpHandler()->getRequest()->file.fileContent;
+		std::string uploadPath = getUpload();
+		std::string fileName = getHttpHandler()->getRequest()->file.fileName;
+		std::string fileContent = getHttpHandler()->getRequest()->file.fileContent;
+		std::string fullPath = uploadPath + fileName;
+		logger.log(INFO, "Uploaded a file to " + fullPath + " called "
+			+ fileName);
+		std::fstream file(fullPath, std::ios::out | std::ios::binary);
+		if (file.is_open())
+		{
+			file << fileContent;
+			file.close();
+		}
+		else
+		{
+			logger.log(ERR, "Failed to open the file: " + fullPath);
+		}
 	}
 }
 void	handleSigInt(int signal)
 {
-	Logger& logger = Logger::getInstance();
+	Logger &logger = Logger::getInstance();
 	if (signal == SIGINT)
 	{
 		logger.log(ERR, "closed Webserv with SIGINT");
@@ -134,8 +149,8 @@ int Webserv::execute(void)
 	socklen_t	addrlen;
 	request_t	request;
 	response_t	response;
-	Logger& logger = Logger::getInstance();
 
+	Logger &logger = Logger::getInstance();
 	signal(SIGINT, handleSigInt);
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
@@ -150,9 +165,14 @@ int Webserv::execute(void)
 		if (client_socket == -1)
 		{
 			logger.log(ERR, "Error in accept()");
-			continue;
+			continue ;
 		}
 		valread = read(client_socket, buffer, MAX_LENGTH_HTTP_REQ - 1);
+		if (valread == -1)
+		{
+			_servers[0].getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
+		}
 		buffer[valread] = '\0';
 		parse_request(&request, buffer);
 		// logger.log(DEBUG, "Not ParsedRequest\n" + (std::string)buffer);
@@ -163,7 +183,8 @@ int Webserv::execute(void)
 		}
 		catch (const std::exception &e)
 		{
-			if (_servers[0].getHttpHandler()->getResponse()->status == httpStatusCode::NotFound && _servers[0].getRoot() != "")
+			if (_servers[0].getHttpHandler()->getResponse()->status == httpStatusCode::NotFound
+				&& _servers[0].getRoot() != "")
 				_servers[0].getHttpHandler()->getRequest()->requestURL = _servers[0].getRoot()
 					+ _servers[0].getError404();
 			else

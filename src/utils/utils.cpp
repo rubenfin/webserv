@@ -11,3 +11,11 @@ void setNonBlocking(int *sock) {
         exit(EXIT_FAILURE);
     }
 }
+
+bool hasSpecialCharacters(const std::string& fileName)
+{
+    for (char ch : fileName)
+        if (!std::isalnum(ch) && ch != '.' && ch != '_' && ch != '-') 
+            return true;
+    return false;
+}

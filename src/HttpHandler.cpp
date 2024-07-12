@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:38:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 14:36:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,11 +129,22 @@ void HttpHandler::methodCheck(void)
 		throw std::exception();
 }
 
+void HttpHandler::fileCheck()
+{
+	if (getRequest()->file.fileName.size() > 256 || hasSpecialCharacters(getRequest()->file.fileName))
+	{
+		getResponse()->status = httpStatusCode::BadRequest;
+		throw std::exception();
+	}
+}
+
 void HttpHandler::checkRequestData(void)
 {
 	httpVersionCheck();
 	pathCheck();
 	methodCheck();
+	if (getRequest()->file.fileExists)
+		fileCheck();
 }
 void	deleteFoundDirective(Locations *_foundDirective)
 {

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/11 09:00:57 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/12 14:32:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,3 +70,4 @@ void	resetRequestResponse(request_t &request, response_t &response);
 int		checkIfDir(const std::string &pathname);
 int		checkIfFile(const std::string &pathname);
 void	setNonBlocking(int *fd);
+bool	hasSpecialCharacters(const std::string& fileName);
