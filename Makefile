@@ -5,6 +5,7 @@ SERVER_DIR = server
 UTILS_DIR = utils
 REQUEST_DIR = request
 RESPONSE_DIR = response
+LOG_DIR = extra/log
 
 SRC :=  $(wildcard $(SRC_DIR)/*.cpp) \
 		$(wildcard $(SRC_DIR)/$(SERVER_DIR)/*.cpp) \
@@ -21,6 +22,7 @@ all: $(NAME)
 
 clean:
 	rm -rf $(OBJ)
+	rm -rf $(LOG_DIR)
 	@echo "$(YELLOW)Removed all objects!$(DEFAULT)"
 
 fclean: clean

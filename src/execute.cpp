@@ -104,6 +104,7 @@ char *Server::cgi(char **env)
 void Server::setFileInServer()
 {
 	Logger &logger = Logger::getInstance();
+	int file;
 	if (_upload.empty())
 	{
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
@@ -116,15 +117,15 @@ void Server::setFileInServer()
 		std::string fileName = getHttpHandler()->getRequest()->file.fileName;
 		std::string fileContent = getHttpHandler()->getRequest()->file.fileContent;
 		std::string fullPath = uploadPath + fileName;
-		logger.log(INFO, "Uploaded a file to " + fullPath + " called "
-			+ fileName);
-		std::fstream file(fullPath, std::ios::out | std::ios::binary);
-		if (file.is_open())
+		
+		file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+		if (file != -1)
 		{
-			file << fileContent;
-			file.close();
+			write(file, fileContent.c_str(), fileContent.size());
+			close(file);
 			getHttpHandler()->getResponse()->status = httpStatusCode::Created;
 			makeResponse(NULL);
+			logger.log(INFO, "Uploaded a file to " + fullPath + " called " + fileName);
 		}
 		else
 		{
