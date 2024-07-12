@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/11 09:07:12 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/12 15:26:09 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,32 +32,37 @@ Logger &Logger::getInstance()
 	std::call_once(initInstanceFlag, []() { instance.reset(new Logger()); });
 	return (*instance);
 }
-
 void Logger::log(level lvl, const std::string &message)
 {
-	totalLog += message;
-    switch (lvl) {
-        case ERR:
-            std::cout << BRIGHT_RED << getCurrTime() << " [ERROR]: " << message << RESET << std::endl;
-            break;
-        case WARNING:
-            std::cout << BRIGHT_YELLOW << getCurrTime() << " [WARNING]: " << message << RESET << std::endl;
-            break;
-        case DEBUG:
-            std::cout << BRIGHT_GREEN << getCurrTime() << " [DEBUG]: " << message << RESET << std::endl;
-            break;
-        case INFO:
-            std::cout << BRIGHT_WHITE << getCurrTime() << " [INFO]: " << message << RESET << std::endl;
-            break;
-        case REQUEST:
-            std::cout << BRIGHT_BLUE << getCurrTime() << " [REQUEST]: " << message << RESET << std::endl;
-            break;
-         case RESPONSE:
-            std::cout << BRIGHT_CYAN << getCurrTime() << " [RESPONSE]: " << message << RESET << std::endl;
-            break;
-        default:
-            std::cerr << getCurrTime() << " [UNKNOWN]: " << message << std::endl;
-            break;
+    std::istringstream messageStream(message);
+    std::string line;
+    
+    while (std::getline(messageStream, line)) {
+        totalLog += line + "\n";
+        std::string timeStr = getCurrTime();
+        switch (lvl) {
+            case ERR:
+                std::cout << BRIGHT_RED << timeStr << " [ERROR]: " << line << RESET << std::endl;
+                break;
+            case WARNING:
+                std::cout << BRIGHT_YELLOW << timeStr << " [WARNING]: " << line << RESET << std::endl;
+                break;
+            case DEBUG:
+                std::cout << BRIGHT_GREEN << timeStr << " [DEBUG]: " << line << RESET << std::endl;
+                break;
+            case INFO:
+                std::cout << BRIGHT_WHITE << timeStr << " [INFO]: " << line << RESET << std::endl;
+                break;
+            case REQUEST:
+                std::cout << BRIGHT_BLUE << timeStr << " [REQUEST]: " << line << RESET << std::endl;
+                break;
+            case RESPONSE:
+                std::cout << BRIGHT_CYAN << timeStr << " [RESPONSE]: " << line << RESET << std::endl;
+                break;
+            default:
+                std::cerr << timeStr << " [UNKNOWN]: " << line << std::endl;
+                break;
+        }
     }
 }
 

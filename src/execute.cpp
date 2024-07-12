@@ -127,6 +127,8 @@ void Server::setFileInServer()
 		else
 		{
 			logger.log(ERR, "Failed to open the file: " + fullPath);
+			getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+			makeResponse((char *)PAGE_500);
 		}
 	}
 }
