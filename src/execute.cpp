@@ -105,13 +105,14 @@ void Server::setFileInServer()
 {
 	if(_upload.empty())
 	{
-		getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-		makeResponse((char *)PAGE_400);
+		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+		makeResponse((char *)PAGE_403);
 		return;
 	}
 	else
 	{
-		makeResponse((char *)getHttpHandler()->getRequest()->file.fileContent.c_str());
+		std::ofstream File(getUpload() + getHttpHandler()->getRequest()->file.fileName);
+		File << getHttpHandler()->getRequest()->file.fileContent;
 	}
 }
 void	handleSigInt(int signal)
