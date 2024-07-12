@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 15:26:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 17:01:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,11 +64,13 @@ void Logger::log(level lvl, const std::string &message)
                 break;
         }
     }
+    printLog();
 }
 
 void Logger::printLog()
 {
-	std::cout << totalLog << std::endl;
+    std::ofstream log("extra/log");
+	log << totalLog;
 }
 
 Logger::Logger()

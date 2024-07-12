@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:30 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 15:26:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 16:56:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <mutex>
 #include <ctime> 
 #include <sstream>
+#include <fstream>
 
 enum level
 {

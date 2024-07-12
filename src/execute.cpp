@@ -123,6 +123,8 @@ void Server::setFileInServer()
 		{
 			file << fileContent;
 			file.close();
+			getHttpHandler()->getResponse()->status = httpStatusCode::Created;
+			makeResponse(NULL);
 		}
 		else
 		{
