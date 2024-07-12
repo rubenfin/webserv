@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/09 12:56:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 11:29:42 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,5 +91,6 @@ class Server
 	Server(std::string serverContent);
 	void makeResponse(char *buffer);
 	void readFile(void);
+	void setFileInServer();
 	~Server();
 };

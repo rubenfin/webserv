@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/11 09:00:25 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/12 11:10:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ int	main(int argc, char **argv, char **env)
 		return (std::cerr << "The configuration filepath is not correct" << std::endl,
 			EXIT_FAILURE);
 	Webserv webserv(filename, env);
-	// webserv.printParsing();
 	webserv.execute();
 	return (EXIT_SUCCESS);
 }

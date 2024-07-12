@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:42:14 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 12:19:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,10 @@ void Server::setIndex(void)
 
 void Server::setUpload(void)
 {
-	_upload = getRoot() + trim(extractValue("upload"));
+	_upload = trim(extractValue("upload "));
+	if (_upload.empty())
+		return;
+	_upload = getRoot() + _upload; 		
 	std::cout << "curr upload directory: " << _upload << std::endl;
 }
 

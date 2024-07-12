@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:29:02 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/12 11:35:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,18 @@ void printFileStruct(file_t *file) {
 
 void findFileContent(request_t *req, file_t *requestFile)
 {
-	std::size_t start = req->requestContent.find("\r\n\r\n");
-	std::size_t end = req->requestContent.find(requestFile->fileBoundary + "--");
-	requestFile->fileContent = req->requestContent.substr(start, end);
-	// clearLastLine(requestFile->fileContent);
-	// clearUntilDoubleNewline(requestFile->fileContent);
+    std::size_t start = req->requestBody.find("\r\n\r\n");
+    if (start != std::string::npos) {
+        start += 4;
+    }
+    
+    std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
+    if (end != std::string::npos) {
+        end = req->requestBody.rfind("\r\n", end);
+    }
+    requestFile->fileContent = req->requestBody.substr(start, end - start);
 }
+
 
 void setFile(request_t *req, file_t *requestFile)
 {
@@ -77,6 +83,8 @@ void setFile(request_t *req, file_t *requestFile)
 		logger.log(WARNING, "Did not proceed with setFile(), contentLength = 0");
 		return;
 	}
+	logger.log(DEBUG, "File exists set to true in RequestFile");
+	requestFile->fileExists = true;
 	requestFile->fileContentType = trim(extractValue(req, "Content-Type: "));
 	trimLastChar(requestFile->fileContentType);
 	if (requestFile->fileContentType == "multipart/form-data")

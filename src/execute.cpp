@@ -101,6 +101,19 @@ char *Server::cgi(char **env)
 	return (0);
 }
 
+void Server::setFileInServer()
+{
+	if(_upload.empty())
+	{
+		getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
+		makeResponse((char *)PAGE_400);
+		return;
+	}
+	else
+	{
+		makeResponse((char *)getHttpHandler()->getRequest()->file.fileContent.c_str());
+	}
+}
 void	handleSigInt(int signal)
 {
 	Logger& logger = Logger::getInstance();
@@ -159,6 +172,8 @@ int Webserv::execute(void)
 			_servers[0].cgi(_environmentVariables);
 		else if (_servers[0].getHttpHandler()->getRedirect())
 			_servers[0].makeResponse(NULL);
+		else if (_servers[0].getHttpHandler()->getRequest()->file.fileExists)
+			_servers[0].setFileInServer();
 		else
 			_servers[0].readFile();
 		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
