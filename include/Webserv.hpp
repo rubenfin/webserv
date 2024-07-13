@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 14:32:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 11:55:51 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ class	Logger;
 class	Server;
 class	Locations;
 class	HttpHandler;
+
+extern Logger &logger;
 
 class Webserv
 {

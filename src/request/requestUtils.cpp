@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:14:55 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:51:21 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ void	resetRequest(request_t &request)
 
 void	printRequestStruct(request_t *req)
 {
-	Logger &logger = Logger::getInstance();
 	logger.log(REQUEST, "PARSED REQUEST");
 	logger.log(REQUEST, "----------------------------------");
 	logger.log(REQUEST, "http_v: " + req->http_v);
@@ -45,7 +44,6 @@ void	printRequestStruct(request_t *req)
 	logger.log(REQUEST, "requestFile: " + req->requestFile);
 	logger.log(REQUEST, "contentLength: " + std::to_string(req->contentLength));
 	logger.log(REQUEST, "contentType: " + req->contentType);
-	// Uncomment and modify if you have headers
 	// for (const auto &header : req->header) {
 	//     logger.log(REQUEST, header.first + ": " + header.second);
 	// }

@@ -6,11 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 11:10:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 11:55:32 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Webserv.hpp"
+
+Logger &logger = Logger::getInstance();
 
 int	main(int argc, char **argv, char **env)
 {

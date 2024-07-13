@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:20:52 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:56:47 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ Locations *HttpHandler::findMatchingDirective(void)
 
 void HttpHandler::combineRightUrl(void)
 {
-	Logger& logger = Logger::getInstance();
 	if (!_foundDirective || getResponse()->status == httpStatusCode::NotFound)
 	{
 		logger.log(ERR, "[404] No directory found");
@@ -105,8 +104,6 @@ void HttpHandler::httpVersionCheck(void)
 
 int HttpHandler::pathCheck(void)
 {
-	Logger& logger = Logger::getInstance();
-
 	std::string dir = getServer()->getRoot() + getRequest()->requestDirectory;
 	std::string file = getServer()->getRoot() + getRequest()->requestDirectory
 		+ getRequest()->requestFile;
@@ -175,8 +172,6 @@ void HttpHandler::checkLocationMethod(void)
 	// std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
 	// std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
 	// std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
-	Logger& logger = Logger::getInstance();
-
 	if (getRequest()->method == GET)
 	{
 		if (!_foundDirective->getMethods().GET)

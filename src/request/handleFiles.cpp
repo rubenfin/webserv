@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 10:49:11 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:51:35 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ void trimLastChar(std::string &str)
 }
 
 void printFileStruct(file_t *file) {
-    Logger& logger = Logger::getInstance();
 
     logger.log(REQUEST, "fileName: " + file->fileName);
     logger.log(REQUEST, "fileContent: " + file->fileContent);
@@ -72,7 +71,6 @@ void setFile(request_t *req, file_t *requestFile)
 {
 	std::string cLength;
 	std::string totalFileContent;
-	Logger& logger = Logger::getInstance();
 
 	cLength = trim(extractValue(req, "Content-Length: "));
 	if (!cLength.empty())

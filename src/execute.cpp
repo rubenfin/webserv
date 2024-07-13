@@ -73,7 +73,6 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 
 void Server::cgi(char **env)
 {
-	Logger& logger = Logger::getInstance();
 	pid_t pid;
 	int fds[2];
 	ssize_t bytesRead;
@@ -109,7 +108,6 @@ void Server::cgi(char **env)
 
 void Server::setFileInServer()
 {
-	Logger &logger = Logger::getInstance();
 	int file;
 	if (_upload.empty())
 	{
@@ -146,7 +144,6 @@ void Server::setFileInServer()
 }
 void handleSigInt(int signal)
 {
-	Logger &logger = Logger::getInstance();
 	if (signal == SIGINT)
 	{
 		logger.log(ERR, "closed Webserv with SIGINT");
@@ -164,7 +161,6 @@ int Webserv::execute(void)
 	request_t request;
 	response_t response;
 
-	Logger &logger = Logger::getInstance();
 	signal(SIGINT, handleSigInt);
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());

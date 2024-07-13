@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:31:01 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:50:12 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,6 @@ void Server::setIndex(void)
 
 void Server::setUpload(void)
 {
-	Logger &logger = Logger::getInstance();
 	_upload = trim(extractValue("upload "));
 	if (_upload.empty())
 		return;
@@ -302,7 +301,6 @@ void Server::setLocationsRegex(std::string serverContent)
 
 Server::Server(std::string serverContent)
 {
-	Logger &logger = Logger::getInstance();
 	_serverContent = serverContent;
 	setServerName();
 	setPort();
@@ -366,7 +364,6 @@ void Server::readFile(void)
 {
 	int file;
 	int rdbytes;
-	Logger &logger = Logger::getInstance();
 	logger.log(DEBUG, "Request URL in readFile() " + _http_handler->getRequest()->requestURL);
 	file = open(_http_handler->getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
