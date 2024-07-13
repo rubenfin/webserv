@@ -194,14 +194,7 @@ int Webserv::execute(void)
 		{
 			_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
 														&response);
-		}
-		catch (const std::exception &e)
-		{
-			if (_servers[0].getHttpHandler()->getResponse()->status == httpStatusCode::NotFound && _servers[0].getRoot() != "")
-				_servers[0].getHttpHandler()->getRequest()->requestURL = _servers[0].getRoot() + _servers[0].getError404();
-			else
-				_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
-		}
+		
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
 		else if (_servers[0].getHttpHandler()->getRedirect())
@@ -210,7 +203,13 @@ int Webserv::execute(void)
 			_servers[0].setFileInServer();
 		else
 			_servers[0].readFile();
-		// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
+		}
+		catch (const HttpException &e)
+		{
+			logger.log(WARNING, "In catch block");
+			_servers[0].makeResponse(e.getPageContent());
+		}
+				// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
 		// if (_servers[0].getHttpHandler()->getRequestBody() != "")
 		// 	std::cout << "\n\n MY REQUEST BODY\n"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
 		logger.log(RESPONSE, _servers[0].getResponse());

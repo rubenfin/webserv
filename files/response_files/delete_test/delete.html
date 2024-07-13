@@ -3,48 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Example</title>
+    <title>Delete File</title>
 </head>
 <body>
-    <h1>Delete Example</h1>
-    
-    <p>Enter ID of item to delete:</p>
+    <h1>Delete a File</h1>
     <form id="deleteForm">
-        <label for="itemId">Item ID:</label>
-        <input type="text" id="itemId" name="itemId" required>
-        <button type="button" onclick="deleteItem()">Delete Item</button>
+        <label for="fileName">File Name:</label>
+        <input id="fileName" name="fileName" type="text" required>
+        <button type="submit">Delete</button>
     </form>
 
-    <div id="deleteResult"></div>
-
     <script>
-        function deleteItem() {
-            var itemId = document.getElementById("itemId").value;
-
-            // Construct the URL for your DELETE request
-            var url = 'http://localhost:8080/delete-item/' + itemId;  // Replace with your server URL and endpoint
-
-            // Create a new XMLHttpRequest object
-            var xhr = new XMLHttpRequest();
-
-            // Open a DELETE request to the server
-            xhr.open('DELETE', url, true);
-
-            // Set the content type
-            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-            // Define what happens on successful data submission
-            xhr.onload = function () {
-                if (xhr.status == 200) {
-                    document.getElementById("deleteResult").innerHTML = "Item deleted successfully!";
-                } else {
-                    document.getElementById("deleteResult").innerHTML = "Failed to delete item.";
-                }
-            };
-
-            // Send the request
-            xhr.send();
-        }
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+        
+        var fileName = document.getElementById('fileName').value;
+        
+        fetch('/delete_test', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'fileName=' + encodeURIComponent(fileName)
+        }).then(function(response) {
+            if (response.ok) {
+                window.location.href = '/delete-success'; // Redirect on success
+            } else {
+                window.location.href = '/delete-error'; // Redirect on error
+            }
+        }).catch(function(error) {
+            console.error('Error:', error);
+            window.location.href = '/delete-error'; // Redirect on error
+        });
+    });
     </script>
 </body>
 </html>

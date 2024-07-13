@@ -45,7 +45,7 @@ server {
 
 	location /delete_test {
 		index delete.html
-		allow_methods POST DELETE GET
+		allow_methods POST GET
 		client_body_buffer_ size 100
 	}
 

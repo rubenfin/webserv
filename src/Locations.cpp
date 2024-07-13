@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:49:50 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:59:58 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void Locations::printLocationsContent(void)
 void Locations::setMethods(void)
 {
 	_methodsList = extractValueUntilNL("allow_methods");
-	logger.log(DEBUG, _methodsList);
+	// logger.log(DEBUG, _methodsList);
 	_allowedMethods.GET = false;
 	_allowedMethods.POST = false;
 	_allowedMethods.DELETE = false;
@@ -142,7 +142,7 @@ std::string Locations::extractValue(std::string toSearch)
 void Locations::setRoot(void)
 {
 	_root = extractValue("root");
-	logger.log(DEBUG, _locationDirective);
+	// logger.log(DEBUG, _locationDirective);
 	if (_locationDirective == "/")
 		_root = "files/response_files/";
 }

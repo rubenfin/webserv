@@ -6,19 +6,51 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/27 14:44:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 21:06:15 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXCEPTIONS_HPP
-# define EXCEPTIONS_HPP
+#define EXCEPTIONS_HPP
 
-# include <stdexcept>
+#include "HttpHandler.hpp"
+#include <exception>
+#include <stdexcept>
+#include <string>
 
-struct runTimeExceptions : public virtual std::runtime_error
-{
-   runTimeExceptions() 
-        : std::runtime_error("Standard runtime Exception") {}
+class HttpException : public std::runtime_error {
+protected:
+    int statusCode;
+    char * pageContent;
+
+public:
+    HttpException(int code, const std::string& message, char *content)
+        : std::runtime_error(message), statusCode(code), pageContent(content) {}
+
+    int getStatusCode() const { return statusCode; }
+    char * getPageContent() const { return pageContent; }
 };
 
+#define DEFINE_HTTP_EXCEPTION(name, code, content) \
+class name ## Exception : public HttpException { \
+public: \
+    name ## Exception() : HttpException(code, #name, content) {} \
+};
+
+DEFINE_HTTP_EXCEPTION(Created, 201, PAGE_201)
+DEFINE_HTTP_EXCEPTION(NoContent, 204, PAGE_204)
+DEFINE_HTTP_EXCEPTION(BadRequest, 400, PAGE_400)
+DEFINE_HTTP_EXCEPTION(Unauthorized, 401, PAGE_401)
+DEFINE_HTTP_EXCEPTION(Forbidden, 403, PAGE_403)
+DEFINE_HTTP_EXCEPTION(NotFound, 404, PAGE_404)
+DEFINE_HTTP_EXCEPTION(MethodNotAllowed, 405, PAGE_405)
+DEFINE_HTTP_EXCEPTION(InternalServerError, 500, PAGE_500)
+DEFINE_HTTP_EXCEPTION(NotImplemented, 501, PAGE_501)
+DEFINE_HTTP_EXCEPTION(BadGateway, 502, PAGE_502)
+DEFINE_HTTP_EXCEPTION(ServiceUnavailable, 503, PAGE_503)
+DEFINE_HTTP_EXCEPTION(HttpVersionNotSupported, 505, PAGE_505)
+
+extern void makeResponse(char *buffer);
+
 #endif
+

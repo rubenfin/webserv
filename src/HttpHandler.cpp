@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:56:47 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 21:20:39 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,10 @@ response_t *HttpHandler::getResponse(void)
 void HttpHandler::httpVersionCheck(void)
 {
 	if (getRequest()->http_v != "1.1")
+	{
 		getResponse()->status = httpStatusCode::httpVersionNotSupported;
+		throw HttpVersionNotSupportedException();
+	}
 }
 
 int HttpHandler::pathCheck(void)
@@ -108,16 +111,19 @@ int HttpHandler::pathCheck(void)
 	std::string file = getServer()->getRoot() + getRequest()->requestDirectory
 		+ getRequest()->requestFile;
 	if (!checkIfDir(dir))
+	{
+		logger.log(ERR, "[404] Directory doesn't exist");
 		getResponse()->status = httpStatusCode::NotFound;
+		throw NotFoundException();
+	}
 	if (getRequest()->requestFile != "")
 	{
 		if (!checkIfFile(file))
+		{
+			logger.log(ERR, "[404] File doesn't exist");
 			getResponse()->status = httpStatusCode::NotFound;
-	}
-	if (getResponse()->status == httpStatusCode::NotFound)
-	{
-		logger.log(ERR, "[404] directory or file doesn't exist");
-		throw std::exception();
+			throw NotFoundException();
+		}
 	}
 	return (1);
 }
@@ -125,26 +131,29 @@ int HttpHandler::pathCheck(void)
 void HttpHandler::methodCheck(void)
 {
 	if (getRequest()->method == ERROR)
-		getResponse()->status = httpStatusCode::NotFound;
-	if (getResponse()->status == httpStatusCode::NotFound)
-		throw std::exception();
+	{
+		logger.log(ERR, "[400] Only available methods are GET, POST and DELETE");
+		getResponse()->status = httpStatusCode::BadRequest;
+		throw BadRequestException();
+	}
 }
 
 void HttpHandler::fileCheck()
 {
 	if (getRequest()->file.fileName.size() > 256 || hasSpecialCharacters(getRequest()->file.fileName))
 	{
+		logger.log(ERR, "[400] Filename has too many characters or has special characters");
 		getResponse()->status = httpStatusCode::BadRequest;
-		throw std::exception();
+		throw BadRequestException();
 	}
 }
 
 void HttpHandler::checkRequestData(void)
 {
 	httpVersionCheck();
-	pathCheck();
 	methodCheck();
-	if (getRequest()->file.fileExists)
+	pathCheck();
+	if (getRequest()->method == POST && getRequest()->file.fileExists)
 		fileCheck();
 }
 void	deleteFoundDirective(Locations *_foundDirective)
@@ -176,7 +185,7 @@ void HttpHandler::checkLocationMethod(void)
 	{
 		if (!_foundDirective->getMethods().GET)
 		{	
-			logger.log(ERR, "Method not allowed in location");
+			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}
@@ -184,7 +193,7 @@ void HttpHandler::checkLocationMethod(void)
 	{	
 		if (!_foundDirective->getMethods().POST)
 		{
-			logger.log(ERR, "Method not allowed in location");
+			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}
@@ -192,7 +201,7 @@ void HttpHandler::checkLocationMethod(void)
 	{
 		if (!_foundDirective->getMethods().DELETE)
 		{
-			logger.log(ERR, "Method not allowed in location");
+			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 		}
 	}
