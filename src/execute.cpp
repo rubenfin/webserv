@@ -209,7 +209,7 @@ int Webserv::execute(void)
 		if (_servers[0].getHttpHandler()->getCgi())
 			_servers[0].cgi(_environmentVariables);
 		else if (_servers[0].getHttpHandler()->getRedirect())
-			_servers[0].makeResponse(NULL);
+			_servers[0].makeResponseForRedirect();
 		else if (_servers[0].getHttpHandler()->getRequest()->file.fileExists)
 			_servers[0].setFileInServer();
 		else

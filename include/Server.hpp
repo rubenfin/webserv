@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:24:47 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:30:20 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ class Server
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
 	void makeResponse(char *buffer);
+	void makeResponseForRedirect(void);
 	void readFile(void);
 	void setFileInServer();
 	~Server();

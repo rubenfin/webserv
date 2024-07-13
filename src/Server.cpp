@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:06:18 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:31:01 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,38 +315,46 @@ Server::Server(std::string serverContent)
 	logger.log(DEBUG, "Server port: " + std::to_string(_port));
 }
 
+void Server::makeResponseForRedirect(void)
+{
+	std::string header;
+	std::string body;
+
+	// Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
+	getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
+	std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+	header = "HTTP/1.1 " + message + "\r\n";
+
+	std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
+	if (redirectUrl.substr(0, 4) != "http")
+	{
+		redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
+	}
+	header += "Location: " + redirectUrl + "\r\n";
+	header += "Content-Type: text/html\r\n";
+	header += "Content-Length: 0"
+			  "\r\n";
+	header += "\r\n";
+
+	_response = header + body;
+}
+
 void Server::makeResponse(char *buffer)
 {
 	std::string header;
 	std::string body;
 
-	if (getHttpHandler()->getRedirect())
-	{
-		// Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
-		getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
-		std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
-		header = "HTTP/1.1 " + message + "\r\n";
+	std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+	header = "HTTP/1.1 " + message + "\r\n";
 
-		std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
-		if (redirectUrl.substr(0, 4) != "http")
-		{
-			redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
-		}
-		header += "Location: " + redirectUrl + "\r\n";
-		header += "Content-Type: text/html\r\n";
-		header += "Content-Length: 0"
-				  "\r\n";
+	if (buffer)
+	{
+		body = buffer;
+		header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
 	}
 	else
 	{
-		std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
-		header = "HTTP/1.1 " + message + "\r\n";
-
-		if (buffer)
-		{
-			body = buffer;
-			header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
-		}
+		header += "Content-Length: 0";
 	}
 
 	header += "\r\n";

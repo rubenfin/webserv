@@ -19,6 +19,4 @@ toekomst
     alias: directory wordt vervangen door alias, als je gelijk naar een directory gaat zonder alias werkt ook.
 }
 
-Wat is een MIME type?
-
-Putting /uploads as a location
+Belangrijk: je krijgt een segfault als je teveel locations hebt?
