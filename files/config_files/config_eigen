@@ -5,7 +5,7 @@ server {
 	root files/response_files/
 	index index.html
 	error_page 404 /404.html
-	upload uploads/
+	upload /uploads
 	allow_methods GET
 
 	location / {
@@ -55,8 +55,8 @@ server {
 		index youpi.bad_extension
 	}
 
-	location /test {
-		allow_methods DELETE
+	location /uploads {
+		allow_methods GET DELETE POST
 		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 }

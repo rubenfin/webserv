@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/10 16:23:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 11:14:55 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ void	printRequestStruct(request_t *req)
 	logger.log(REQUEST, "requestBody: " + req->requestBody);
 	logger.log(REQUEST, "requestURL: " + req->requestURL);
 	logger.log(REQUEST, "requestDirectory: " + req->requestDirectory);
+	logger.log(REQUEST, "requestFile: " + req->requestFile);
 	logger.log(REQUEST, "contentLength: " + std::to_string(req->contentLength));
 	logger.log(REQUEST, "contentType: " + req->contentType);
 	// Uncomment and modify if you have headers

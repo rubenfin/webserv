@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 11:35:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 10:49:11 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void setFile(request_t *req, file_t *requestFile)
     else 
 	{
         req->contentLength = 0;
-		logger.log(WARNING, "Did not proceed with setFile(), contentLength = 0");
+		logger.log(DEBUG, "Did not proceed with setFile(), contentLength = 0");
 		return;
 	}
 	logger.log(DEBUG, "File exists set to true in RequestFile");

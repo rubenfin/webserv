@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/12 14:36:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 11:20:52 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,10 @@ Locations *HttpHandler::findMatchingDirective(void)
 
 void HttpHandler::combineRightUrl(void)
 {
+	Logger& logger = Logger::getInstance();
 	if (!_foundDirective || getResponse()->status == httpStatusCode::NotFound)
 	{
-		// There is no directive found so we return an error.
+		logger.log(ERR, "[404] No directory found");
 		getRequest()->requestURL = _server->getRoot() + _server->getError404();
 		getResponse()->status = httpStatusCode::NotFound;
 		return ;
@@ -104,6 +105,8 @@ void HttpHandler::httpVersionCheck(void)
 
 int HttpHandler::pathCheck(void)
 {
+	Logger& logger = Logger::getInstance();
+
 	std::string dir = getServer()->getRoot() + getRequest()->requestDirectory;
 	std::string file = getServer()->getRoot() + getRequest()->requestDirectory
 		+ getRequest()->requestFile;
@@ -113,11 +116,12 @@ int HttpHandler::pathCheck(void)
 	{
 		if (!checkIfFile(file))
 			getResponse()->status = httpStatusCode::NotFound;
-		if (access(file.c_str(), X_OK) == -1)
-			getResponse()->status = httpStatusCode::NotFound;
 	}
 	if (getResponse()->status == httpStatusCode::NotFound)
+	{
+		logger.log(ERR, "[404] directory or file doesn't exist");
 		throw std::exception();
+	}
 	return (1);
 }
 

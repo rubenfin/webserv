@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 10:00:38 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/13 11:06:18 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void Server::setServer()
 {
-	int	opt;
+	int opt;
 
 	opt = 1;
 	this->_address = new struct sockaddr_in;
@@ -27,7 +27,7 @@ void Server::setServer()
 		exit(EXIT_FAILURE);
 	}
 	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-			sizeof(opt)) < 0 )
+				   sizeof(opt)) < 0)
 	{
 		perror("setsockopt");
 		delete this->_address;
@@ -60,7 +60,7 @@ void Server::setServer()
 
 void Server::getLocationStack(std::string locationContent)
 {
-	bool	insideBrackets;
+	bool insideBrackets;
 
 	std::vector<std::string> result;
 	std::string line;
@@ -110,8 +110,8 @@ void Server::getLocationStack(std::string locationContent)
 }
 std::string Server::extractValue(const std::string &searchString)
 {
-	size_t	pos;
-	size_t	endPos;
+	size_t pos;
+	size_t endPos;
 
 	pos = _serverContent.find(searchString);
 	if (pos != std::string::npos)
@@ -143,19 +143,27 @@ void Server::setIndex(void)
 {
 	_index = extractValue("index");
 	_index.erase(remove_if(_index.begin(), _index.end(), isspace),
-		_index.end());
+				 _index.end());
 }
 
 void Server::setUpload(void)
 {
+	Logger &logger = Logger::getInstance();
 	_upload = trim(extractValue("upload "));
 	if (_upload.empty())
 		return;
-	_upload = getRoot() + _upload; 		
-	
-	std::cout << "curr upload directory: " << _upload << std::endl;
+	for (int i = 0; i < _locations.size(); i++)
+	{
+		if (_locations[i].getLocationDirective() == _upload)
+		{
+			logger.log(INFO, "Set upload variable: " + _upload + ", equal to location directive: " + _locations[i].getLocationDirective());
+			_upload = getRoot() + _upload;
+			return;
+		}
+	}
+	_upload = "";
+	logger.log(WARNING, "Found upload variable in configuration file doesn't match any location.");
 }
-
 
 void Server::setMethods(void)
 {
@@ -263,9 +271,9 @@ struct sockaddr_in *Server::getAddress(void)
 
 void Server::setLocationsRegex(std::string serverContent)
 {
-	size_t	index;
-	bool	copyAllowed;
-	int		count;
+	size_t index;
+	bool copyAllowed;
+	int count;
 
 	index = 0;
 	copyAllowed = false;
@@ -294,62 +302,69 @@ void Server::setLocationsRegex(std::string serverContent)
 
 Server::Server(std::string serverContent)
 {
-	Logger& logger = Logger::getInstance();
+	Logger &logger = Logger::getInstance();
 	_serverContent = serverContent;
 	setServerName();
 	setPort();
 	setRoot();
 	setIndex();
-	setUpload();
 	setMethods();
 	setError404();
 	setLocationsRegex(serverContent);
+	setUpload();
 	logger.log(DEBUG, "Server port: " + std::to_string(_port));
 }
 
-void Server::makeResponse(char *buffer) {
-    std::string header;
-    std::string body;
+void Server::makeResponse(char *buffer)
+{
+	std::string header;
+	std::string body;
 
-    if (getHttpHandler()->getRedirect()) {
-        // Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
-        getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
-        std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
-        header = "HTTP/1.1 " + message + "\r\n";
-        
-        std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
-        if (redirectUrl.substr(0, 4) != "http") {
-            redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
-        }        
-        header += "Location: " + redirectUrl + "\r\n";
-        header += "Content-Type: text/html\r\n";
-        header += "Content-Length: 0" "\r\n";
-    } else {
-        std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
-        header = "HTTP/1.1 " + message + "\r\n";
-        
-        if (buffer) {
-            body = buffer;
-            header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
-        } 
-    }
+	if (getHttpHandler()->getRedirect())
+	{
+		// Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
+		getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
+		std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+		header = "HTTP/1.1 " + message + "\r\n";
 
-    header += "\r\n";
+		std::string redirectUrl = getHttpHandler()->getFoundDirective()->getReturn();
+		if (redirectUrl.substr(0, 4) != "http")
+		{
+			redirectUrl = "http://" + redirectUrl; // Ensure the URL includes the protocol
+		}
+		header += "Location: " + redirectUrl + "\r\n";
+		header += "Content-Type: text/html\r\n";
+		header += "Content-Length: 0"
+				  "\r\n";
+	}
+	else
+	{
+		std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
+		header = "HTTP/1.1 " + message + "\r\n";
 
-    _response = header + body;
+		if (buffer)
+		{
+			body = buffer;
+			header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
+		}
+	}
+
+	header += "\r\n";
+
+	_response = header + body;
 }
 
 void Server::readFile(void)
 {
-	int	file;
-	int	rdbytes;
-	Logger& logger = Logger::getInstance();
+	int file;
+	int rdbytes;
+	Logger &logger = Logger::getInstance();
 	logger.log(DEBUG, "Request URL in readFile() " + _http_handler->getRequest()->requestURL);
 	file = open(_http_handler->getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
 		perror("opening file of responseURL");
-		return ;
+		return;
 	}
 	rdbytes = read(file, _buffer, 9999999);
 	_buffer[rdbytes] = '\0';
@@ -360,6 +375,6 @@ void Server::readFile(void)
 
 Server::~Server()
 {
-	delete	_http_handler;
+	delete _http_handler;
 	free(_buffer);
 }

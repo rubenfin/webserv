@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/12 11:29:42 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 11:24:47 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class Server
 	HttpHandler			*_http_handler;
 
   public:
-	char *cgi(char **env);
+	void cgi(char **env);
 	void execute_CGI_script(pid_t pid, int *fds, const char *script,
 		char **env);
 	void getLocationStack(std::string locationContent);
