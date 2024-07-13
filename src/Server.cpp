@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 14:13:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 10:00:38 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,9 +331,7 @@ void Server::makeResponse(char *buffer) {
         if (buffer) {
             body = buffer;
             header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
-        } else {
-            header += "Content-Length: 0\r\n";
-        }
+        } 
     }
 
     header += "\r\n";

@@ -6,13 +6,14 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/18 14:28:52 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/08 14:18:49 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/13 10:06:31 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTP_STATUS_CODES_HPP
 #define HTTP_STATUS_CODES_HPP
 
+#define PAGE_201 "<h1>201 - Created</h1>\n<h2>Your file has been successfully uploaded to the server.</h2>\n<p><a href=\"/\">Return to homepage</a></p>"
 #define PAGE_204 "<h1>204 - No Content </h1>"
 #define PAGE_400 "<h1>400 - Bad Request </h1>"
 #define PAGE_401 "<h1>401 - Unauthorized </h1>"

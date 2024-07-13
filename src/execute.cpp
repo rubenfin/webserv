@@ -124,7 +124,7 @@ void Server::setFileInServer()
 			write(file, fileContent.c_str(), fileContent.size());
 			close(file);
 			getHttpHandler()->getResponse()->status = httpStatusCode::Created;
-			makeResponse(NULL);
+			makeResponse((char *)PAGE_201);
 			logger.log(INFO, "Uploaded a file to " + fullPath + " called " + fileName);
 		}
 		else
