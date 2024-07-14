@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:50:12 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/14 14:26:27 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,7 @@ std::string Server::extractValue(const std::string &searchString)
 void Server::setServerName(void)
 {
 	_serverName = extractValue("server_name");
+	logger.log(INFO, "Server name: " + _serverName);
 }
 void Server::setPort(void)
 {
@@ -310,7 +311,7 @@ Server::Server(std::string serverContent)
 	setError404();
 	setLocationsRegex(serverContent);
 	setUpload();
-	logger.log(DEBUG, "Server port: " + std::to_string(_port));
+	logger.log(INFO, "Server port: " + std::to_string(_port));
 }
 
 void Server::makeResponseForRedirect(void)

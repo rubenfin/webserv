@@ -64,6 +64,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 			  getHttpHandler()->getRequest()->requestBody.size());
 		// close(STDIN_FILENO);  // Close STDIN after writing
 	}
+	logger.log(INFO, "Executing CGI script");
 	execve(script, exec_args, env);
 	// If execve returns, it failed
 	perror("execve failed");
@@ -164,7 +165,7 @@ int Webserv::execute(void)
 	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
-	logger.log(INFO, "Server started");
+	logger.log(INFO, "Server " +  _servers[0].getServerName() + " started on port " + _servers[0].getPortString());
 	interrupted = 0;
 	while (!interrupted)
 	{
