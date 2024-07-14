@@ -68,7 +68,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 	// If execve returns, it failed
 	perror("execve failed");
 	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-	exit(EXIT_FAILURE);
+	exit(400);
 }
 
 void Server::cgi(char **env)
@@ -80,8 +80,8 @@ void Server::cgi(char **env)
 	if (access(getHttpHandler()->getRequest()->requestURL.c_str(), X_OK) != 0)
 	{
 		logger.log(ERR, "[403] Script doesn't have executable rights");
-		makeResponse((char *)PAGE_403);
-		return;
+		getHttpHandler()->getResponse()->status == httpStatusCode::Forbidden;
+		throw ForbiddenException();
 	}
 
 	if (pipe(fds) == -1)
@@ -113,8 +113,7 @@ void Server::setFileInServer()
 	{
 		logger.log(ERR, "[403] Tried uploading without setting an upload directory");
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
-		makeResponse((char *)PAGE_403);
-		return;
+		throw ForbiddenException();
 	}
 	else
 	{
@@ -138,7 +137,7 @@ void Server::setFileInServer()
 		{
 			logger.log(ERR, "[500] Failed to open the file: " + fullPath);
 			getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
-			makeResponse((char *)PAGE_500);
+			throw InternalServerErrorException();
 		}
 	}
 }
@@ -206,12 +205,14 @@ int Webserv::execute(void)
 		}
 		catch (const HttpException &e)
 		{
-			logger.log(WARNING, "In catch block");
-			_servers[0].makeResponse(e.getPageContent());
+			if (_servers[0].getHttpHandler()->getResponse()->status == httpStatusCode::NotFound && !_servers[0].getError404().empty())
+			{
+				_servers[0].getHttpHandler()->getRequest()->requestURL = _servers[0].getRoot() + _servers[0].getError404();
+				_servers[0].readFile();
+			}
+			else
+				_servers[0].makeResponse(e.getPageContent());
 		}
-				// std::cout << _servers[0].getHttpHandler()->getRequest()->requestURL.c_str() << std::endl;
-		// if (_servers[0].getHttpHandler()->getRequestBody() != "")
-		// 	std::cout << "\n\n MY REQUEST BODY\n"<< _servers[0].getHttpHandler()->getRequestBody() << std::endl;
 		logger.log(RESPONSE, _servers[0].getResponse());
 		if (send(client_socket, _servers[0].getResponse().c_str(),
 				 strlen(_servers[0].getResponse().c_str()), 0) == -1)

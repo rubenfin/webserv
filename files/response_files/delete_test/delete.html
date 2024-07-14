@@ -27,9 +27,9 @@
             body: 'fileName=' + encodeURIComponent(fileName)
         }).then(function(response) {
             if (response.ok) {
-                window.location.href = '/delete-success'; // Redirect on success
+                window.location.href = '/ '; // Redirect on success
             } else {
-                window.location.href = '/delete-error'; // Redirect on error
+                window.location.href = '/'; // Redirect on error
             }
         }).catch(function(error) {
             console.error('Error:', error);

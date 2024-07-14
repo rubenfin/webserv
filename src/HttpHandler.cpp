@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/13 21:20:39 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/14 12:11:51 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,8 @@ void HttpHandler::combineRightUrl(void)
 	if (!_foundDirective || getResponse()->status == httpStatusCode::NotFound)
 	{
 		logger.log(ERR, "[404] No directory found");
-		getRequest()->requestURL = _server->getRoot() + _server->getError404();
 		getResponse()->status = httpStatusCode::NotFound;
-		return ;
+		throw NotFoundException();
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
@@ -187,6 +186,7 @@ void HttpHandler::checkLocationMethod(void)
 		{	
 			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
+			throw MethodNotAllowedException();
 		}
 	}
 	else if (getRequest()->method == POST)
@@ -195,6 +195,7 @@ void HttpHandler::checkLocationMethod(void)
 		{
 			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
+			throw MethodNotAllowedException();
 		}
 	}
 	else if (getRequest()->method == DELETE)
@@ -203,10 +204,9 @@ void HttpHandler::checkLocationMethod(void)
 		{
 			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
+			throw MethodNotAllowedException();
 		}
 	}
-	if (getResponse()->status == httpStatusCode::MethodNotAllowed)
-		throw std::exception();
 }
 
 void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
