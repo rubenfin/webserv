@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/14 12:11:51 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/15 14:23:23 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ Locations *HttpHandler::findMatchingDirective(void)
 			if (currLongestLocation == nullptr
 				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
 				currLongestLocation = &_server->getLocation()[i];
-			// std::cout << locationDirective << " | " << currLongestLocation->getLocationDirective() << std::endl;
 		}
 	}
 	if (currLongestLocation)
@@ -77,7 +76,7 @@ void HttpHandler::combineRightUrl(void)
 				+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
 		}
 	}
-	// std::cout << "requestURL result --> " << getRequest()->requestURL << std::endl;
+	// logger.log(DEBUG, "requestURL result --> " + getRequest()->requestURL);
 }
 
 Server *HttpHandler::getServer(void)
