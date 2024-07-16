@@ -175,7 +175,11 @@ void Server::deleteFileInServer()
 			throw AcceptedException();
 		}
 		else
+		{
 			logger.log(ERR, "Could not delete the file located at " + filePath);
+			getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
+			throw BadRequestException();
+		}
 	}	
 }
 
