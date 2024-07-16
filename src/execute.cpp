@@ -167,7 +167,6 @@ void Server::deleteFileInServer()
 	}
 	else
 	{
-		
 		if (remove(filePath.c_str()) == 0)
 		{
 			logger.log(INFO, "Succesfully deleted the file located at " + filePath);
