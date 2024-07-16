@@ -52,6 +52,7 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 {
 	char *exec_args[] = {(char *)script, nullptr};
 
+	logger.log(INFO, "Executing CGI script");
 	close(fds[0]);
 	setEnv(env);
 	// Redirect both STDOUT and STDERR
@@ -64,12 +65,11 @@ void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
 			  getHttpHandler()->getRequest()->requestBody.size());
 		// close(STDIN_FILENO);  // Close STDIN after writing
 	}
-	logger.log(INFO, "Executing CGI script");
 	execve(script, exec_args, env);
 	// If execve returns, it failed
 	perror("execve failed");
 	getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-	exit(400);
+	exit(EXIT_FAILURE);
 }
 
 void Server::cgi(char **env)
@@ -81,7 +81,7 @@ void Server::cgi(char **env)
 	if (access(getHttpHandler()->getRequest()->requestURL.c_str(), X_OK) != 0)
 	{
 		logger.log(ERR, "[403] Script doesn't have executable rights");
-		getHttpHandler()->getResponse()->status == httpStatusCode::Forbidden;
+		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		throw ForbiddenException();
 	}
 
@@ -96,10 +96,10 @@ void Server::cgi(char **env)
 		close(fds[1]);
 		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer,
 															  10000);
-		std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
+		// std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
+		// logger.log(DEBUG, std::to_string(getHttpHandler()->getResponse()->contentLength));
 		_buffer[getHttpHandler()->getResponse()->contentLength] = '\0';
-		std::cout << "STRING FROM CGI SCRIPT\n"
-				  << _buffer << std::endl;
+		// logger.log(INFO, "CGI SCRIPT OUTPUT\n" + (std::string)_buffer);
 		close(fds[0]);
 		makeResponse(_buffer);
 		waitpid(pid, NULL, 0);
@@ -184,6 +184,7 @@ int Webserv::execute(void)
 		valread = read(client_socket, buffer, MAX_LENGTH_HTTP_REQ - 1);
 		if (valread == -1)
 		{
+			logger.log(ERR, "Read of client socket failed");
 			_servers[0].getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
 			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
 		}
