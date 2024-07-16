@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/16 11:46:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/16 13:08:55 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,6 @@ void	parse_request(request_t *req, char *buffer)
 	// printf("THE REQUEST\n%s\n", buffer);
 	req->requestContent = buffer;
 	req->file.fileExists = false;
-	req->file.filePOST = false;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
 	setMethod(req);

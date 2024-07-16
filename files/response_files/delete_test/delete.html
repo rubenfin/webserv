@@ -26,14 +26,17 @@
             },
             body: 'fileName=' + encodeURIComponent(fileName)
         }).then(function(response) {
-            if (response.ok) {
-                window.location.href = '/ '; // Redirect on success
-            } else {
-                window.location.href = '/'; // Redirect on error
-            }
+        return response.text(); // Get the response as text (HTML)
+        document.open();
+        document.write(html);
+        document.close();
+}).then(function(html) {
+    // Load the HTML content returned by the server
+    document.open();
+    document.write(html);
+    document.close();
         }).catch(function(error) {
             console.error('Error:', error);
-            window.location.href = '/delete-error'; // Redirect on error
         });
     });
     </script>

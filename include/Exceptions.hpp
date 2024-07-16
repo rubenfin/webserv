@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 21:06:15 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/16 13:54:44 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ public: \
 };
 
 DEFINE_HTTP_EXCEPTION(Created, 201, PAGE_201)
+DEFINE_HTTP_EXCEPTION(Accepted, 202, PAGE_202)
 DEFINE_HTTP_EXCEPTION(NoContent, 204, PAGE_204)
 DEFINE_HTTP_EXCEPTION(BadRequest, 400, PAGE_400)
 DEFINE_HTTP_EXCEPTION(Unauthorized, 401, PAGE_401)

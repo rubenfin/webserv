@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 14:31:14 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/16 11:46:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/16 13:08:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 typedef struct file_t
 {
     bool fileExists;
-    bool filePOST;
     std::string fileName;
     std::string fileContent;
     std::string fileContentType;

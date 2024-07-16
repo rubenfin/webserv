@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/15 14:23:23 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/16 13:20:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,19 @@ void HttpHandler::fileCheck()
 	}
 }
 
+void HttpHandler::setDelete()
+{
+	size_t foundEqual = getRequest()->requestBody.find("=");
+	if (foundEqual + 1 == std::string::npos)
+	{
+		logger.log(WARNING, "Did not find any well formatted file");
+		getResponse()->status = httpStatusCode::BadRequest;
+		throw BadRequestException();
+	}
+	getRequest()->file.fileName = getRequest()->requestBody.substr(foundEqual + 1, getRequest()->requestBody.size() - foundEqual);
+	logger.log(DEBUG, "File found to delete: " + getRequest()->file.fileName);
+}
+
 void HttpHandler::checkRequestData(void)
 {
 	httpVersionCheck();
@@ -153,6 +166,8 @@ void HttpHandler::checkRequestData(void)
 	pathCheck();
 	if (getRequest()->method == POST && getRequest()->file.fileExists)
 		fileCheck();
+	if (getRequest()->method == DELETE)
+		setDelete();
 }
 void	deleteFoundDirective(Locations *_foundDirective)
 {

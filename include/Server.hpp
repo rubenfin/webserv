@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:30:20 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/16 13:34:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,5 +93,6 @@ class Server
 	void makeResponseForRedirect(void);
 	void readFile(void);
 	void setFileInServer();
+	void deleteFileInServer();
 	~Server();
 };

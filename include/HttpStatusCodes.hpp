@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/18 14:28:52 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 21:09:55 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/16 13:54:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define HTTP_STATUS_CODES_HPP
 
 #define PAGE_201 (char *)"<h1>201 - Created</h1>\n<h2>Your file has been successfully uploaded to the server.</h2>\n<p><a href=\"/\">Return to homepage</a></p>"
+#define PAGE_202 (char *)"<h1>202 - Accepted </h1>"
 #define PAGE_204 (char *)"<h1>204 - No Content </h1>"
 #define PAGE_400 (char *)"<h1>400 - Bad Request </h1>"
 #define PAGE_401 (char *)"<h1>401 - Unauthorized </h1>"
