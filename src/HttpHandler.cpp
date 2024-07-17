@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/17 13:57:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/17 21:40:14 by ruben         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,9 +51,17 @@ void HttpHandler::combineRightUrl(void)
 {
 	if (!_foundDirective)
 	{
-		logger.log(ERR, "[404] No directory found");
-		getResponse()->status = httpStatusCode::NotFound;
-		throw NotFoundException();
+		if (checkIfFile(getServer()->getRoot() + getRequest()->requestURL))
+		{
+			getRequest()->requestURL = getServer()->getRoot()
+			+ getRequest()->requestURL;
+		}
+		else
+		{
+			logger.log(ERR, "[404] No directory found");
+			getResponse()->status = httpStatusCode::NotFound;
+			throw NotFoundException();
+		}
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
@@ -241,9 +249,8 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	_hasRedirect = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
-	// if (_foundDirective)
-	// 	std::cout << "FoundDirective= " << _foundDirective->getLocationDirective() << std::endl;
-	checkLocationMethod();
+	if (_foundDirective)
+		checkLocationMethod();
 	setBooleans();
 	combineRightUrl();
 	// deleteFoundDirective(_foundDirective);
