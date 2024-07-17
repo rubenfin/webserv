@@ -96,8 +96,7 @@ void Server::cgi(char **env)
 	else
 	{
 		close(fds[1]);
-		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer,
-				10000);
+		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer, 10000);
 		// std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
 		// logger.log(DEBUG,
 		// std::to_string(getHttpHandler()->getResponse()->contentLength));
@@ -127,7 +126,13 @@ void Server::setFileInServer()
 		std::string fileName = getHttpHandler()->getRequest()->file.fileName;
 		std::string fileContent = getHttpHandler()->getRequest()->file.fileContent;
 		std::string fullPath = uploadPath + "/" + fileName;
-		if (access(fullPath.c_str(), F_OK) == 0)
+		if (getHttpHandler()->getRequest()->file.fileName.empty())
+		{
+			logger.log(ERR, "No file has been uploaded");
+			getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+			throw ForbiddenException();
+		}
+		else if (access(fullPath.c_str(), F_OK) == 0)
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
 		file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -158,13 +163,19 @@ void Server::deleteFileInServer()
 	fileNameSize = getHttpHandler()->getRequest()->file.fileName.size();
 	if (getUpload().empty())
 	{
-		logger.log(ERR, "No upload location has been set, can't delete file");
+		logger.log(ERR, "[403] No upload location has been set, can't delete file");
+		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+		throw ForbiddenException();
+	}
+	else if (filePath.find("../") != std::string::npos)
+	{
+		logger.log(ERR, "[403] You can only stay in the designated upload folder");
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		throw ForbiddenException();
 	}
 	else if (access(filePath.c_str(), F_OK) == -1)
 	{
-		logger.log(ERR, "Tried deleting a file or directory that doesn't exist");
+		logger.log(ERR, "[403] Tried deleting a file or directory that doesn't exist");
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		throw ForbiddenException();
 	}
@@ -174,14 +185,14 @@ void Server::deleteFileInServer()
 		if (getHttpHandler()->getRequest()->file.fileName[fileNameSize
 			- 1] != '/')
 		{
-			logger.log(ERR, "Tried deleting a directory with unvalid syntax  "
+			logger.log(ERR, "[409] Tried deleting a directory with unvalid syntax  "
 				+ filePath);
 			getHttpHandler()->getResponse()->status = httpStatusCode::Conflict;
 			throw ConflictException();
 		}
 		else if (access(filePath.c_str(), W_OK) == -1)
 		{
-			logger.log(ERR, "Directory does not have write permissions  "
+			logger.log(ERR, "[403] Directory does not have write permissions  "
 				+ filePath);
 			getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 			throw ForbiddenException();
@@ -190,13 +201,13 @@ void Server::deleteFileInServer()
 		{
 			if (remove(filePath.c_str()) == 0)
 			{
-				logger.log(INFO, "Succesfully deleted the file located at " + filePath);
+				logger.log(INFO, "[204] Succesfully deleted the file located at " + filePath);
 				getHttpHandler()->getResponse()->status = httpStatusCode::NoContent;
 				throw NoContentException();
 			}
 			else
 			{
-				logger.log(ERR, "Could not delete the file located at " + filePath);
+				logger.log(ERR, "[500] Could not delete the file located at " + filePath);
 				getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
 				throw InternalServerErrorException();
 			}
@@ -204,13 +215,13 @@ void Server::deleteFileInServer()
 	}
 	if (remove(filePath.c_str()) == 0)
 	{
-		logger.log(INFO, "Succesfully deleted the file located at " + filePath);
+		logger.log(INFO, "[202] Succesfully deleted the file located at " + filePath);
 		getHttpHandler()->getResponse()->status = httpStatusCode::Accepted;
 		throw AcceptedException();
 	}
 	else
 	{
-		logger.log(ERR, "Could not delete the file located at " + filePath);
+		logger.log(ERR, "[500] Could not delete the file located at " + filePath);
 		getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}

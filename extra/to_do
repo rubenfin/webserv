@@ -1,13 +1,4 @@
-voor vandaag 
-- uitzoeken wat post en delete nog extra request parsen nodig heeft
-
-voor weekend
-
-
-toekomst
 - meerdere servers met poll
-- cgi handlen
-
 
 - GET POST DELETE
 {
@@ -20,3 +11,27 @@ toekomst
 }
 
 Belangrijk: je krijgt een segfault als je teveel locations hebt?
+
+Autoindex
+If Nginx cannot provide an index page for the requested directory, the default behavior is to return a 403 Forbidden HTTP error page. With the following set of directives, you enable an automatic listing of the files that are present in the requested directory:
+
+
+SEGFAULT wanneer je direct naar get_post_delete.html gaat
+f1r1s15% ./webserv files/config_files/config_eigen           
+[14:44:15] [INFO]: Server name: webserv
+[14:44:15] [INFO]: Set upload variable: /uploads, equal to location directive: /uploads
+[14:44:15] [INFO]: Server port: 8000
+[14:44:15] [INFO]: Server webserv started on port 8000
+[14:44:17] [DEBUG]: Did not proceed with setFile(), contentLength = 0
+[14:44:17] [REQUEST]: PARSED REQUEST
+[14:44:17] [REQUEST]: ----------------------------------
+[14:44:17] [REQUEST]: http_v: 1.1
+[14:44:17] [REQUEST]: firstLine: GET /get_post_delete.html HTTP/1.1
+[14:44:17] [REQUEST]: requestBody: 
+[14:44:17] [REQUEST]: requestURL: /get_post_delete.html
+[14:44:17] [REQUEST]: requestDirectory: 
+[14:44:17] [REQUEST]: requestFile: /get_post_delete.html
+[14:44:17] [REQUEST]: contentLength: 0
+[14:44:17] [REQUEST]: contentType: 
+[14:44:17] [REQUEST]: END PR ---------------------------------- END PR
+zsh: segmentation fault (core dumped)  ./webserv files/config_files/config_eigen

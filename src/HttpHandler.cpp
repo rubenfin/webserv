@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/17 12:01:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/17 13:57:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ Locations *HttpHandler::findMatchingDirective(void)
 
 void HttpHandler::combineRightUrl(void)
 {
-	if (!_foundDirective || getResponse()->status == httpStatusCode::NotFound)
+	if (!_foundDirective)
 	{
 		logger.log(ERR, "[404] No directory found");
 		getResponse()->status = httpStatusCode::NotFound;
@@ -64,8 +64,7 @@ void HttpHandler::combineRightUrl(void)
 	}
 	else
 	{
-		if (getRequest()->requestFile != ""
-			&& getResponse()->status != httpStatusCode::NotFound)
+		if (getRequest()->requestFile != "")
 		{
 			getRequest()->requestURL = _server->getRoot()
 				+ getRequest()->requestDirectory + getRequest()->requestFile;
