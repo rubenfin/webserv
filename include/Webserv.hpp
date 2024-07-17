@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:55:51 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/17 12:01:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,3 +73,4 @@ int		checkIfDir(const std::string &pathname);
 int		checkIfFile(const std::string &pathname);
 void	setNonBlocking(int *fd);
 bool	hasSpecialCharacters(const std::string& fileName);
+void 	replaceEncodedSlash(std::string &str);

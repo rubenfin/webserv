@@ -100,7 +100,7 @@ void Server::cgi(char **env)
 				10000);
 		// std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
 		// logger.log(DEBUG,
-			// std::to_string(getHttpHandler()->getResponse()->contentLength));
+		// std::to_string(getHttpHandler()->getResponse()->contentLength));
 		_buffer[getHttpHandler()->getResponse()->contentLength] = '\0';
 		// logger.log(INFO, "CGI SCRIPT OUTPUT\n" + (std::string)_buffer);
 		close(fds[0]);
@@ -151,35 +151,69 @@ void Server::setFileInServer()
 
 void Server::deleteFileInServer()
 {
-	std::string filePath = getUpload() + "/" + getHttpHandler()->getRequest()->file.fileName;
+	int	fileNameSize;
 
+	std::string filePath = getUpload() + "/"
+		+ getHttpHandler()->getRequest()->file.fileName;
+	fileNameSize = getHttpHandler()->getRequest()->file.fileName.size();
 	if (getUpload().empty())
 	{
 		logger.log(ERR, "No upload location has been set, can't delete file");
-		getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-		throw BadRequestException();
+		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+		throw ForbiddenException();
 	}
 	else if (access(filePath.c_str(), F_OK) == -1)
 	{
-		logger.log(ERR, "Tried deleting a file that doesn't exist");
-		getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-		throw BadRequestException();
+		logger.log(ERR, "Tried deleting a file or directory that doesn't exist");
+		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+		throw ForbiddenException();
 	}
-	else
+	else if (checkIfDir(getUpload() + "/"
+			+ getHttpHandler()->getRequest()->file.fileName))
 	{
-		if (remove(filePath.c_str()) == 0)
+		if (getHttpHandler()->getRequest()->file.fileName[fileNameSize
+			- 1] != '/')
 		{
-			logger.log(INFO, "Succesfully deleted the file located at " + filePath);
-			getHttpHandler()->getResponse()->status = httpStatusCode::Accepted;
-			throw AcceptedException();
+			logger.log(ERR, "Tried deleting a directory with unvalid syntax  "
+				+ filePath);
+			getHttpHandler()->getResponse()->status = httpStatusCode::Conflict;
+			throw ConflictException();
+		}
+		else if (access(filePath.c_str(), W_OK) == -1)
+		{
+			logger.log(ERR, "Directory does not have write permissions  "
+				+ filePath);
+			getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+			throw ForbiddenException();
 		}
 		else
 		{
-			logger.log(ERR, "Could not delete the file located at " + filePath);
-			getHttpHandler()->getResponse()->status = httpStatusCode::BadRequest;
-			throw BadRequestException();
+			if (remove(filePath.c_str()) == 0)
+			{
+				logger.log(INFO, "Succesfully deleted the file located at " + filePath);
+				getHttpHandler()->getResponse()->status = httpStatusCode::NoContent;
+				throw NoContentException();
+			}
+			else
+			{
+				logger.log(ERR, "Could not delete the file located at " + filePath);
+				getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+				throw InternalServerErrorException();
+			}
 		}
-	}	
+	}
+	if (remove(filePath.c_str()) == 0)
+	{
+		logger.log(INFO, "Succesfully deleted the file located at " + filePath);
+		getHttpHandler()->getResponse()->status = httpStatusCode::Accepted;
+		throw AcceptedException();
+	}
+	else
+	{
+		logger.log(ERR, "Could not delete the file located at " + filePath);
+		getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+		throw InternalServerErrorException();
+	}
 }
 
 void	handleSigInt(int signal)
@@ -219,7 +253,7 @@ int Webserv::execute(void)
 			_servers[0].makeResponse((char *)PAGE_500);
 			if (send(client_socket, _servers[0].getResponse().c_str(),
 					strlen(_servers[0].getResponse().c_str()), 0) == -1)
-				logger.log(ERR, "[500] Failed to send response to client, send()");
+				logger.log(ERR, "[500] Failed to send response to client,send()");
 			continue ;
 		}
 		valread = read(client_socket, buffer, MAX_LENGTH_HTTP_REQ - 1);

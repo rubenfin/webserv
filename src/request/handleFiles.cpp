@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 20:13:09 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/17 11:36:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void trimFirstChar(std::string &str)
 
 void trimLastChar(std::string &str)
 {
-	str = str.substr(0, str.size()-1);	
+	str = str.substr(0, str.size() - 1);	
 }
 
 void printFileStruct(file_t *file) {

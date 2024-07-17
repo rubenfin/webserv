@@ -19,3 +19,15 @@ bool hasSpecialCharacters(const std::string& fileName)
             return true;
     return false;
 }
+
+void replaceEncodedSlash(std::string &str)
+{
+    const std::string encodedSlash = "%2F";
+    const std::string slash = "/";
+    
+    size_t pos = 0;
+    while ((pos = str.find(encodedSlash, pos)) != std::string::npos) {
+        str.replace(pos, encodedSlash.length(), slash);
+        pos += slash.length(); // Move past the replaced part
+    }
+}

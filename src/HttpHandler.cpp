@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/16 13:20:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/17 12:01:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,9 +138,11 @@ void HttpHandler::methodCheck(void)
 
 void HttpHandler::fileCheck()
 {
-	if (getRequest()->file.fileName.size() > 256 || hasSpecialCharacters(getRequest()->file.fileName))
+	if (getRequest()->file.fileName.size() > 256
+		|| hasSpecialCharacters(getRequest()->file.fileName))
 	{
-		logger.log(ERR, "[400] Filename has too many characters or has special characters");
+		logger.log(ERR,
+			"[400] Filename has too many characters or has special characters");
 		getResponse()->status = httpStatusCode::BadRequest;
 		throw BadRequestException();
 	}
@@ -148,15 +150,22 @@ void HttpHandler::fileCheck()
 
 void HttpHandler::setDelete()
 {
-	size_t foundEqual = getRequest()->requestBody.find("=");
-	if (foundEqual + 1 == std::string::npos)
+	// size_t foundEqual = getRequest()->requestBody.find("=");
+	// if (foundEqual + 1 == std::string::npos)
+	// {
+	// 	logger.log(WARNING, "Did not find any well formatted file");
+	// 	getResponse()->status = httpStatusCode::BadRequest;
+	// 	throw BadRequestException();
+	// }
+	if (!getRequest()->requestBody.empty())
 	{
-		logger.log(WARNING, "Did not find any well formatted file");
-		getResponse()->status = httpStatusCode::BadRequest;
-		throw BadRequestException();
+		getRequest()->file.fileName = getRequest()->requestBody;
+		trimFirstChar(getRequest()->file.fileName);
+		trimLastChar(getRequest()->file.fileName);
+		replaceEncodedSlash(getRequest()->file.fileName);
+		logger.log(DEBUG, "File found to delete: "
+			+ getRequest()->file.fileName);
 	}
-	getRequest()->file.fileName = getRequest()->requestBody.substr(foundEqual + 1, getRequest()->requestBody.size() - foundEqual);
-	logger.log(DEBUG, "File found to delete: " + getRequest()->file.fileName);
 }
 
 void HttpHandler::checkRequestData(void)
@@ -197,14 +206,14 @@ void HttpHandler::checkLocationMethod(void)
 	if (getRequest()->method == GET)
 	{
 		if (!_foundDirective->getMethods().GET)
-		{	
+		{
 			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
 			throw MethodNotAllowedException();
 		}
 	}
 	else if (getRequest()->method == POST)
-	{	
+	{
 		if (!_foundDirective->getMethods().POST)
 		{
 			logger.log(ERR, "[405] Method not allowed in location");
