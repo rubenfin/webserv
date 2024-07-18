@@ -109,49 +109,47 @@ void Server::cgi(char **env)
 	return ;
 }
 
-void Server::setFileInServer()
-{
-	int	file;
+void Server::setFileInServer() {
+    int file;
 
-	if (_upload.empty())
-	{
-		logger.log(ERR,
-			"[403] Tried uploading without setting an upload directory");
-		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
-	else
-	{
-		std::string uploadPath = getUpload();
-		std::string fileName = getHttpHandler()->getRequest()->file.fileName;
-		std::string fileContent = getHttpHandler()->getRequest()->file.fileContent;
-		std::string fullPath = uploadPath + "/" + fileName;
-		if (getHttpHandler()->getRequest()->file.fileName.empty())
-		{
-			logger.log(ERR, "No file has been uploaded");
-			getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
-			throw ForbiddenException();
-		}
-		else if (access(fullPath.c_str(), F_OK) == 0)
-			logger.log(WARNING,
-				"File with same name already exists and has been overwritten");
-		file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (file != -1)
-		{
-			write(file, fileContent.c_str(), fileContent.size());
-			close(file);
-			getHttpHandler()->getResponse()->status = httpStatusCode::Created;
-			makeResponse((char *)PAGE_201);
-			logger.log(INFO, "Uploaded a file to " + uploadPath + " called "
-				+ fileName);
-		}
-		else
-		{
-			logger.log(ERR, "[500] Failed to open the file: " + fullPath);
-			getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
-			throw InternalServerErrorException();
-		}
-	}
+    if (_upload.empty()) {
+        logger.log(ERR, "[403] Tried uploading without setting an upload directory");
+        getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+        throw ForbiddenException();
+    } else {
+        std::string uploadPath = getUpload();
+        std::string fileName = getHttpHandler()->getRequest()->file.fileName;
+        const std::vector<char>& fileContent = getHttpHandler()->getRequest()->file.fileContent;
+        std::string fullPath = uploadPath + "/" + fileName;
+
+        if (fileName.empty()) {
+            logger.log(ERR, "No file has been uploaded");
+            getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
+            throw ForbiddenException();
+        } else if (access(fullPath.c_str(), F_OK) == 0) {
+            logger.log(WARNING, "File with same name already exists and has been overwritten");
+        }
+
+        file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (file != -1) {
+            ssize_t bytesWritten = write(file, fileContent.data(), fileContent.size());
+            close(file);
+
+            if (bytesWritten == static_cast<ssize_t>(fileContent.size())) {
+                getHttpHandler()->getResponse()->status = httpStatusCode::Created;
+                makeResponse((char *)PAGE_201);
+                logger.log(INFO, "Uploaded a file to " + uploadPath + " called " + fileName);
+            } else {
+                logger.log(ERR, "[500] Failed to write the entire file content: " + fullPath);
+                getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+                throw InternalServerErrorException();
+            }
+        } else {
+            logger.log(ERR, "[500] Failed to open the file: " + fullPath);
+            getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+            throw InternalServerErrorException();
+        }
+    }
 }
 
 void Server::deleteFileInServer()
@@ -240,7 +238,7 @@ void	handleSigInt(int signal)
 int Webserv::execute(void)
 {
 	int			client_socket;
-	char		buffer[MAX_LENGTH_HTTP_REQ] = {0};
+	char		*buffer;
 	ssize_t		valread;
 	socklen_t	addrlen;
 	request_t	request;
@@ -248,6 +246,7 @@ int Webserv::execute(void)
 
 	signal(SIGINT, handleSigInt);
 	// struct sockaddr_in	*address;
+	buffer = (char *)malloc(9999999999 * sizeof(char));
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
 	logger.log(INFO, "Server " + _servers[0].getServerName()
@@ -267,7 +266,7 @@ int Webserv::execute(void)
 				logger.log(ERR, "[500] Failed to send response to client,send()");
 			continue ;
 		}
-		valread = read(client_socket, buffer, MAX_LENGTH_HTTP_REQ - 1);
+		valread = read(client_socket, buffer, 9999999999 - 1);
 		if (valread == -1)
 		{
 			logger.log(ERR, "Read of client socket failed");
@@ -275,7 +274,8 @@ int Webserv::execute(void)
 			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
 		}
 		buffer[valread] = '\0';
-		parse_request(&request, buffer);
+		printf("my buffer\n%s\n\n\n\n\n,", buffer);
+		parse_request(&request, buffer, valread);
 		// logger.log(DEBUG, "Not ParsedRequest\n" + (std::string)buffer);
 		try
 		{

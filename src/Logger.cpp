@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/12 17:01:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/18 13:18:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ Logger &Logger::getInstance()
 	std::call_once(initInstanceFlag, []() { instance.reset(new Logger()); });
 	return (*instance);
 }
+
 void Logger::log(level lvl, const std::string &message)
 {
     std::istringstream messageStream(message);

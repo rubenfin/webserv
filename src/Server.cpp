@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/14 14:26:27 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/18 14:13:14 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void Server::setServer()
 		exit(EXIT_FAILURE);
 	}
 	_http_handler = new HttpHandler;
-	_buffer = (char *)malloc(999999 * sizeof(char));
+	_buffer = (char *)malloc(1000000 * sizeof(char));
 }
 
 void Server::getLocationStack(std::string locationContent)
