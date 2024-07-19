@@ -1,4 +1,4 @@
-CC = c++ -std=c++17
+CC = c++ -std=c++11
 CFLAGS = -g
 SRC_DIR = src
 SERVER_DIR = server
