@@ -50,7 +50,7 @@ void Server::setEnv(char **&env)
 	env[addedEnv.size() + existingEnvCount] = nullptr;
 }
 
-void Server::execute_CGI_script(pid_t pid, int *fds, const char *script,
+void Server::execute_CGI_script(int *fds, const char *script,
 	char **env)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
@@ -79,7 +79,6 @@ void Server::cgi(char **env)
 {
 	pid_t	pid;
 	int		fds[2];
-	ssize_t	bytesRead;
 
 	if (access(getHttpHandler()->getRequest()->requestURL.c_str(), X_OK) != 0)
 	{
@@ -91,8 +90,7 @@ void Server::cgi(char **env)
 		return ;
 	pid = fork();
 	if (pid == 0)
-		execute_CGI_script(pid, fds,
-			getHttpHandler()->getRequest()->requestURL.c_str(), env);
+		execute_CGI_script(fds, getHttpHandler()->getRequest()->requestURL.c_str(), env);
 	else
 	{
 		close(fds[1]);

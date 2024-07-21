@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 11:34:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:53:32 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Locations
 	std::string extractValue(std::string toSearch);
 	std::string extractValueUntilNL(std::string toSearch);
 	void printLocationsContent(void);
-	void getLocationRegex(std::string locationContent);
+	void getLocationRegex(void);
 	Locations(std::string locationContent);
 	Locations(const Locations *other);
 	Locations();

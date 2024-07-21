@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 11:37:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:53:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void Locations::setAutoIndex(void)
 	std::cout << (extractValue("autoindex ")) << _autoindex << std::endl;
 }
 
-void Locations::getLocationRegex(std::string locationContent)
+void Locations::getLocationRegex(void)
 {
 	_locationDirective = extractValue("location");
 	setRoot();
@@ -94,7 +94,7 @@ Locations::Locations(std::string locationContent)
 	_locationContent = locationContent;
 	// std::cout << locationContent << std::endl;
 	// std::vector<std::string> content = getLocationStack(locationContent);
-	getLocationRegex(locationContent);
+	getLocationRegex();
 	// for (const std::string &line : content)
 	// {
 	// 	std::cout << "Location: " << line << std::endl;

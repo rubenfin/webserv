@@ -1,5 +1,5 @@
 CC = c++ -std=c++11
-CFLAGS = -g
+CFLAGS = -Wall -Wextra -Werror -g
 SRC_DIR = src
 SERVER_DIR = server
 UTILS_DIR = utils

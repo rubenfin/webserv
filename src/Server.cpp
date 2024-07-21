@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 12:56:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:55:35 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ void Server::setUpload(void)
 	_upload = trim(extractValue("upload "));
 	if (_upload.empty())
 		return;
-	for (int i = 0; i < _locations.size(); i++)
+	for (size_t i = 0; i < _locations.size(); i++)
 	{
 		if (_locations[i].getLocationDirective() == _upload)
 		{
