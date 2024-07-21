@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:15:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:46:59 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ std::string returnAutoIndex(std::string &uri)
     DIR *dr = opendir(uri.c_str());
     autoIndexFile += "<html>\n<body>";
     autoIndexFile += "Index of " + uri;
+    autoIndexFile += "\n<hr>\n";
     if (dr == NULL)
     {
         logger.log(ERR, "Could not open directory in autoindex");
@@ -28,9 +29,9 @@ std::string returnAutoIndex(std::string &uri)
     }
 
     while ((de = readdir(dr)) != NULL) 
-        autoIndexFile += "<a href=\"/" + (std::string)de->d_name +  "\">" + (std::string)de->d_name + "<//a>\r\n";
+        autoIndexFile += "<a href=\"/" + (std::string)de->d_name +  "\">" + (std::string)de->d_name + "<//a><br>\r\n";
 
-    autoIndexFile += "</body>\n</html>";
+    autoIndexFile += "\n<hr>\n</body>\n</html>";
     closedir(dr);   
     return (autoIndexFile);    
 }

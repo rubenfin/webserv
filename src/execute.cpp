@@ -281,7 +281,6 @@ int Webserv::execute(void)
 		{	
 			_servers[0].getHttpHandler()->handleRequest(_servers[0], &request,
 				&response);
-	
 			if (_servers[0].getHttpHandler()->getReturnAutoIndex())
 				_servers[0].makeResponse((char *)returnAutoIndex(_servers[0].getHttpHandler()->getRequest()->requestURL).c_str());
 			else if (_servers[0].getHttpHandler()->getRequest()->method == DELETE)
