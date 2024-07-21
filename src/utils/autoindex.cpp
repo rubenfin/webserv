@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 14:57:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 15:00:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ std::string Server::returnAutoIndex(std::string &uri)
     logger.log(DEBUG, uriNoRoot);
     DIR *dr = opendir(uri.c_str());
     autoIndexFile += "<html>\n<body>";
-    autoIndexFile += "Index of " + uri;
+    autoIndexFile += "Index of " + uriNoRoot;
     autoIndexFile += "\n<hr>\n";
     if (dr == NULL)
     {
