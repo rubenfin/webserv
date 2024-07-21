@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 15:14:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 15:21:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,10 @@ std::string Server::returnAutoIndex(std::string &uri) {
         }
 
         autoIndexFile += "<tr>";
-        autoIndexFile += "<td><a href=\"" + uriNoRoot + fileName + "\">" + fileName + "</a></td>";
+        autoIndexFile += "<td><a href=\"" + uriNoRoot + fileName + "\">" + fileName;
+        if (checkIfDir(fullPath))
+            autoIndexFile += "/";
+        autoIndexFile +="</a></td>";
         autoIndexFile += "<td>" + std::string(timeBuf) + "</td>";
         autoIndexFile += "<td align=\"right\">" + fileSizeStream.str() + "</td>";
         autoIndexFile += "</tr>\n";
