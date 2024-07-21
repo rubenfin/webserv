@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/17 21:40:14 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/21 11:25:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,16 @@ void HttpHandler::combineRightUrl(void)
 		}
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
-		getRequest()->requestURL = _server->getRoot() + _server->getIndex();
+	{
+		if (!_server->getIndex().empty())
+			getRequest()->requestURL = _server->getRoot() + _server->getIndex();
+		else
+		{
+			logger.log(ERR, "[404] No index found in config file");
+			getResponse()->status = httpStatusCode::NotFound;
+			throw NotFoundException();
+		}
+	}	
 	else if (_foundDirective->getRoot() != "")
 	{
 		getRequest()->requestURL = _foundDirective->getRoot()
