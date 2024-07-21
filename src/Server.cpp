@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/18 17:38:55 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 12:56:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,28 @@ std::string Server::extractValue(const std::string &searchString)
 	}
 	return ("");
 }
+
+std::string Server::extractValueUntilLocation(const std::string &searchString) {
+    size_t pos;
+    size_t endPos;
+    size_t locationPos;
+
+    pos = _serverContent.find(searchString);
+    locationPos = _serverContent.find("location");
+
+    if (pos != std::string::npos && (locationPos == std::string::npos || pos < locationPos))
+    {
+        pos += searchString.length();
+        endPos = _serverContent.find('\n', pos);
+        if (endPos != std::string::npos && (locationPos == std::string::npos || endPos < locationPos))
+            return (trim(_serverContent.substr(pos, endPos - pos)));
+        else if (locationPos != std::string::npos)
+            return (trim(_serverContent.substr(pos, locationPos - pos)));
+        else
+            return (trim(_serverContent.substr(pos)));
+    }
+    return ("");
+}
 void Server::setServerName(void)
 {
 	_serverName = extractValue("server_name");
@@ -142,7 +164,7 @@ void Server::setRoot(void)
 }
 void Server::setIndex(void)
 {
-	_index = extractValue("index");
+	_index = extractValueUntilLocation("index");
 	_index.erase(remove_if(_index.begin(), _index.end(), isspace),
 				 _index.end());
 }

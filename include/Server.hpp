@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/18 17:38:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 12:56:14 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ class Server
 		char **env);
 	void getLocationStack(std::string locationContent);
 	std::string extractValue(const std::string &searchString);
+	std::string extractValueUntilLocation(const std::string &searchString);
 	void setServerName(void);
 	void setPort(void);
 	void setRoot(void);

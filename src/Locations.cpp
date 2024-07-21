@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:59:58 by ruben         ########   odam.nl         */
+/*   Updated: 2024/07/21 11:37:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,14 @@ void Locations::setAlias(void)
 	_alias = extractValue("alias ");
 }
 
+void Locations::setAutoIndex(void)
+{
+	_autoindex = false;
+	if (trim(extractValue("autoindex ")) == "on")
+		_autoindex = true;
+	std::cout << (extractValue("autoindex ")) << _autoindex << std::endl;
+}
+
 void Locations::getLocationRegex(std::string locationContent)
 {
 	_locationDirective = extractValue("location");
@@ -52,6 +60,7 @@ void Locations::getLocationRegex(std::string locationContent)
 	setCgi_pass();
 	setMethods();
 	setReturn();
+	setAutoIndex();
 }
 
 std::string Locations::getLocationDirective(void)
@@ -72,6 +81,11 @@ std::string Locations::getAlias(void)
 std::string Locations::getReturn(void)
 {
 	return (_return);
+}
+
+bool 		Locations::getAutoIndex(void)
+{
+	return (_autoindex);
 }
 
 Locations::Locations(std::string locationContent)

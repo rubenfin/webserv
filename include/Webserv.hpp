@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/18 16:31:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 12:44:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include <sys/epoll.h>
 #include <signal.h>
 #include "Logger.hpp"
+#include <dirent.h>
 
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 1024
@@ -74,3 +75,4 @@ int		checkIfFile(const std::string &pathname);
 void	setNonBlocking(int *fd);
 bool	hasSpecialCharacters(const std::string& fileName);
 void 	replaceEncodedSlash(std::string &str);
+std::string returnAutoIndex(std::string &uri);

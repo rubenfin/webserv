@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/16 12:46:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:22:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class HttpHandler
 	Server			*_server;
 	bool			_isCgi;
 	bool			_hasRedirect;
-
+	bool			_returnAutoIndex;
   public:
 	HttpHandler();
 	~HttpHandler();
@@ -54,4 +54,5 @@ class HttpHandler
 	void		setBooleans(void);
 	bool		getCgi(void);
 	bool		getRedirect(void);
+	bool		getReturnAutoIndex(void);
 };

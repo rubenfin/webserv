@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 11:25:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 13:23:14 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,14 @@ void HttpHandler::combineRightUrl(void)
 	{
 		if (!_server->getIndex().empty())
 			getRequest()->requestURL = _server->getRoot() + _server->getIndex();
-		else
+		else if (_foundDirective->getAutoIndex())
 		{
-			logger.log(ERR, "[404] No index found in config file");
+			getRequest()->requestURL = _server->getRoot();
+			_returnAutoIndex = true;
+			logger.log(WARNING, "No index found in config file and now trying to use autoindex for /");
+		}
+		else{
+			logger.log(ERR, "[404] No index found in config file and no autoindex in current directive");
 			getResponse()->status = httpStatusCode::NotFound;
 			throw NotFoundException();
 		}
@@ -88,8 +93,9 @@ void HttpHandler::combineRightUrl(void)
 		}
 		else
 		{
-			getRequest()->requestURL = _server->getRoot()
-				+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
+			if (!_foundDirective->getIndex().empty())
+				getRequest()->requestURL = _server->getRoot()
+					+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
 		}
 	}
 	// logger.log(DEBUG, "requestURL result --> " + getRequest()->requestURL);
@@ -109,6 +115,12 @@ response_t *HttpHandler::getResponse(void)
 {
 	return (_response);
 }
+
+bool		HttpHandler::getReturnAutoIndex(void)
+{
+	return (_returnAutoIndex);
+}
+
 
 void HttpHandler::httpVersionCheck(void)
 {
@@ -256,6 +268,7 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	_response = response;
 	_isCgi = false;
 	_hasRedirect = false;
+	_returnAutoIndex = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	if (_foundDirective)

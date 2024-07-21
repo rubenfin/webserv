@@ -3,12 +3,12 @@ server {
 	listen 8000
 
 	root files/response_files/
-	index index.html
 	error_page 404 /404.html
 	upload /uploads
 	allow_methods GET
 
 	location / {
+		autoindex on
 		allow_methods GET POST
 	}
 
@@ -34,7 +34,7 @@ server {
 	}
 
 	location /get_request/GET_nested {
-		index test.html
+		autoindex on
 		allow_methods GET
 	}
 
