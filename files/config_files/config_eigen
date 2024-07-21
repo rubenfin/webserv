@@ -57,6 +57,7 @@ server {
 
 	location /uploads {
 		allow_methods GET DELETE POST
+		autoindex on
 		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 }

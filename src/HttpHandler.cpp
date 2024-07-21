@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 14:18:25 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 15:08:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,8 @@ void HttpHandler::combineRightUrl(void)
 			_returnAutoIndex = true;
 			logger.log(WARNING, "No index found in config file and now trying to use autoindex for /");
 		}
+		else if(_hasRedirect)
+			return;
 		else
 		{
 			logger.log(ERR,
@@ -105,6 +107,8 @@ void HttpHandler::combineRightUrl(void)
 				_returnAutoIndex = true;
 				logger.log(WARNING, "No index found in foundDirective, now trying autoindex");
 			}
+			else if (_hasRedirect)
+				return;
 			else
 			{
 				logger.log(ERR,
