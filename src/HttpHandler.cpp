@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:23:14 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 14:18:25 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void HttpHandler::combineRightUrl(void)
 		if (checkIfFile(getServer()->getRoot() + getRequest()->requestURL))
 		{
 			getRequest()->requestURL = getServer()->getRoot()
-			+ getRequest()->requestURL;
+				+ getRequest()->requestURL;
 		}
 		else
 		{
@@ -73,12 +73,14 @@ void HttpHandler::combineRightUrl(void)
 			_returnAutoIndex = true;
 			logger.log(WARNING, "No index found in config file and now trying to use autoindex for /");
 		}
-		else{
-			logger.log(ERR, "[404] No index found in config file and no autoindex in current directive");
+		else
+		{
+			logger.log(ERR,
+				"[404] No index found in config file and no autoindex in current directive");
 			getResponse()->status = httpStatusCode::NotFound;
 			throw NotFoundException();
 		}
-	}	
+	}
 	else if (_foundDirective->getRoot() != "")
 	{
 		getRequest()->requestURL = _foundDirective->getRoot()
@@ -95,7 +97,21 @@ void HttpHandler::combineRightUrl(void)
 		{
 			if (!_foundDirective->getIndex().empty())
 				getRequest()->requestURL = _server->getRoot()
-					+ getRequest()->requestURL + "/" + _foundDirective->getIndex();
+					+ getRequest()->requestURL + "/"
+					+ _foundDirective->getIndex();
+			else if (_foundDirective->getAutoIndex())
+			{
+				getRequest()->requestURL = _server->getRoot() + getRequest()->requestURL;
+				_returnAutoIndex = true;
+				logger.log(WARNING, "No index found in foundDirective, now trying autoindex");
+			}
+			else
+			{
+				logger.log(ERR,
+					"[404] No index foundDirective in config file and no autoindex in foundDirective");
+				getResponse()->status = httpStatusCode::NotFound;
+				throw NotFoundException();
+			}
 		}
 	}
 	// logger.log(DEBUG, "requestURL result --> " + getRequest()->requestURL);
@@ -116,11 +132,10 @@ response_t *HttpHandler::getResponse(void)
 	return (_response);
 }
 
-bool		HttpHandler::getReturnAutoIndex(void)
+bool HttpHandler::getReturnAutoIndex(void)
 {
 	return (_returnAutoIndex);
 }
-
 
 void HttpHandler::httpVersionCheck(void)
 {

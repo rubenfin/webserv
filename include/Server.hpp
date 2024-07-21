@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:52:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 14:19:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,5 +94,6 @@ class Server
 	void readFile(void);
 	void setFileInServer();
 	void deleteFileInServer();
+	std::string returnAutoIndex(std::string &uri);
 	~Server();
 };

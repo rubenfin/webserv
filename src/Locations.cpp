@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:53:46 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/21 14:16:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ void Locations::setRoot(void)
 }
 void Locations::setIndex(void)
 {
-	_index = extractValue("index");
+	_index = extractValue("	index");
 }
 void Locations::setCgi_pass(void)
 {
