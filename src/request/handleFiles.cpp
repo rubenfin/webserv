@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 15:16:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 16:05:55 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,11 @@ void findFileContent(request_t *req, file_t *requestFile)
         start += 4;
     }
     
-    // std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
-    // std::size_t end;
-    // if (end != std::string::npos) {
-    //     logger.log(WARNING, "Did not find any ending boundary");
-    //     end = req->requestBody.rfind("\r\n", end);
-    // }
+    std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
+    if (end != std::string::npos) {
+        logger.log(WARNING, "Did not find any ending boundary");
+        end = req->requestBody.rfind("\r\n", end);
+    }
     requestFile->fileContent = req->requestBody.substr(start);
     requestFile->fileContentLength = requestFile->fileContent.size();
 }
@@ -80,7 +79,7 @@ void setFile(request_t *req, file_t *requestFile)
 	std::string totalFileContent;
 
 	cLength = trim(extractValue(req, "Content-Length: "));
-	if (req->method == POST)
+	if (req->method == POST && !cLength.empty())
 		req->contentLength = std::stoi(cLength);
     else 
 	{
