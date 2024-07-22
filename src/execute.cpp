@@ -124,7 +124,7 @@ void Server::setFileInServer() {
     } else {
         std::string uploadPath = getUpload();
         std::string fileName = getHttpHandler()->getRequest()->file.fileName;
-        const std::vector<char>& fileContent = getHttpHandler()->getRequest()->file.fileContent;
+        std::string &fileContent = getHttpHandler()->getRequest()->file.fileContent;
         std::string fullPath = uploadPath + "/" + fileName;
 
         if (fileName.empty()) {
@@ -137,10 +137,10 @@ void Server::setFileInServer() {
 
         file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (file != -1) {
-            ssize_t bytesWritten = write(file, fileContent.data(), fileContent.size());
+            ssize_t bytesWritten = write(file, fileContent.c_str(), getHttpHandler()->getRequest()->contentLength);
             close(file);
-
-            if (bytesWritten == static_cast<ssize_t>(fileContent.size())) {
+			logger.log(DEBUG ,std::to_string(bytesWritten) + "|" + std::to_string(getHttpHandler()->getRequest()->contentLength));
+            if (bytesWritten == getHttpHandler()->getRequest()->contentLength) {
                 getHttpHandler()->getResponse()->status = httpStatusCode::Created;
                 makeResponse((char *)PAGE_201);
                 logger.log(INFO, "Uploaded a file to " + uploadPath + " called " + fileName);
@@ -244,7 +244,7 @@ void	handleSigInt(int signal)
 int Webserv::execute(void)
 {
 	int			client_socket;
-	char		*buffer;
+	char		buffer[368400];
 	ssize_t		valread;
 	socklen_t	addrlen;
 	request_t	request;
@@ -252,7 +252,6 @@ int Webserv::execute(void)
 
 	signal(SIGINT, handleSigInt);
 	// struct sockaddr_in	*address;
-	buffer = (char *)malloc(9999999999 * sizeof(char));
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer();
 	logger.log(INFO, "Server " + _servers[0].getServerName()
@@ -272,7 +271,7 @@ int Webserv::execute(void)
 				logger.log(ERR, "[500] Failed to send response to client,send()");
 			continue ;
 		}
-		valread = read(client_socket, buffer, 9999999999 - 1);
+		valread = read(client_socket, buffer, 368400 - 1);
 		if (valread == -1)
 		{
 			logger.log(ERR, "Read of client socket failed");
@@ -280,7 +279,9 @@ int Webserv::execute(void)
 			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
 		}
 		buffer[valread] = '\0';
-		parse_request(&request, buffer, valread);
+		logger.log(DEBUG, "Amount of bytes read from original request: " + std::to_string(valread));
+//		std::string request(buffer, valread);
+		parse_request(&request, std::string(buffer, valread));
 		// logger.log(DEBUG, "Not ParsedRequest\n" + (std::string)buffer);
 		try
 		{	

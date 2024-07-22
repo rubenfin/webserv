@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 11:09:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 15:16:09 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ void trimLastChar(std::string &str)
 void printFileStruct(file_t *file) {
 
     logger.log(REQUEST, "fileName: " + file->fileName);
-    logger.log(REQUEST, "fileContent: ");
+    logger.log(REQUEST, "fileContent: " + file->fileContent);
+    logger.log(REQUEST, "fileContent.size(): " + std::to_string(file->fileContent.size()));
     // for(int i = 0; i < file->fileContent.size(); i++)
     //     std::cout << file->fileContent[i] << std::endl;
     logger.log(REQUEST, "fileContentType: " + file->fileContentType);
@@ -55,27 +56,21 @@ void printFileStruct(file_t *file) {
     logger.log(REQUEST, "fileBoundary: " + file->fileBoundary);
 }
 
-void findFileContent(request_t *req, file_t *requestFile) {
-
-    req->rawBody.erase(req->rawBody.begin(), req->rawBody.begin() + 4);
-
-    auto headerEnd = std::search(req->rawBody.begin(), req->rawBody.end(),
-                                 std::begin("\r\n\r\n"), std::end("\r\n\r\n") - 1);
-    if (headerEnd == req->rawBody.end()) {
-        requestFile->fileContent.clear();
-        return;
+void findFileContent(request_t *req, file_t *requestFile)
+{
+    std::size_t start = req->requestBody.find("\r\n\r\n");
+    if (start != std::string::npos) {
+        start += 4;
     }
-    auto start = headerEnd + 4;
-
-    std::string endBoundary = "\r\n--" + requestFile->fileBoundary + "--";
-    auto end = std::search(start, req->rawBody.end(),
-                           endBoundary.begin(), endBoundary.end());
-
-    if (end == req->rawBody.end()) {
-        end = req->rawBody.end();
-    }
-
-    requestFile->fileContent.assign(start, end);
+    
+    // std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
+    // std::size_t end;
+    // if (end != std::string::npos) {
+    //     logger.log(WARNING, "Did not find any ending boundary");
+    //     end = req->requestBody.rfind("\r\n", end);
+    // }
+    requestFile->fileContent = req->requestBody.substr(start);
+    requestFile->fileContentLength = requestFile->fileContent.size();
 }
 
 
@@ -106,25 +101,6 @@ void setFile(request_t *req, file_t *requestFile)
 		requestFile->fileName = trim(extractValue(req, "filename="));
 		trimFirstChar(requestFile->fileName);
 		trimLastChar(requestFile->fileName);
-        for (unsigned char element : req->rawBody) {
-        if (std::isprint(element)) {
-            std::cout << element;
-        } else {
-            std::cout << "\\x" << std::hex << static_cast<int>(element);
-        }
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-        std::cout << std::endl;
-
 		findFileContent(req, &req->file);
-        for (unsigned char element : req->file.fileContent) {
-            if (std::isprint(element)) {
-                std::cout << element;
-            } else {
-                std::cout << "\\x" << std::hex << static_cast<int>(element);
-            }
-        }
-    std::cout << std::endl;
-}
+    }
 }

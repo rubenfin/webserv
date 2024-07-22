@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/18 16:04:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 15:27:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,36 +144,10 @@ static void	setRequestBody(request_t *req)
 	req->requestBody = req->requestContent.substr(foundBody);
 }
 
-void setRawData(request_t *req, const char *buffer, ssize_t bufferSize) {
-
-    req->rawData.assign(buffer, buffer + bufferSize);
-
-    auto it = std::search(req->rawData.begin(), req->rawData.end(),
-                          std::begin("\r\n\r\n"), std::end("\r\n\r\n") - 1);
-
-    if (it == req->rawData.end()) {
-        req->rawBody.clear();
-        return;
-    }
-
-    req->rawBody.assign(it, req->rawData.end());
-
-    // Print the raw body
-    // std::cout << "Raw body contents:" << std::endl;
-    // for (unsigned char element : req->rawBody) {
-    //     if (std::isprint(element)) {
-    //         std::cout << element;
-    //     } else {
-    //         std::cout << "\\x" << std::hex << static_cast<int>(element);
-    //     }
-    // }
-    // std::cout << std::endl;
-}
-
-void	parse_request(request_t *req, char *buffer, ssize_t bufferSize)
+void	parse_request(request_t *req, std::string buffer)
 {
-	setRawData(req, buffer, bufferSize);
 	req->requestContent = buffer;
+    logger.log(DEBUG, 	"size of requestContent at start: " + std::to_string(req->requestContent.size()));
 	req->file.fileExists = false;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
