@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/18 14:21:34 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 11:09:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,19 +113,18 @@ void setFile(request_t *req, file_t *requestFile)
             std::cout << "\\x" << std::hex << static_cast<int>(element);
         }
         }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
 
 		findFileContent(req, &req->file);
-	}
-
-    for (unsigned char element : req->file.fileContent) {
-        if (std::isprint(element)) {
-            std::cout << element;
-        } else {
-            std::cout << "\\x" << std::hex << static_cast<int>(element);
+        for (unsigned char element : req->file.fileContent) {
+            if (std::isprint(element)) {
+                std::cout << element;
+            } else {
+                std::cout << "\\x" << std::hex << static_cast<int>(element);
+            }
         }
-    }
     std::cout << std::endl;
+}
 }

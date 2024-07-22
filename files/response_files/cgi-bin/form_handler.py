@@ -8,7 +8,7 @@ import urllib.parse
 try:
     # Get data from QUERY_STRING for both GET and POST requests
     query_string = os.environ.get('QUERY_STRING', '')
-    form_data = urllib.parse.parse_qs(query_string)
+    form_data = urllib.parse.parse_qs(make)
 
     # Get data from parsed form
     name = form_data.get('name', [''])[0]

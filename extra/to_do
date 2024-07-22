@@ -12,6 +12,3 @@
 
 Belangrijk: je krijgt een segfault als je teveel locations hebt?
 
-Autoindex
-If Nginx cannot provide an index page for the requested directory, the default behavior is to return a 403 Forbidden HTTP error page. With the following set of directives, you enable an automatic listing of the files that are present in the requested directory:
-

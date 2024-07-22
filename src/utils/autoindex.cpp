@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 15:21:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 11:11:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@ std::string Server::returnAutoIndex(std::string &uri) {
     std::string autoIndexFile;
     std::string uriNoRoot = uri.substr(getRoot().size(), uri.size() - getRoot().size()) + "/";
     
-    logger.log(DEBUG, uriNoRoot);
-    
+	logger.log(DEBUG, "in returnAutoIndex");
+
     DIR *dr = opendir(uri.c_str());
     if (dr == NULL) {
         logger.log(ERR, "Could not open directory in autoindex");

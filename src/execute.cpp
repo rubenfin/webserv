@@ -79,7 +79,7 @@ void Server::cgi(char **env)
 {
 	pid_t	pid;
 	int		fds[2];
-
+	logger.log(DEBUG, "in CGI");
 	if (access(getHttpHandler()->getRequest()->requestURL.c_str(), X_OK) != 0)
 	{
 		logger.log(ERR, "[403] Script doesn't have executable rights");
@@ -87,19 +87,25 @@ void Server::cgi(char **env)
 		throw ForbiddenException();
 	}
 	if (pipe(fds) == -1)
-		return ;
+	{
+		logger.log(ERR, "[500] Pipe has failed");
+		getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+		throw InternalServerErrorException();
+	}
 	pid = fork();
-	if (pid == 0)
+	if (pid == -1)
+	{
+		logger.log(ERR, "[500] Fork has failed");
+		getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+		throw InternalServerErrorException();
+	}
+	else if (pid == 0)
 		execute_CGI_script(fds, getHttpHandler()->getRequest()->requestURL.c_str(), env);
 	else
 	{
 		close(fds[1]);
-		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer, 10000);
-		// std::cout << getHttpHandler()->getResponse()->contentLength << std::endl;
-		// logger.log(DEBUG,
-		// std::to_string(getHttpHandler()->getResponse()->contentLength));
+		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer, 9999999);
 		_buffer[getHttpHandler()->getResponse()->contentLength] = '\0';
-		// logger.log(INFO, "CGI SCRIPT OUTPUT\n" + (std::string)_buffer);
 		close(fds[0]);
 		makeResponse(_buffer);
 		waitpid(pid, NULL, 0);
@@ -110,6 +116,7 @@ void Server::cgi(char **env)
 void Server::setFileInServer() {
     int file;
 
+	logger.log(DEBUG, "in setFileInServer");
     if (_upload.empty()) {
         logger.log(ERR, "[403] Tried uploading without setting an upload directory");
         getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
@@ -154,6 +161,7 @@ void Server::deleteFileInServer()
 {
 	int	fileNameSize;
 
+	logger.log(DEBUG, "in deleteFileInServer");
 	std::string filePath = getUpload() + "/"
 		+ getHttpHandler()->getRequest()->file.fileName;
 	fileNameSize = getHttpHandler()->getRequest()->file.fileName.size();
@@ -272,7 +280,6 @@ int Webserv::execute(void)
 			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
 		}
 		buffer[valread] = '\0';
-		printf("my buffer\n%s\n\n\n\n\n,", buffer);
 		parse_request(&request, buffer, valread);
 		// logger.log(DEBUG, "Not ParsedRequest\n" + (std::string)buffer);
 		try

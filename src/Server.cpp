@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:55:35 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/22 11:33:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,19 @@ void Server::setServer()
 	this->_address->sin_port = htons(getPort());
 	if (_port <= 0)
 	{
-		std::cerr << "Not available port" << std::endl;
+		logger.log(ERR, "Not an available port");
 		delete _address;
 		exit(EXIT_FAILURE);
 	}
 	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
 	{
-		perror("bind failed");
+		logger.log(ERR, "Failed to bind");
 		delete _address;
 		exit(EXIT_FAILURE);
 	}
 	if (listen(getSocketFD(), 5) < 0)
 	{
-		perror("listen");
+		logger.log(ERR, "Failed to listen");
 		delete _address;
 		exit(EXIT_FAILURE);
 	}
@@ -302,7 +302,7 @@ void Server::setLocationsRegex(std::string serverContent)
 	std::string line;
 	std::istringstream iss(serverContent);
 	std::regex startPattern(R"(location)");
-	std::string locationsStrings[10];
+	std::string locationsStrings[1000]; // NEED TO FIX MAYBE?
 	while (std::getline(iss, line))
 	{
 		if (std::regex_search(line, startPattern))
@@ -340,7 +340,8 @@ void Server::makeResponseForRedirect(void)
 {
 	std::string header;
 	std::string body;
-
+    
+	logger.log(DEBUG, "in makeResponseForRedirect");
 	// Use 302 Found for temporary redirects, or 301 Moved Permanently for permanent redirects
 	getHttpHandler()->getResponse()->status = httpStatusCode::MovedPermanently; // or 301 for permanent
 	std::string message = getHttpStatusMessage(getHttpHandler()->getResponse()->status);
@@ -374,12 +375,9 @@ void Server::makeResponse(char *buffer)
 		header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
 	}
 	else
-	{
 		header += "Content-Length: 0";
-	}
 
 	header += "\r\n";
-
 	_response = header + body;
 }
 
@@ -394,11 +392,10 @@ void Server::readFile(void)
 		perror("opening file of responseURL");
 		return;
 	}
-	rdbytes = read(file, _buffer, 9999999);
+	rdbytes = read(file, _buffer, 1000000);
 	_buffer[rdbytes] = '\0';
 	close(file);
 	makeResponse(_buffer);
-	// std::cout << "\n\n\n\nRESPONSE\n" << _response << "\n--------------------------------" << std::endl;
 }
 
 Server::~Server()
