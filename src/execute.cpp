@@ -104,7 +104,7 @@ void Server::cgi(char **env)
 	else
 	{
 		close(fds[1]);
-		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer, 9999999);
+		getHttpHandler()->getResponse()->contentLength = read(fds[0], _buffer, 9999);
 		_buffer[getHttpHandler()->getResponse()->contentLength] = '\0';
 		close(fds[0]);
 		makeResponse(_buffer);

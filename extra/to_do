@@ -12,3 +12,10 @@
 
 Belangrijk: je krijgt een segfault als je teveel locations hebt?
 
+
+
+
+meerdere zelfde port moet bind() in je man en een error geven en dan stoppen
+default error pages? ff kijken
+siege for stresstesting servers
+alle fds op poll ook read en write van cgi pipes
