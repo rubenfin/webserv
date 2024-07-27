@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.hpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 14:19:45 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/07/27 13:16:00 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,8 @@ class Server
 	void setUpload(void);
 	void setError404(void);
 	void printMethods(void);
-	void setSockedFD(int fd);
-	void setServer();
+	void setSockedFD();
+	void setServer(int epollFd);
 	void setEnv(char **&env);
 	std::string getResponse(void);
 	std::string getServerName(void);

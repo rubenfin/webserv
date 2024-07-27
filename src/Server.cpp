@@ -1,25 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 11:33:51 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/07/27 13:20:00 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-void Server::setServer()
+void my_epoll_add(int epoll_fd, int fd, uint32_t events)
+{
+    struct epoll_event event;
+
+    memset(&event, 0, sizeof(struct epoll_event));
+
+    event.events  = events;
+    event.data.fd = fd;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0) 
+	{
+		printf("epoll_ctl\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void Server::setServer(int epollFd)
 {
 	int opt;
 
 	opt = 1;
 	this->_address = new struct sockaddr_in;
 	_addrlen = sizeof(*this->_address);
-	setSockedFD(socket(AF_INET, SOCK_STREAM, 0));
+	setSockedFD();
 	if (getSocketFD() < 0)
 	{
 		perror("socket failed");
@@ -54,6 +69,7 @@ void Server::setServer()
 		delete _address;
 		exit(EXIT_FAILURE);
 	}
+	my_epoll_add(epollFd, _socketfd, EPOLLIN | EPOLLPRI);
 	_http_handler = new HttpHandler;
 	_buffer = (char *)malloc(1000000 * sizeof(char));
 }
@@ -213,9 +229,9 @@ void Server::printMethods(void)
 	std::cout << "DELETE Methods == " << _allowedMethods.DELETE << std::endl;
 }
 
-void Server::setSockedFD(int fd)
+void Server::setSockedFD()
 {
-	this->_socketfd = fd;
+	this->_socketfd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
 std::string Server::getError404(void)

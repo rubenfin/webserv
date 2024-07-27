@@ -249,16 +249,20 @@ int Webserv::execute(void)
 	socklen_t	addrlen;
 	request_t	request;
 	response_t	response;
+	int epollCount;
+	 struct epoll_event events[32];
 
 	signal(SIGINT, handleSigInt);
-	// struct sockaddr_in	*address;
 	addrlen = sizeof(_servers[0].getAddress());
-	_servers[0].setServer();
+	_servers[0].setServer(_epollFd);
 	logger.log(INFO, "Server " + _servers[0].getServerName()
 		+ " started on port " + _servers[0].getPortString());
 	interrupted = 0;
 	while (!interrupted)
 	{
+		epollCount = epoll_wait(_epollFd, events, 40, 3000);
+		if (epollCount == 0)
+			std::cout << "werkt" << std::endl;
 		resetRequestResponse(request, response);
 		client_socket = accept(_servers[0].getSocketFD(),
 				(struct sockaddr *)_servers[0].getAddress(), &addrlen);

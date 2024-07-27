@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.cpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/13 11:53:03 by ruben         ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/07/27 13:37:25 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Webserv.hpp"
-
 
 void Webserv::printParsing(void)
 {
@@ -38,7 +37,7 @@ void Webserv::printParsing(void)
 		}
 	}
 }
-Webserv::Webserv(std::string fileName, char **env)
+void Webserv::setConfig(std::string fileName)
 {
 	int		index;
 	bool	flag;
@@ -85,6 +84,12 @@ Webserv::Webserv(std::string fileName, char **env)
 		}
 	}
 	setResponse("files/response_files/test.html");
+}
+
+Webserv::Webserv(std::string fileName, char **env)
+{
+	_epollFd = epoll_create(1);
+	setConfig(fileName);
 	_environmentVariables = env;
 }
 
@@ -99,7 +104,7 @@ void Webserv::setResponse(const std::string &filePath)
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Unable to open file " << filePath << std::endl;
-		return;
+		return ;
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
