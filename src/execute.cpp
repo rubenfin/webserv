@@ -12,7 +12,7 @@ void Server::setEnv(char **&env)
 {
 	char	**savedEnv;
 	int		existingEnvCount;
-
+	
 
 	std::vector<std::string> addedEnv;
 	std::string currMethod;
@@ -189,7 +189,8 @@ void Server::deleteFileInServer()
 	fileNameSize = getHttpHandler()->getRequest()->file.fileName.size();
 	if (getUpload().empty())
 	{
-		logger.log(ERR, "[403] No upload location has been set,can't delete file");
+		logger.log(ERR,
+			"[403] No upload location has been set,can't delete file");
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		throw ForbiddenException();
 	}
@@ -202,7 +203,8 @@ void Server::deleteFileInServer()
 	}
 	else if (access(filePath.c_str(), F_OK) == -1)
 	{
-		logger.log(ERR, "[403] Tried deleting a file or directory that doesn't exist");
+		logger.log(ERR,
+			"[403] Tried deleting a file or directory that doesn't exist");
 		getHttpHandler()->getResponse()->status = httpStatusCode::Forbidden;
 		throw ForbiddenException();
 	}
@@ -212,7 +214,8 @@ void Server::deleteFileInServer()
 		if (getHttpHandler()->getRequest()->file.fileName[fileNameSize
 			- 1] != '/')
 		{
-			logger.log(ERR, "[409] Tried deleting a directory with unvalid syntax  "
+			logger.log(ERR,
+				"[409] Tried deleting a directory with unvalid syntax  "
 				+ filePath);
 			getHttpHandler()->getResponse()->status = httpStatusCode::Conflict;
 			throw ConflictException();
@@ -269,7 +272,8 @@ void	handleSigInt(int signal)
 	}
 }
 
-void Webserv::serverActions(int client_socket, request_t request, response_t response)
+void Webserv::serverActions(int client_socket, request_t request,
+	response_t response)
 {
 	try
 	{
@@ -306,17 +310,41 @@ void Webserv::serverActions(int client_socket, request_t request, response_t res
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	close(client_socket);
 }
+void Server::clientConnectionFailed(int client_socket)
+{
+	logger.log(ERR, "[500] Error in accept()");
+	makeResponse((char *)PAGE_500);
+	if (send(client_socket, getResponse().c_str(),
+			strlen(getResponse().c_str()), 0) == -1)
+		logger.log(ERR, "[500] Failed to send response to client,send()");
+}
+
+int make_socket_non_blocking(int sfd) {
+    int flags = fcntl(sfd, F_GETFL, 0);
+    if (flags == -1) {
+        perror("fcntl");
+        return -1;
+    }
+    flags |= O_NONBLOCK;
+    if (fcntl(sfd, F_SETFL, flags) == -1) {
+        perror("fcntl");
+        return -1;
+    }
+    return 0;
+}
 
 int Webserv::execute(void)
 {
 	int					client_socket;
-	char				buffer[368400];
-	ssize_t				valread;
+	char				buffer[1024];
+	ssize_t				read_count;
 	socklen_t			addrlen;
 	request_t			request;
 	response_t			response;
 	int					eventCount;
-	struct epoll_event	events[32];
+	struct epoll_event	eventConfig;
+	struct epoll_event	eventList[32];
+	int					client_tmp;
 
 	signal(SIGINT, handleSigInt);
 	addrlen = sizeof(_servers[0].getAddress());
@@ -326,33 +354,79 @@ int Webserv::execute(void)
 	interrupted = 0;
 	while (!interrupted)
 	{
-		eventCount = epoll_wait(_epollFd, events, 40, -1);
+		eventCount = epoll_wait(_epollFd, eventList, 40, 1000);
 		resetRequestResponse(request, response);
-		
-		client_socket = accept(_servers[0].getSocketFD(),
-				(struct sockaddr *)_servers[0].getAddress(), &addrlen);
-		if (client_socket == -1)
+		for (int i = 0; i < eventCount; ++i)
 		{
-			logger.log(ERR, "[500] Error in accept()");
-			_servers[0].makeResponse((char *)PAGE_500);
-			if (send(client_socket, _servers[0].getResponse().c_str(),
-					strlen(_servers[0].getResponse().c_str()), 0) == -1)
-				logger.log(ERR,
-					"[500] Failed to send response to client,send()");
-			continue ;
+			if (eventList[i].data.fd == _servers[0].getServerFd())
+			{
+					client_socket = accept(_servers[0].getSocketFD(),
+							(struct sockaddr *)_servers[0].getAddress(),
+							&addrlen);
+					
+					if (client_socket == -1)
+					{
+						_servers[0].clientConnectionFailed(client_socket);
+						break;
+						}
+					 if (make_socket_non_blocking(client_tmp) == -1) {
+                        close(client_tmp);
+                        continue;
+                    }
+					eventConfig.events = EPOLLIN | EPOLLET;
+					eventConfig.data.fd = client_socket;
+					if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, client_socket,
+							&eventConfig))
+					{
+						std::cout << "Connection with epoll_ctl fails!" << std::endl;
+						close(client_socket);
+					}
+					std::cout << "komt hier wel" << std::endl;
+			}
+			else
+			{
+				client_tmp = eventList[i].data.fd;
+				if (eventList[i].events & EPOLLIN)
+				{
+					read_count = read(client_tmp, buffer, sizeof(buffer));
+					buffer[read_count] = '\0';
+					if (read_count == -1)
+					{
+						logger.log(ERR, "Read of client socket failed");
+						_servers[0].getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
+						_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
+						close(client_tmp);
+					}
+					else if (read_count == 0)
+						close(client_tmp);
+					else
+					{
+						eventConfig.events = EPOLLOUT | EPOLLET;
+						eventConfig.data.fd = client_tmp;
+						if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, client_tmp,
+								&eventConfig))
+						{
+							std::cout << "Modify does not work" << std::endl;
+							close(client_tmp);
+						}
+					}
+				}
+				else if (eventList[i].events & EPOLLOUT)
+				{
+					logger.log(DEBUG,
+						"Amount of bytes read from original request: "
+						+ std::to_string(read_count));
+					parse_request(&request, std::string(buffer, read_count));
+					serverActions(client_socket, request, response);
+					eventConfig.events = EPOLLIN | EPOLLET;
+					eventConfig.data.fd = client_tmp;
+					if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, client_tmp, &eventConfig) == -1)
+					{
+						close(client_tmp);
+					}
+				}
+			}
 		}
-		valread = read(client_socket, buffer, 368400 - 1);
-		if (valread == -1)
-		{
-			logger.log(ERR, "Read of client socket failed");
-			_servers[0].getHttpHandler()->getResponse()->status = httpStatusCode::InternalServerError;
-			_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler()->getResponse()->status));
-		}
-		buffer[valread] = '\0';
-		logger.log(DEBUG, "Amount of bytes read from original request: "
-			+ std::to_string(valread));
-		parse_request(&request, std::string(buffer, valread));
-		serverActions(client_socket, request, response);
 	}
 	close(_servers[0].getSocketFD());
 	logger.log(INFO, "Server shut down");

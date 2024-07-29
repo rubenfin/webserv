@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/07/29 14:32:02 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/07/29 15:23:39 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,6 +305,11 @@ HttpHandler *Server::getHttpHandler(void)
 struct sockaddr_in *Server::getAddress(void)
 {
 	return (_address);
+}
+
+int Server::getServerFd(void)
+{
+	return(_serverFd);
 }
 
 void Server::setLocationsRegex(std::string serverContent)

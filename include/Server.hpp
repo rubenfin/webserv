@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/07/29 14:32:02 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/07/29 16:27:22 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ class Server
 	void setSockedFD();
 	void setServer(int epollFd);
 	void setEnv(char **&env);
+	int getServerFd(void);
 	std::string getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
@@ -95,5 +96,6 @@ class Server
 	void setFileInServer();
 	void deleteFileInServer();
 	std::string returnAutoIndex(std::string &uri);
+	void clientConnectionFailed(int client_socket);
 	~Server();
 };
