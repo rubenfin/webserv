@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/07/27 13:01:01 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/07/29 14:29:47 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class Webserv
 	void setResponse(const std::string &filePath);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
+	void serverActions(int client_socket, request_t request, response_t response);
 	Webserv(std::string fileName, char **env);
 	~Webserv();
 };

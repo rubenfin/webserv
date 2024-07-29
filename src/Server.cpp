@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/07/27 13:20:00 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/07/29 14:32:02 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void Server::setServer(int epollFd)
 		delete _address;
 		exit(EXIT_FAILURE);
 	}
-	my_epoll_add(epollFd, _socketfd, EPOLLIN | EPOLLPRI);
+	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
 	_http_handler = new HttpHandler;
 	_buffer = (char *)malloc(1000000 * sizeof(char));
 }
@@ -231,7 +231,7 @@ void Server::printMethods(void)
 
 void Server::setSockedFD()
 {
-	this->_socketfd = socket(AF_INET, SOCK_STREAM, 0);
+	this->_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
 std::string Server::getError404(void)
@@ -241,7 +241,7 @@ std::string Server::getError404(void)
 
 int Server::getSocketFD(void)
 {
-	return (this->_socketfd);
+	return (this->_serverFd);
 }
 
 std::string Server::getResponse(void)

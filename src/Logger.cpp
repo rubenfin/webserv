@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Logger.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/18 13:18:51 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Logger.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/10 14:31:56 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/07/29 14:11:02 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void Logger::log(level lvl, const std::string &message)
                 break;
         }
     }
-    printLog();
+    // printLog();
 }
 
 void Logger::printLog()

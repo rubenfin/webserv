@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/07/27 13:16:00 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/07/29 14:32:02 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Server
 	std::string 		_methodsList;
 	char				*_buffer;
 	std::string			_response;
-	int					_socketfd;
+	int					_serverFd;
 	std::string 		_serverName;
 	int					_port;
 	std::string 		_root;
