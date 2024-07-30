@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/07/29 16:27:22 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.hpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/07/30 15:02:08 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 #include <string>
 #include <sys/socket.h>
 #include <unordered_set>
+
+#define MAX_EVENTS 16
 
 class					Locations;
 class					HttpHandler;
@@ -53,11 +55,11 @@ class Server
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
-	HttpHandler			*_http_handler;
+	HttpHandler			*_http_handler[MAX_EVENTS];
 
   public:
-	void cgi(char **env);
-	void execute_CGI_script(int *fds, const char *script, char **env);
+	void cgi(char **env, int index);
+	void execute_CGI_script(int *fds, const char *script, char **env, int index);
 	void getLocationStack(std::string locationContent);
 	std::string extractValue(const std::string &searchString);
 	std::string extractValueUntilLocation(const std::string &searchString);
@@ -71,7 +73,7 @@ class Server
 	void printMethods(void);
 	void setSockedFD();
 	void setServer(int epollFd);
-	void setEnv(char **&env);
+	void setEnv(char **&env, int index);
 	int getServerFd(void);
 	std::string getResponse(void);
 	std::string getServerName(void);
@@ -86,16 +88,16 @@ class Server
 	std::string getMethodsList(void);
 	struct sockaddr_in *getAddress(void);
 	std::vector<Locations> getLocation(void);
-	HttpHandler *getHttpHandler(void);
+	HttpHandler *getHttpHandler(int index);
 	std::string getError404(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
-	void makeResponse(char *buffer);
-	void makeResponseForRedirect(void);
-	void readFile(void);
-	void setFileInServer();
-	void deleteFileInServer();
+	void makeResponse(char *buffer, int index);
+	void makeResponseForRedirect(int index);
+	void readFile(int index);
+	void setFileInServer(int index);
+	void deleteFileInServer(int index);
 	std::string returnAutoIndex(std::string &uri);
-	void clientConnectionFailed(int client_socket);
+	void clientConnectionFailed(int client_socket, int index);
 	~Server();
 };

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/17 13:32:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/30 15:00:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ DEFINE_HTTP_EXCEPTION(BadGateway, 502, PAGE_502)
 DEFINE_HTTP_EXCEPTION(ServiceUnavailable, 503, PAGE_503)
 DEFINE_HTTP_EXCEPTION(HttpVersionNotSupported, 505, PAGE_505)
 
-extern void makeResponse(char *buffer);
+extern void makeResponse(char *buffer, int index);
 
 #endif
 
