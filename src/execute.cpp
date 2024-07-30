@@ -401,6 +401,8 @@ int Webserv::execute(void)
 					read_count = read(client_tmp, buffer, BUFFERSIZE - 1);
 					buffer[read_count] = '\0';
 					std::cout << read_count << std::endl;
+					std::cout << buffer << std::endl;
+					parse_request(&request[i], std::string(buffer, read_count));
 					if (read_count == -1)
 					{
 						logger.log(ERR, "Read of client socket failed");
@@ -430,7 +432,6 @@ int Webserv::execute(void)
 					logger.log(DEBUG,
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
-					parse_request(&request[i], std::string(buffer, read_count));
 					serverActions(client_socket, request[i], response[i], i);
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 16:05:55 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/30 16:13:06 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ void findFileContent(request_t *req, file_t *requestFile)
         logger.log(WARNING, "Did not find any ending boundary");
         end = req->requestBody.rfind("\r\n", end);
     }
+    requestFile->fileEndBoundaryFound = true;
     requestFile->fileContent = req->requestBody.substr(start);
     requestFile->fileContentLength = requestFile->fileContent.size();
 }
