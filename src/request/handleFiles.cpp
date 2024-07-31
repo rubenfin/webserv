@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 15:56:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 17:48:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ void findFileContent(request_t *req, file_t *requestFile)
     requestFile->fileEndBoundaryFound = true;
     requestFile->fileContent = req->requestBody.substr(start);
     requestFile->fileContentLength = requestFile->fileContent.size();
+    
 }
 
 

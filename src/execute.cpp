@@ -13,6 +13,7 @@ void	handleSigInt(int signal)
 void Webserv::serverActions(int client_socket, request_t request,
 	response_t response, int index)
 {
+	printRequestStruct(&request);
 	try
 	{
 		if (_servers[0].getHttpHandler(index)->getHeaderChecked() == false)
@@ -44,12 +45,15 @@ void Webserv::serverActions(int client_socket, request_t request,
 		else
 			_servers[0].makeResponse(e.getPageContent(), index);
 	}
-	if (_servers[0].getHttpHandler(index)->getTotalReadCount() == _servers[0].getHttpHandler(index)->getBytesToRead() || _servers[0].getHttpHandler(index)->getBytesToRead() == 0)
+	if (_servers[0].getHttpHandler(index)->getTotalReadCount() == _servers[0].getHttpHandler(index)->getBytesToRead()
+		|| _servers[0].getHttpHandler(index)->getBytesToRead() == 0
+		|| negativeStatusCode(_servers[0].getHttpHandler(index)->getResponse()->status))
 	{
 		logger.log(RESPONSE, _servers[0].getResponse());
 		if (send(client_socket, _servers[0].getResponse().c_str(),
 				strlen(_servers[0].getResponse().c_str()), 0) == -1)
 			logger.log(ERR, "[500] Failed to send response to client, send()");
+		close(client_socket);
 	}
 }
 void Server::clientConnectionFailed(int client_socket, int index)
@@ -148,12 +152,16 @@ int Webserv::execute(void)
 					buffer[read_count] = '\0';
 					std::cout << read_count << std::endl;
 					std::cout << buffer << std::endl;
-					_servers[0].getHttpHandler(i)->addToTotalReadCount(read_count);
+					_servers[0].getHttpHandler(i)->setReadCount(read_count);
 					if (_servers[0].getHttpHandler(i)->getHeaderChecked() == false)
+					{
 						parse_request(&request[i], std::string(buffer,
 								read_count));
+						_servers[0].getHttpHandler(i)->addToTotalReadCount(request[i].file.fileContent.size());
+					}
 					else
 					{
+						_servers[0].getHttpHandler(i)->addToTotalReadCount(read_count);
 						request[i].file.fileExists = true;
 						request[i].file.fileContent = std::string(buffer,
 								read_count);
@@ -186,7 +194,6 @@ int Webserv::execute(void)
 					logger.log(DEBUG,
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
-					_servers[0].getHttpHandler(i)->setReadCount(read_count);
 					serverActions(client_socket, request[i], response[i], i);
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;

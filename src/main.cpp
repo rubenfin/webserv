@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:42:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 16:32:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ Logger &logger = Logger::getInstance();
 
 int	main(int argc, char **argv, char **env)
 {
+	logger.setWorking(false);
 	if (argc == 2)
 	{
 		std::string filename(argv[1]);

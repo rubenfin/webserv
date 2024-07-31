@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:37:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 17:47:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,10 +162,21 @@ void Server::setFileInServer(int index)
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
 		}
-		file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		logger.setWorking(true);
+		logger.log(ERR, std::to_string(getHttpHandler(index)->getTotalReadCount()));
+		logger.setWorking(false);
+		if (getHttpHandler(index)->getTotalReadCount() <= BUFFERSIZE)
+			file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		else
+			file = open(fullPath.c_str(), O_WRONLY | O_APPEND, 0644);
 		if (file != -1)
 		{
-			bytesWritten = write(file, fileContent.data(), BUFFERSIZE);
+			// size_t pos = 0;
+			// while ((pos = fileContent.find(getHttpHandler(index)->getRequest()->file.fileBoundary + "--")) != std::string::npos) {
+			// 		fileContent.erase(pos, getHttpHandler(index)->getRequest()->file.fileBoundary.length() + 2);
+			// }
+
+			bytesWritten = write(file, fileContent.data(), fileContent.size());
 			// close(file);
 			logger.log(DEBUG, std::to_string(bytesWritten) + "|"
 				+ std::to_string(getHttpHandler(index)->getRequest()->contentLength));

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/18 14:28:52 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/17 13:34:34 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 16:16:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,5 +48,9 @@ enum class httpStatusCode {
     ServiceUnavailable = 503,
     httpVersionNotSupported = 505
 };
+
+bool positiveStatusCode(httpStatusCode status);
+bool negativeStatusCode(httpStatusCode status);
+
 
 #endif

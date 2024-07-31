@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:30 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:55:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 16:31:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,13 @@ class Logger
 private:
     Logger();
     std::string totalLog;
+    bool _working;
     static std::unique_ptr<Logger> instance;
     static std::once_flag initInstanceFlag;
    
 public:
     static Logger& getInstance();
+    void setWorking(bool boolean);
     void log(level lvl, const std::string &message);
     void printLog();
     Logger(const Logger&) = delete;

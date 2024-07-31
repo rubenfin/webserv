@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/30 16:14:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 16:14:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void	resetRequest(request_t &request)
 	request.requestURL = "";
 	request.requestDirectory = "";
 	request.requestFile = "";
+	request.file.fileExists = false;
 	request.file.fileEndBoundaryFound = false;
 }
 
