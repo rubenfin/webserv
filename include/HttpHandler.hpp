@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpHandler.hpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 20:00:39 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/07/31 14:19:44 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   HttpHandler.hpp                                    :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/07/31 15:58:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,12 @@ class HttpHandler
 	Locations *_foundDirective;
 	Server *_server;
 	int _readCount;
+	int _totalReadCount;
+	int _bytesToRead;
 	bool _isCgi;
 	bool _hasRedirect;
 	bool _returnAutoIndex;
+	bool _headerChecked;
 
   public:
 	HttpHandler();
@@ -56,8 +59,13 @@ class HttpHandler
 	Locations *findMatchingDirective(void);
 	void setBooleans(void);
 	void setReadCount(int ReadCount);
+	void addToTotalReadCount(int count);
 	int getReadCount(void);
+	int getTotalReadCount(void);
+	int getBytesToRead(void);
 	bool getCgi(void);
 	bool getRedirect(void);
 	bool getReturnAutoIndex(void);
+	bool getHeaderChecked(void);
+	void cleanHttpHandler();
 };

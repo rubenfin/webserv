@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/07/31 14:22:27 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   HttpHandler.cpp                                    :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/07/31 15:59:02 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
 HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr),
-	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
+	_foundDirective(nullptr), _server(nullptr), _readCount(0), _totalReadCount(0), _bytesToRead(0), _isCgi(false),
 	_hasRedirect(false)
 {
 }
@@ -148,6 +148,7 @@ void HttpHandler::httpVersionCheck(void)
 		getResponse()->status = httpStatusCode::httpVersionNotSupported;
 		throw HttpVersionNotSupportedException();
 	}
+	_headerChecked = true;
 }
 
 int HttpHandler::pathCheck(void)
@@ -193,6 +194,7 @@ void HttpHandler::fileCheck()
 		getResponse()->status = httpStatusCode::BadRequest;
 		throw BadRequestException();
 	}
+	_bytesToRead = getRequest()->contentLength;
 }
 
 void HttpHandler::setReadCount(int ReadCount)
@@ -200,9 +202,24 @@ void HttpHandler::setReadCount(int ReadCount)
 	_readCount = ReadCount;
 }
 
+void HttpHandler::addToTotalReadCount(int count)
+{
+	_totalReadCount += count;
+}
+
 int HttpHandler::getReadCount(void)
 {
 	return(_readCount);
+}
+
+int HttpHandler::getTotalReadCount(void)
+{
+	return (_totalReadCount);	
+}
+
+int HttpHandler::getBytesToRead(void)
+{
+	return (_bytesToRead);
 }
 
 void HttpHandler::setDelete()
@@ -234,6 +251,7 @@ void HttpHandler::checkRequestData(void)
 		fileCheck();
 	if (getRequest()->method == DELETE)
 		setDelete();
+	
 }
 void	deleteFoundDirective(Locations *_foundDirective)
 {
@@ -289,6 +307,19 @@ void HttpHandler::checkLocationMethod(void)
 	}
 }
 
+void HttpHandler::cleanHttpHandler()
+{
+	_server = nullptr;
+	_request = nullptr;
+	_response = nullptr;
+	_isCgi = false;
+	_hasRedirect = false;
+	_returnAutoIndex = false;
+	_headerChecked = false;
+	_readCount = 0;
+	_totalReadCount = 0;
+}
+
 void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	response_t *response)
 {
@@ -298,6 +329,7 @@ void HttpHandler::handleRequest(Server &serverAddress, request_t *request,
 	_isCgi = false;
 	_hasRedirect = false;
 	_returnAutoIndex = false;
+	_headerChecked = false;
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	if (_foundDirective)
@@ -320,4 +352,9 @@ bool HttpHandler::getCgi(void)
 bool HttpHandler::getRedirect(void)
 {
 	return (_hasRedirect);
+}
+
+bool HttpHandler::getHeaderChecked(void)
+{
+	return (_headerChecked);
 }

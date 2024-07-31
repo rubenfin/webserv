@@ -15,8 +15,9 @@ void Webserv::serverActions(int client_socket, request_t request,
 {
 	try
 	{
-		_servers[0].getHttpHandler(index)->handleRequest(_servers[0], &request,
-			&response);
+		if (_servers[0].getHttpHandler(index)->getHeaderChecked() == false)
+			_servers[0].getHttpHandler(index)->handleRequest(_servers[0],
+				&request, &response);
 		if (_servers[0].getHttpHandler(index)->getReturnAutoIndex())
 			_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(_servers[0].getHttpHandler(index)->getRequest()->requestURL).c_str(),
 				index);
@@ -43,10 +44,13 @@ void Webserv::serverActions(int client_socket, request_t request,
 		else
 			_servers[0].makeResponse(e.getPageContent(), index);
 	}
-	logger.log(RESPONSE, _servers[0].getResponse());
-	if (send(client_socket, _servers[0].getResponse().c_str(),
-			strlen(_servers[0].getResponse().c_str()), 0) == -1)
-		logger.log(ERR, "[500] Failed to send response to client, send()");
+	if (_servers[0].getHttpHandler(index)->getTotalReadCount() == _servers[0].getHttpHandler(index)->getBytesToRead() || _servers[0].getHttpHandler(index)->getBytesToRead() == 0)
+	{
+		logger.log(RESPONSE, _servers[0].getResponse());
+		if (send(client_socket, _servers[0].getResponse().c_str(),
+				strlen(_servers[0].getResponse().c_str()), 0) == -1)
+			logger.log(ERR, "[500] Failed to send response to client, send()");
+	}
 }
 void Server::clientConnectionFailed(int client_socket, int index)
 {
@@ -110,6 +114,8 @@ int Webserv::execute(void)
 	logger.log(INFO, "Server " + _servers[0].getServerName()
 		+ " started on port " + _servers[0].getPortString());
 	interrupted = 0;
+	for (size_t i = 0; i < MAX_EVENTS; i++)
+		resetRequestResponse(request[i], response[i]);
 	while (!interrupted)
 	{
 		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
@@ -117,6 +123,7 @@ int Webserv::execute(void)
 		{
 			if (eventList[i].data.fd == _servers[0].getServerFd())
 			{
+				_servers[0].getHttpHandler(i)->cleanHttpHandler();
 				resetRequestResponse(request[i], response[i]);
 				if (!acceptClienSocket(client_socket, addrlen, i))
 					break ;
@@ -141,7 +148,16 @@ int Webserv::execute(void)
 					buffer[read_count] = '\0';
 					std::cout << read_count << std::endl;
 					std::cout << buffer << std::endl;
-					parse_request(&request[i], std::string(buffer, read_count));
+					_servers[0].getHttpHandler(i)->addToTotalReadCount(read_count);
+					if (_servers[0].getHttpHandler(i)->getHeaderChecked() == false)
+						parse_request(&request[i], std::string(buffer,
+								read_count));
+					else
+					{
+						request[i].file.fileExists = true;
+						request[i].file.fileContent = std::string(buffer,
+								read_count);
+					}
 					if (read_count == -1)
 					{
 						logger.log(ERR, "Read of client socket failed");
