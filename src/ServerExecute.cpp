@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:32:24 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 12:37:47 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void Server::setEnv(char **&env, int index)
 {
 	char	**savedEnv;
 	int		existingEnvCount;
-	
+
 	std::vector<std::string> addedEnv;
 	std::string currMethod;
 	savedEnv = env;
@@ -33,10 +33,12 @@ void Server::setEnv(char **&env, int index)
 	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
 	addedEnv.push_back("QUERY_STRING="
 		+ getHttpHandler(index)->getRequest()->requestBody);
-	auto contentTypeIt = getHttpHandler(index)->getRequest()->header.find("Content-Type");
+	std::map<std::string,
+		std::string>::iterator contentTypeIt = getHttpHandler(index)->getRequest()->header.find("Content-Type");
 	if (contentTypeIt != getHttpHandler(index)->getRequest()->header.end())
 		addedEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
-	auto contentLengthIt = getHttpHandler(index)->getRequest()->header.find("Content-Length");
+	std::map<std::string,
+		std::string>::iterator contentLengthIt = getHttpHandler(index)->getRequest()->header.find("Content-Length");
 	if (contentLengthIt != getHttpHandler(index)->getRequest()->header.end())
 		addedEnv.push_back("CONTENT_LENGTH=" + contentLengthIt->second);
 	addedEnv.push_back("SERVER_NAME=" + getServerName());
@@ -56,7 +58,8 @@ void Server::setEnv(char **&env, int index)
 	env[addedEnv.size() + existingEnvCount] = nullptr;
 }
 
-void Server::execute_CGI_script(int *fds, const char *script, char **env, int index)
+void Server::execute_CGI_script(int *fds, const char *script, char **env,
+	int index)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
 
@@ -109,7 +112,8 @@ void Server::cgi(char **env, int index)
 	}
 	else if (pid == 0)
 		execute_CGI_script(fds,
-			getHttpHandler(index)->getRequest()->requestURL.c_str(), env, index);
+			getHttpHandler(index)->getRequest()->requestURL.c_str(), env,
+			index);
 	else
 	{
 		close(fds[1]);
@@ -149,7 +153,7 @@ void Server::setFileInServer(int index)
 		std::string fullPath = uploadPath + "/" + fileName;
 		if (fileName.empty())
 		{
-			logger.log(ERR, "No file has been uploaded");
+			logger.log(ERR, "[403] No file has been uploaded");
 			getHttpHandler(index)->getResponse()->status = httpStatusCode::Forbidden;
 			throw ForbiddenException();
 		}
@@ -161,7 +165,7 @@ void Server::setFileInServer(int index)
 		file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (file != -1)
 		{
-			bytesWritten = write(file, fileContent.c_str(), BUFFERSIZE);
+			bytesWritten = write(file, fileContent.data(), BUFFERSIZE);
 			// close(file);
 			logger.log(DEBUG, std::to_string(bytesWritten) + "|"
 				+ std::to_string(getHttpHandler(index)->getRequest()->contentLength));
@@ -192,7 +196,7 @@ void Server::setFileInServer(int index)
 
 void Server::deleteFileInServer(int index)
 {
-	int	fileNameSize;
+	int fileNameSize;
 
 	logger.log(DEBUG, "in deleteFileInServer");
 	std::string filePath = getUpload() + "/"

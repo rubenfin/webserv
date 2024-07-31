@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/07/29 14:29:47 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.cpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/07/31 12:46:44 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ void Webserv::setConfig(std::string fileName)
 			_servers.emplace_back(serverString);
 		}
 	}
-	setResponse("files/response_files/test.html");
 }
 
 Webserv::Webserv(std::string fileName, char **env)
@@ -98,19 +97,6 @@ void Webserv::setEnv(char **env)
 	_environmentVariables = env;
 }
 
-void Webserv::setResponse(const std::string &filePath)
-{
-	std::ifstream file(filePath);
-	if (!file.is_open())
-	{
-		std::cerr << "Error: Unable to open file " << filePath << std::endl;
-		return ;
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	std::string response = buffer.str();
-	_response = "HTTP/1.1 200 OK\nContent-type: text/html\n\n" + response;
-}
 Webserv::~Webserv()
 {
 }

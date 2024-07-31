@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:28:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 13:50:06 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
+#include "Utils.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -67,19 +68,10 @@ class Webserv
   public:
 	int execute(void);
 	void printParsing(void);
-	void setResponse(const std::string &filePath);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
 	void serverActions(int client_socket, request_t request, response_t response, int index);
+	int acceptClienSocket(int& client_socket, socklen_t addrlen, const int &i);
 	Webserv(std::string fileName, char **env);
 	~Webserv();
 };
-
-size_t	ft_strlen(const char *s);
-char	*ft_strjoin(char const *s1, char const *s2);
-void	resetRequestResponse(request_t &request, response_t &response);
-int		checkIfDir(const std::string &pathname);
-int		checkIfFile(const std::string &pathname);
-void	setNonBlocking(int *fd);
-bool	hasSpecialCharacters(const std::string& fileName);
-void 	replaceEncodedSlash(std::string &str);

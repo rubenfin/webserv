@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:32:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 13:52:07 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -448,6 +448,5 @@ Server::~Server()
 	{
 			delete	_http_handler[i];
 	}
-
 	free(_buffer);
 }

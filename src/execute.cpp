@@ -19,7 +19,8 @@ void Webserv::serverActions(int client_socket, request_t request,
 		_servers[0].getHttpHandler(index)->handleRequest(_servers[0], &request,
 			&response);
 		if (_servers[0].getHttpHandler(index)->getReturnAutoIndex())
-			_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(_servers[0].getHttpHandler(index)->getRequest()->requestURL).c_str(), index);
+			_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(_servers[0].getHttpHandler(index)->getRequest()->requestURL).c_str(),
+				index);
 		else if (_servers[0].getHttpHandler(index)->getRequest()->method == DELETE)
 			_servers[0].deleteFileInServer(index);
 		else if (_servers[0].getHttpHandler(index)->getCgi())
@@ -65,16 +66,30 @@ int	make_socket_non_blocking(int sfd)
 	flags = fcntl(sfd, F_GETFL, 0);
 	if (flags == -1)
 	{
+		close(sfd);
 		perror("fcntl");
-		return (-1);
+		return (0);
 	}
 	flags |= O_NONBLOCK;
 	if (fcntl(sfd, F_SETFL, flags) == -1)
 	{
+		close(sfd);
 		perror("fcntl");
-		return (-1);
+		return (0);
 	}
-	return (0);
+	return (1);
+}
+
+int Webserv::acceptClienSocket(int& client_socket, socklen_t addrlen, const int &i)
+{
+	client_socket = accept(_servers[0].getSocketFD(),
+			(struct sockaddr *)_servers[0].getAddress(), &addrlen);
+	if (client_socket == -1)
+	{
+		_servers[0].clientConnectionFailed(client_socket, i);
+		return (0);
+	}
+	return (1);
 }
 
 int Webserv::execute(void)
@@ -104,18 +119,10 @@ int Webserv::execute(void)
 			if (eventList[i].data.fd == _servers[0].getServerFd())
 			{
 				resetRequestResponse(request[i], response[i]);
-				client_socket = accept(_servers[0].getSocketFD(),
-						(struct sockaddr *)_servers[0].getAddress(), &addrlen);
-				if (client_socket == -1)
-				{
-					_servers[0].clientConnectionFailed(client_socket, i);
+				if (!acceptClienSocket(client_socket, addrlen, i))
 					break ;
-				}
-				if (make_socket_non_blocking(client_tmp) == -1)
-				{
-					close(client_tmp);
+				if (!make_socket_non_blocking(client_tmp))
 					continue ;
-				}
 				eventConfig.events = EPOLLIN | EPOLLET;
 				eventConfig.data.fd = client_socket;
 				if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, client_socket,
@@ -140,7 +147,8 @@ int Webserv::execute(void)
 					{
 						logger.log(ERR, "Read of client socket failed");
 						_servers[0].getHttpHandler(i)->getResponse()->status = httpStatusCode::InternalServerError;
-						_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler(i)->getResponse()->status), i);
+						_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler(i)->getResponse()->status),
+							i);
 						close(client_tmp);
 					}
 					else if (read_count == 0)

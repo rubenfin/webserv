@@ -31,3 +31,14 @@ void replaceEncodedSlash(std::string &str)
         pos += slash.length(); // Move past the replaced part
     }
 }
+
+int	configPathCheck(const std::string &filename)
+{
+	if (checkIfDir(filename))
+		return (logger.log(ERR, "The configuration filepath is a directory"),
+			0);
+	if (!checkIfFile(filename))
+		return (logger.log(ERR, "The configuration filepath is not correct"),
+			0);
+    return (1);
+}
