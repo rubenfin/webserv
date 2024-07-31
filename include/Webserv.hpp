@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/30 14:45:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 12:28:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,10 @@
 #include <signal.h>
 #include "Logger.hpp"
 #include <dirent.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 1024
@@ -41,6 +45,7 @@
 #define MAX_EVENTS 16
 
 extern volatile sig_atomic_t	interrupted;
+
 
 class	Logger;
 class	Server;

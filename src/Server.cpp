@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:22:24 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 12:32:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,6 +364,8 @@ void Server::setLocationsRegex(std::string serverContent)
 		_locations.emplace_back(locationsStrings[i]);
 	}
 }
+
+
 
 Server::Server(std::string serverContent)
 {
