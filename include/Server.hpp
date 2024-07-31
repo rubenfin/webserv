@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/30 15:02:08 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 12:22:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,10 @@ class Server
 	std::string getError404(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
+	void setSocketOptions(const int &opt);
+	void initializeAddress();
+	void bindAdressSocket();
+	void listenToSocket();
 	void makeResponse(char *buffer, int index);
 	void makeResponseForRedirect(int index);
 	void readFile(int index);

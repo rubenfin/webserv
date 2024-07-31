@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/30 15:05:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/07/31 12:22:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,48 @@ void	my_epoll_add(int epoll_fd, int fd, uint32_t events)
 	}
 }
 
+void Server::setSocketOptions(const int &opt)
+{
+	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
+			sizeof(opt)) < 0)
+	{
+		perror("setsockopt");
+		delete this->_address;
+		exit(EXIT_FAILURE);
+	}
+}
+
+void Server::initializeAddress()
+{
+	this->_address->sin_family = AF_INET;
+	this->_address->sin_addr.s_addr = INADDR_ANY;
+		// autofills ip address with current host
+	this->_address->sin_port = htons(getPort());
+	if (getPort() <= 0)
+	{
+		logger.log(ERR, "Not an available port");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void Server::bindAdressSocket()
+{
+	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
+	{
+		logger.log(ERR, "Failed to bind");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void Server::listenToSocket()
+{
+	if (listen(getSocketFD(), 5) < 0)
+	{
+		logger.log(ERR, "Failed to listen");
+		exit(EXIT_FAILURE);
+	}
+}
+
 void Server::setServer(int epollFd)
 {
 	int	opt;
@@ -40,37 +82,13 @@ void Server::setServer(int epollFd)
 		delete this->_address;
 		exit(EXIT_FAILURE);
 	}
-	if (setsockopt(getSocketFD(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-			sizeof(opt)) < 0)
-	{
-		perror("setsockopt");
-		delete this->_address;
-		exit(EXIT_FAILURE);
-	}
-	this->_address->sin_family = AF_INET;
-	this->_address->sin_addr.s_addr = INADDR_ANY;
-		// autofills ip address with current host
-	this->_address->sin_port = htons(getPort());
-	if (_port <= 0)
-	{
-		logger.log(ERR, "Not an available port");
-		exit(EXIT_FAILURE);
-	}
-	if (bind(getSocketFD(), (struct sockaddr *)_address, sizeof(*_address)) < 0)
-	{
-		logger.log(ERR, "Failed to bind");
-		exit(EXIT_FAILURE);
-	}
-	if (listen(getSocketFD(), 5) < 0)
-	{
-		logger.log(ERR, "Failed to listen");
-		exit(EXIT_FAILURE);
-	}
+	setSocketOptions(opt);
+	initializeAddress();
+	bindAdressSocket();
+	listenToSocket();
 	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
 	for (size_t i = 0; i < MAX_EVENTS; i++)
-	{
 		_http_handler[i] = new HttpHandler;
-	}
 	_buffer = (char *)malloc(1000000 * sizeof(char));
 }
 

@@ -1,6 +1,6 @@
 server {
 	server_name webserv
-	listen 8001
+	listen 8000
 
 	root files/response_files/
 	error_page 404 /404.html
