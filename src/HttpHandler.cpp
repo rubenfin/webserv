@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpHandler.cpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 15:08:18 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/07/31 14:22:27 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,16 @@ void HttpHandler::fileCheck()
 		getResponse()->status = httpStatusCode::BadRequest;
 		throw BadRequestException();
 	}
+}
+
+void HttpHandler::setReadCount(int ReadCount)
+{
+	_readCount = ReadCount;
+}
+
+int HttpHandler::getReadCount(void)
+{
+	return(_readCount);
 }
 
 void HttpHandler::setDelete()

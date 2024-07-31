@@ -13,7 +13,6 @@ void	handleSigInt(int signal)
 void Webserv::serverActions(int client_socket, request_t request,
 	response_t response, int index)
 {
-	std::cout << "komt hier" << std::endl;
 	try
 	{
 		_servers[0].getHttpHandler(index)->handleRequest(_servers[0], &request,
@@ -48,7 +47,6 @@ void Webserv::serverActions(int client_socket, request_t request,
 	if (send(client_socket, _servers[0].getResponse().c_str(),
 			strlen(_servers[0].getResponse().c_str()), 0) == -1)
 		logger.log(ERR, "[500] Failed to send response to client, send()");
-	close(client_socket);
 }
 void Server::clientConnectionFailed(int client_socket, int index)
 {
@@ -80,7 +78,8 @@ int	make_socket_non_blocking(int sfd)
 	return (1);
 }
 
-int Webserv::acceptClienSocket(int& client_socket, socklen_t addrlen, const int &i)
+int Webserv::acceptClienSocket(int &client_socket, socklen_t addrlen,
+	const int &i)
 {
 	client_socket = accept(_servers[0].getSocketFD(),
 			(struct sockaddr *)_servers[0].getAddress(), &addrlen);
@@ -171,12 +170,16 @@ int Webserv::execute(void)
 					logger.log(DEBUG,
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
+					_servers[0].getHttpHandler(i)->setReadCount(read_count);
 					serverActions(client_socket, request[i], response[i], i);
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;
 					if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, client_tmp,
 							&eventConfig) == -1)
+					{
+						std::cerr << "epoll_ctl failed with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
 						close(client_tmp);
+					}
 				}
 			}
 		}
