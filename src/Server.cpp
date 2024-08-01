@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 14:40:47 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 16:01:22 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	my_epoll_add(int epoll_fd, int fd, uint32_t events)
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0)
 	{
 		printf("epoll_ctl\n");
-		exit(EXIT_FAILURE);
+		perror("epoll add");
 	}
 }
 
@@ -33,7 +33,6 @@ void Server::setSocketOptions(const int &opt)
 	{
 		perror("setsockopt");
 		delete this->_address;
-		exit(EXIT_FAILURE);
 	}
 }
 

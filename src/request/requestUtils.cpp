@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 15:20:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 17:04:25 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ void	resetRequest(request_t &request)
 	request.requestURL = "";
 	request.requestDirectory = "";
 	request.requestFile = "";
-	std::cout << "wordt gecleaned" << request.requestFile << std::endl;
 	request.contentType = "";
 	request.method = ERROR;
 	resetRequestFile(request.file);
