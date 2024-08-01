@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 17:36:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 14:06:07 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 15:21:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ typedef struct request_t
 }			request_t;
 
 void		setFile(request_t *req, file_t *requestFile);
-void		parse_request(request_t *req, std::string buffer);
+void		parse_request(request_t *req, std::string buffer, int index);
 void		resetRequest(request_t &request);
-void		printRequestStruct(request_t *req);
+void		printRequestStruct(request_t *req, int index);
 std::string trim(const std::string &str);
 std::string extractValue(request_t *req, const std::string &toSearch);

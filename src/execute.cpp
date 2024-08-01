@@ -13,9 +13,11 @@ void	handleSigInt(int signal)
 void Webserv::serverActions(int client_socket, request_t request,
 	response_t response, int index)
 {
-	printRequestStruct(&request);
+	printRequestStruct(&request, index);
 	try
 	{
+		if (request.requestURL == "/favicon.ico")
+			throw NotFoundException();
 		if (_servers[0].getHttpHandler(index)->getHeaderChecked() == false)
 			_servers[0].getHttpHandler(index)->handleRequest(_servers[0],
 				&request, &response);
@@ -53,7 +55,8 @@ void Webserv::serverActions(int client_socket, request_t request,
 		if (send(client_socket, _servers[0].getResponse().c_str(),
 				strlen(_servers[0].getResponse().c_str()), 0) == -1)
 			logger.log(ERR, "[500] Failed to send response to client, send()");
-		close(client_socket);
+		_servers[0].getHttpHandler(index)->cleanHttpHandler();
+		resetRequestResponse(request, response);
 	}
 }
 void Server::clientConnectionFailed(int client_socket, int index)
@@ -99,6 +102,10 @@ int Webserv::acceptClienSocket(int &client_socket, socklen_t addrlen,
 	return (1);
 }
 
+void	hier(void)
+{
+}
+
 int Webserv::execute(void)
 {
 	int					client_socket;
@@ -119,7 +126,10 @@ int Webserv::execute(void)
 		+ " started on port " + _servers[0].getPortString());
 	interrupted = 0;
 	for (size_t i = 0; i < MAX_EVENTS; i++)
+	{
+		_servers[0].getHttpHandler(i)->cleanHttpHandler();
 		resetRequestResponse(request[i], response[i]);
+	}
 	while (!interrupted)
 	{
 		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
@@ -127,8 +137,13 @@ int Webserv::execute(void)
 		{
 			if (eventList[i].data.fd == _servers[0].getServerFd())
 			{
-				_servers[0].getHttpHandler(i)->cleanHttpHandler();
-				resetRequestResponse(request[i], response[i]);
+				// _servers[0].getHttpHandler(i)->cleanHttpHandler();
+				// resetRequestResponse(request[i], response[i]);
+				for (size_t i = 0; i < MAX_EVENTS; i++)
+				{
+					_servers[0].getHttpHandler(i)->cleanHttpHandler();
+					resetRequestResponse(request[i], response[i]);
+				}
 				if (!acceptClienSocket(client_socket, addrlen, i))
 					break ;
 				if (!make_socket_non_blocking(client_tmp))
@@ -156,13 +171,12 @@ int Webserv::execute(void)
 					if (_servers[0].getHttpHandler(i)->getHeaderChecked() == false)
 					{
 						parse_request(&request[i], std::string(buffer,
-								read_count));
+								read_count), i);
 						_servers[0].getHttpHandler(i)->addToTotalReadCount(request[i].file.fileContent.size());
 					}
 					else
 					{
 						_servers[0].getHttpHandler(i)->addToTotalReadCount(read_count);
-						request[i].file.fileExists = true;
 						request[i].file.fileContent = std::string(buffer,
 								read_count);
 					}
@@ -175,7 +189,9 @@ int Webserv::execute(void)
 						close(client_tmp);
 					}
 					else if (read_count == 0)
+					{
 						close(client_tmp);
+					}
 					else
 					{
 						eventConfig.events = EPOLLOUT | EPOLLET;
@@ -194,6 +210,7 @@ int Webserv::execute(void)
 					logger.log(DEBUG,
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
+					hier();
 					serverActions(client_socket, request[i], response[i], i);
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;

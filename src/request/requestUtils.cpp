@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 16:14:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 15:20:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,18 @@ std::string trim(const std::string &str)
 	return (right <= left ? std::string() : std::string(left, right));
 }
 
+void 	resetRequestFile(file_t &file)
+{
+	file.fileBoundary = "";
+	file.fileContent = "";
+	file.fileContentDisposition = "";
+	file.fileContentLength = 0;
+	file.fileContentType = "";
+	file.fileEndBoundaryFound = false;
+	file.fileExists = false;
+	file.fileName = "";
+}
+
 void	resetRequest(request_t &request)
 {
 	request.http_v = "";
@@ -30,13 +42,15 @@ void	resetRequest(request_t &request)
 	request.requestURL = "";
 	request.requestDirectory = "";
 	request.requestFile = "";
-	request.file.fileExists = false;
-	request.file.fileEndBoundaryFound = false;
+	std::cout << "wordt gecleaned" << request.requestFile << std::endl;
+	request.contentType = "";
+	request.method = ERROR;
+	resetRequestFile(request.file);
 }
 
-void	printRequestStruct(request_t *req)
+void	printRequestStruct(request_t *req, int index)
 {
-	logger.log(REQUEST, "PARSED REQUEST");
+	logger.log(REQUEST, "PARSED REQUEST: INDEX: " + std::to_string(index));
 	logger.log(REQUEST, "----------------------------------");
 	logger.log(REQUEST, "http_v: " + req->http_v);
 	logger.log(REQUEST, "firstLine: " + req->firstLine);
