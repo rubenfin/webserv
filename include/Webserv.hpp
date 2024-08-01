@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 13:50:06 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 16:03:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ class Webserv
 	void printParsing(void);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
-	void serverActions(int client_socket, request_t request, response_t response, int index);
+	void serverActions(int client_socket, request_t &request, response_t &response, int index);
 	int acceptClienSocket(int& client_socket, socklen_t addrlen, const int &i);
 	Webserv(std::string fileName, char **env);
 	~Webserv();

@@ -6,14 +6,15 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:40:58 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/06/25 16:58:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 17:05:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Webserv.hpp"
 
-void	resetRequestResponse(request_t &request, response_t &response)
+void	resetRequestResponse(request_t &request, response_t &response, int idx)
 {
+	logger.log(DEBUG, "Cleaning request and response struct on index: " + std::to_string(idx));
 	resetRequest(request);
 	resetResponse(response);
 }
