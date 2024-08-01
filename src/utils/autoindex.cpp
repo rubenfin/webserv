@@ -6,17 +6,29 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/22 11:11:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/01 14:47:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Server.hpp"
-
 std::string Server::returnAutoIndex(std::string &uri) {
     std::string autoIndexFile;
-    std::string uriNoRoot = uri.substr(getRoot().size(), uri.size() - getRoot().size()) + "/";
+
+    std::string root = getRoot();
+    if (uri.size() < root.size()) {
+        logger.log(ERR, "URI is shorter than root path in autoindex");
+        logger.log(ERR, uri + "|" + root);
+        throw NotFoundException();
+    }
     
-	logger.log(DEBUG, "in returnAutoIndex");
+    std::string uriNoRoot = uri.substr(root.size());
+    if (uriNoRoot.empty() || uriNoRoot.back() != '/') {
+        uriNoRoot += '/';
+    }
+    
+    logger.log(DEBUG, "in returnAutoIndex");
+    logger.log(DEBUG, "uri: " + uri);
+    logger.log(DEBUG, "uriNoRoot: " + uriNoRoot);
 
     DIR *dr = opendir(uri.c_str());
     if (dr == NULL) {
@@ -37,6 +49,7 @@ std::string Server::returnAutoIndex(std::string &uri) {
         fullPath = uri + "/" + entry->d_name;
         
         if (stat(fullPath.c_str(), &statbuf) == -1) {
+            logger.log(WARNING, "Could not get file info for: " + fullPath);
             continue;  // Skip if we can't get file info
         }
 
@@ -70,3 +83,4 @@ std::string Server::returnAutoIndex(std::string &uri) {
 
     return autoIndexFile;
 }
+
