@@ -112,8 +112,8 @@ int Webserv::execute(void)
 	char				buffer[BUFFERSIZE];
 	ssize_t				read_count;
 	socklen_t			addrlen;
-	request_t			request[MAX_EVENTS];
-	response_t			response[MAX_EVENTS];
+	request_t			*request[MAX_EVENTS];
+	response_t			*response[MAX_EVENTS];
 	int					eventCount;
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
@@ -125,10 +125,12 @@ int Webserv::execute(void)
 	logger.log(INFO, "Server " + _servers[0].getServerName()
 		+ " started on port " + _servers[0].getPortString());
 	interrupted = 0;
+	request = (request_t *)malloc(sizeof(request_t));
+
 	for (size_t i = 0; i < MAX_EVENTS; i++)
 	{
 		_servers[0].getHttpHandler(i)->cleanHttpHandler();
-		resetRequestResponse(request[i], response[i]);
+		resetRequestResponse((*request)[i], (*response)[i]);
 	}
 	while (!interrupted)
 	{
@@ -142,7 +144,7 @@ int Webserv::execute(void)
 				for (size_t i = 0; i < MAX_EVENTS; i++)
 				{
 					_servers[0].getHttpHandler(i)->cleanHttpHandler();
-					resetRequestResponse(request[i], response[i]);
+					resetRequestResponse((*request)[i], (*response)[i]);
 				}
 				if (!acceptClienSocket(client_socket, addrlen, i))
 					break ;
@@ -170,14 +172,14 @@ int Webserv::execute(void)
 					_servers[0].getHttpHandler(i)->setReadCount(read_count);
 					if (_servers[0].getHttpHandler(i)->getHeaderChecked() == false)
 					{
-						parse_request(&request[i], std::string(buffer,
+						parse_request(&(*request)[i], std::string(buffer,
 								read_count), i);
-						_servers[0].getHttpHandler(i)->addToTotalReadCount(request[i].file.fileContent.size());
+						_servers[0].getHttpHandler(i)->addToTotalReadCount((*request)[i].file.fileContent.size());
 					}
 					else
 					{
 						_servers[0].getHttpHandler(i)->addToTotalReadCount(read_count);
-						request[i].file.fileContent = std::string(buffer,
+						(*request)[i].file.fileContent = std::string(buffer,
 								read_count);
 					}
 					if (read_count == -1)
@@ -211,7 +213,7 @@ int Webserv::execute(void)
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
 					hier();
-					serverActions(client_socket, request[i], response[i], i);
+					serverActions(client_socket, (*request)[i], (*response)[i], i);
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;
 					if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, client_tmp,
