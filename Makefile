@@ -36,7 +36,14 @@ $(LIBS_TARGET):
 
 library: $(LIBS_TARGET)
 
-re: fclean all
+re:
+	@read -p "Weet je het zeker Ruben? " answer; \
+	if [ "$$answer" = "ja" ]; then \
+		$(MAKE) fclean; \
+		$(MAKE) all; \
+	else \
+		echo "Aborted."; \
+	fi
 
 $(NAME): $(OBJS_DIR) $(OBJ) $(LIBS_TARGET)
 	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LINKERFLAGS) $(LIBS_TARGET) $(LIBS_TARGET)
@@ -49,7 +56,7 @@ $(OBJS_DIR)/%.o: $(SRC_DIR)/%.cpp
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
 
-#COLORS
+# COLORS
 RED = \033[1;31m
 GREEN = \033[1;32m
 YELLOW = \033[1;33m
