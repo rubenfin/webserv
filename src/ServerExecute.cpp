@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 13:26:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/02 14:52:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ void Server::setFileInServer(int index)
 				"File with same name already exists and has been overwritten");
 		}
 		logger.setWorking(true);
-		logger.log(ERR, std::to_string(getHttpHandler(index)->getTotalReadCount()));
+		logger.log(DEBUG, "Total read bytes in setFileInServer" + std::to_string(getHttpHandler(index)->getTotalReadCount()));
 		logger.setWorking(false);
 		if (getHttpHandler(index)->getTotalReadCount() <= BUFFERSIZE)
 			file = open(fullPath.c_str(), O_RDONLY | O_WRONLY | O_TRUNC, 0644);
