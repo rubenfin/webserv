@@ -16,8 +16,6 @@ void Webserv::serverActions(int client_socket, request_t &request,
 	printRequestStruct(&request, index);
 	try
 	{
-		if (request.requestURL == "/favicon.ico")
-			throw NotFoundException();
 		if (_servers[0].getHttpHandler(index)->getHeaderChecked() == false)
 			_servers[0].getHttpHandler(index)->handleRequest(_servers[0],
 				&request, &response);
@@ -51,6 +49,8 @@ void Webserv::serverActions(int client_socket, request_t &request,
 		|| _servers[0].getHttpHandler(index)->getBytesToRead() == 0
 		|| negativeStatusCode(_servers[0].getHttpHandler(index)->getResponse()->status))
 	{
+		if (negativeStatusCode(_servers[0].getHttpHandler(index)->getResponse()->status))
+			throw std::exception();
 		logger.log(RESPONSE, _servers[0].getResponse());
 		if (send(client_socket, _servers[0].getResponse().c_str(),
 				strlen(_servers[0].getResponse().c_str()), 0) == -1)
@@ -68,7 +68,7 @@ void Server::clientConnectionFailed(int client_socket, int index)
 	makeResponse((char *)PAGE_500, index);
 	if (send(client_socket, getResponse().c_str(),
 			strlen(getResponse().c_str()), 0) == -1)
-		logger.log(ERR, "[500] Failed to send response to client, send() with client connection failed");
+		logger.log(ERR, "[500] Failed to send response to client");
 }
 
 int	make_socket_non_blocking(int sfd)
@@ -119,6 +119,7 @@ int Webserv::execute(void)
 	int					client_tmp;
 
 	signal(SIGINT, handleSigInt);
+	signal(SIGPIPE, SIG_IGN);
 	addrlen = sizeof(_servers[0].getAddress());
 	_servers[0].setServer(_epollFd);
 	logger.log(INFO, "Server " + _servers[0].getServerName()
@@ -137,7 +138,10 @@ int Webserv::execute(void)
 			if (eventList[i].data.fd == _servers[0].getServerFd())
 			{
 				if (!acceptClienSocket(client_socket, addrlen, i))
+				{
+					logger.log(ERR, "BREAKED IN MAIN LOOP");
 					break ;
+				}
 				if (!make_socket_non_blocking(client_tmp))
 					continue ;
 				eventConfig.events = EPOLLIN | EPOLLET;
@@ -169,7 +173,8 @@ int Webserv::execute(void)
 					}
 					else if (read_count == 0)
 					{
-						logger.log(WARNING, "Closed client_tmp: " + std::to_string(client_tmp));
+						logger.log(WARNING, "Closed client_tmp: "
+							+ std::to_string(client_tmp));
 						close(client_tmp);
 					}
 					else
@@ -177,8 +182,29 @@ int Webserv::execute(void)
 						_servers[0].getHttpHandler(i)->setReadCount(read_count);
 						if (_servers[0].getHttpHandler(i)->getHeaderChecked() == false)
 						{
-							parse_request(&request[i], std::string(buffer,
-									read_count), i);
+							try
+							{
+								parse_request(&request[i], std::string(buffer,
+										read_count), i);
+							}
+							catch (const std::exception &e)
+							{
+								logger.log(ERR, "throw in parse_request");
+								response[i].status = httpStatusCode::NotFound;
+								_servers[0].makeResponse(getHttpStatusHTML(httpStatusCode::NotFound),
+									i);
+								logger.log(RESPONSE, _servers[0].getResponse());
+								if (send(client_tmp,
+										_servers[0].getResponse().c_str(),
+										strlen(_servers[0].getResponse().c_str()),
+										0) == -1)
+								{
+									std::cerr << " with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
+									logger.log(ERR, "[500] Failed to send response to client send()");
+								}
+								close(client_tmp);
+								continue ;
+							}
 							_servers[0].getHttpHandler(i)->addToTotalReadCount(request[i].file.fileContent.size());
 						}
 						else
@@ -203,7 +229,15 @@ int Webserv::execute(void)
 					logger.log(DEBUG,
 						"Amount of bytes read from original request: "
 						+ std::to_string(read_count));
-					serverActions(client_socket, request[i], response[i], i);
+					try
+					{
+						serverActions(client_socket, request[i], response[i], i);
+					}
+					catch(const std::exception& e)
+					{
+						close(client_socket);
+						continue;
+					}
 					eventConfig.events = EPOLLIN | EPOLLET;
 					eventConfig.data.fd = client_tmp;
 					if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, client_tmp,

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 15:22:02 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/02 14:41:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,18 @@ static void	setMethod(request_t *req)
 	// TODO: Throw an exception if no method found?
 }
 
-static void	setRequestURL(request_t *req)
+static void setRequestURL(request_t *req)
 {
 	std::size_t startPos = req->firstLine.find(" ");
 	if (startPos == std::string::npos)
 	{
 		req->requestURL = "";
 		return ;
+	}
+	if (req->firstLine.find("/favicon.ico") != std::string::npos)
+	{
+		logger.log(WARNING, "Found a /favicon and send 404 and closed socket");
+		throw NotFoundException();
 	}
 	startPos = req->firstLine.find("/", startPos);
 	if (startPos == std::string::npos)
@@ -151,8 +156,8 @@ void	parse_request(request_t *req, std::string buffer, int index)
 	req->file.fileExists = false;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
-	setMethod(req);
 	setRequestURL(req);
+	setMethod(req);
 	setRequestDirFile(req);
 	setRequestHeader(req);
 	setRequestBody(req);
