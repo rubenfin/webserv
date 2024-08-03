@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 16:03:46 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:24:42 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,31 +14,30 @@
 
 #include "Exceptions.hpp"
 #include "HttpHandler.hpp"
+#include "Logger.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
+#include <dirent.h>
+#include <fcntl.h>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <netinet/in.h>
 #include <regex>
+#include <signal.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <vector>
 #include <sys/epoll.h>
-#include <signal.h>
-#include "Logger.hpp"
-#include <dirent.h>
-#include <fcntl.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
 
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 1024
@@ -47,11 +46,10 @@
 
 extern volatile sig_atomic_t	interrupted;
 
-
-class	Logger;
-class	Server;
-class	Locations;
-class	HttpHandler;
+class							Logger;
+class							Server;
+class							Locations;
+class							HttpHandler;
 
 extern Logger &logger;
 
@@ -66,12 +64,19 @@ class Webserv
 	char **_environmentVariables;
 
   public:
+	void setupServers(socklen_t &addrlen);
 	int execute(void);
 	void printParsing(void);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
-	void serverActions(int client_socket, request_t &request, response_t &response, int index);
-	int acceptClienSocket(int& client_socket, socklen_t addrlen, const int &i);
+	void serverActions(const int&idx, int& socket);
+	void readFromSocketError(const int &err, const int &idx, const int &socket);
+	void readFromSocketSuccess(const int &idx, const char *buffer, const int& bytes_read);
+	int acceptClienSocket(int &client_socket, socklen_t addrlen, const int &i);
+	void cleanHandlerRequestResponse();
+	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
+	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
+	void setFdReadyForWrite(epoll_event &eventConfig, int &client_tmp);
 	Webserv(std::string fileName, char **env);
 	~Webserv();
 };
