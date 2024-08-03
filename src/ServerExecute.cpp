@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 13:20:17 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 17:27:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,6 @@ void Server::setFileInServer(int index)
 		{
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
-			file = open(fullPath.c_str(), O_TRUNC, 0644);
 		}
 		else
 			file = open(fullPath.c_str(), O_CREAT, 0644);
@@ -177,7 +176,7 @@ void Server::setFileInServer(int index)
 			// }
 			bytesWritten = write(file, fileContent.data(), fileContent.size());
 			// close(file);
-			if (bytesWritten < BUFFERSIZE - 1)
+			if (fileContent.empty())
 				throw CreatedException();
 			// if (bytesWritten == getHttpHandler(index)->getRequest()->contentLength)
 			// {
