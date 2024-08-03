@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:30:14 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:47:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ class Server
 	std::string 		_portString;
 	std::string 		_methodsList;
 	char				*_buffer;
-	std::string			_response;
 	int					_serverFd;
 	std::string 		_serverName;
 	int					_port;
@@ -75,7 +74,6 @@ class Server
 	void setServer(int epollFd);
 	void setEnv(char **&env, int index);
 	int getServerFd(void);
-	std::string getResponse(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
 	int getPort(void);
@@ -103,5 +101,9 @@ class Server
 	void deleteFileInServer(int index);
 	std::string returnAutoIndex(std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);
+	void sendResponse(const int &idx, int &socket);
+	void sendFavIconResponse(const int &idx, int &socket);
+	void sendNotFoundResponse(const int& idx, int &socket);
+	void linkHandlerResponseRequest(request_t *request, response_t *response);
 	~Server();
 };

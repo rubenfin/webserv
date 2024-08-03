@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/02 14:52:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:54:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ void Server::setFileInServer(int index)
 		if (access(uploadPath.c_str(), F_OK) != 0)
 		{
 			mkdir(uploadPath.c_str(), 0775);
-			logger.log(WARNING, "Could not find upload directory, so made one automatically.");
+			logger.log(WARNING, "Made upload dir");
 		}
 		std::string fileName = getHttpHandler(index)->getRequest()->file.fileName;
 		std::string &fileContent = getHttpHandler(index)->getRequest()->file.fileContent;
@@ -161,21 +161,20 @@ void Server::setFileInServer(int index)
 		{
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
+			file = open(fullPath.c_str(), O_TRUNC, 0644);
 		}
-		logger.setWorking(true);
-		logger.log(DEBUG, "Total read bytes in setFileInServer" + std::to_string(getHttpHandler(index)->getTotalReadCount()));
-		logger.setWorking(false);
-		if (getHttpHandler(index)->getTotalReadCount() <= BUFFERSIZE)
-			file = open(fullPath.c_str(), O_RDONLY | O_WRONLY | O_TRUNC, 0644);
 		else
-			file = open(fullPath.c_str(), O_WRONLY | O_APPEND, 0644);
+			file = open(fullPath.c_str(), O_CREAT, 0644);
+		file = open(fullPath.c_str(), O_WRONLY | O_APPEND, 0644);
 		if (file != -1)
 		{
 			// size_t pos = 0;
-			// while ((pos = fileContent.find(getHttpHandler(index)->getRequest()->file.fileBoundary + "--")) != std::string::npos) {
-			// 		fileContent.erase(pos, getHttpHandler(index)->getRequest()->file.fileBoundary.length() + 2);
+			// while ((pos = fileContent.find(getHttpHandler(index)->getRequest()->file.fileBoundary
+			// 			+ "--")) != std::string::npos) {
+			// // 		fileContent.erase(pos,
+			// 			getHttpHandler(index)->getRequest()->file.fileBoundary.length()
+			// 			+ 2);
 			// }
-
 			bytesWritten = write(file, fileContent.data(), fileContent.size());
 			// close(file);
 			logger.log(DEBUG, std::to_string(bytesWritten) + "|"
@@ -207,7 +206,7 @@ void Server::setFileInServer(int index)
 
 void Server::deleteFileInServer(int index)
 {
-	int fileNameSize;
+	int	fileNameSize;
 
 	logger.log(DEBUG, "in deleteFileInServer");
 	std::string filePath = getUpload() + "/"
@@ -286,4 +285,14 @@ void Server::deleteFileInServer(int index)
 		getHttpHandler(index)->getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}
+}
+
+void Server::sendResponse(const int &idx, int &socket)
+{
+	logger.log(RESPONSE, getHttpHandler(idx)->getResponse()->response);
+	if (send(socket, getHttpHandler(idx)->getResponse()->response.c_str(), strlen(getHttpHandler(idx)->getResponse()->response.c_str()), 0) == -1)
+	{
+		logger.log(ERR, "[500] Failed to send response to client, send()");
+	}
+	getHttpHandler(idx)->cleanHttpHandler();
 }

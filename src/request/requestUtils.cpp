@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 17:04:25 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:56:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void	printRequestStruct(request_t *req, int index)
 	logger.log(REQUEST, "http_v: " + req->http_v);
 	logger.log(REQUEST, "firstLine: " + req->firstLine);
 	logger.log(REQUEST, "requestBody: " + req->requestBody);
-    logger.log(DEBUG, 	"FILESIZE OF REQUESTBODY: " + std::to_string(req->requestBody.size()));
+    // logger.log(DEBUG, 	"FILESIZE OF REQUESTBODY: " + std::to_string(req->requestBody.size()));
 	logger.log(REQUEST, "requestURL: " + req->requestURL);
 	logger.log(REQUEST, "requestDirectory: " + req->requestDirectory);
 	logger.log(REQUEST, "requestFile: " + req->requestFile);

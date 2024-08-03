@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/31 12:46:44 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/02 16:42:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,11 +90,26 @@ Webserv::Webserv(std::string fileName, char **env)
 	_epollFd = epoll_create(1);
 	setConfig(fileName);
 	_environmentVariables = env;
+	interrupted = 0;
 }
 
 void Webserv::setEnv(char **env)
 {
 	_environmentVariables = env;
+}
+
+void Webserv::setupServers(socklen_t &addrlen)
+{
+	addrlen = sizeof(_servers[0].getAddress());
+	_servers[0].setServer(_epollFd);
+	logger.log(INFO, "Server " + _servers[0].getServerName()
+		+ " started on port " + _servers[0].getPortString());
+}
+
+void Webserv::cleanHandlerRequestResponse()
+{
+	for (size_t i = 0; i < MAX_EVENTS; i++)
+		_servers[0].getHttpHandler(i)->cleanHttpHandler();
 }
 
 Webserv::~Webserv()

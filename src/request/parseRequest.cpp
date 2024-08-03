@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/02 14:41:29 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:16:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,8 @@ static void setRequestURL(request_t *req)
 	}
 	if (req->firstLine.find("/favicon.ico") != std::string::npos)
 	{
-		logger.log(WARNING, "Found a /favicon and send 404 and closed socket");
-		throw NotFoundException();
+		logger.log(WARNING, "Found a /favicon.ico send back 404");
+		throw FavIconException();
 	}
 	startPos = req->firstLine.find("/", startPos);
 	if (startPos == std::string::npos)
@@ -149,8 +149,9 @@ static void	setRequestBody(request_t *req)
 	req->requestBody = req->requestContent.substr(foundBody);
 }
 
-void	parse_request(request_t *req, std::string buffer, int index)
+void	parse_request(request_t *req, std::string buffer, const int& idx, const int& bytes_read)
 {
+	req->currentBytesRead = bytes_read;
 	req->requestContent = buffer;
     logger.log(DEBUG, 	"size of requestContent at start: " + std::to_string(req->requestContent.size()));
 	req->file.fileExists = false;
@@ -162,7 +163,7 @@ void	parse_request(request_t *req, std::string buffer, int index)
 	setRequestHeader(req);
 	setRequestBody(req);
 	setFile(req, &req->file);
-	printRequestStruct(req, index);
+	printRequestStruct(req, idx);
 	if (req->contentLength)
 		printFileStruct(&req->file);
 }

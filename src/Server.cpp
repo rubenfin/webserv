@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 16:01:22 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 12:49:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void Server::initializeAddress()
 {
 	this->_address->sin_family = AF_INET;
 	this->_address->sin_addr.s_addr = INADDR_ANY;
-		// autofills ip address with current host
+	// autofills ip address with current host
 	this->_address->sin_port = htons(getPort());
 	if (getPort() <= 0)
 	{
@@ -213,7 +213,8 @@ void Server::setUpload(void)
 	{
 		if (_locations[i].getLocationDirective() == _upload)
 		{
-			logger.log(INFO, "Set upload variable: " + _upload + ",equal to location directive: "
+			logger.log(INFO, "Set upload variable: " + _upload
+				+ ",equal to location directive: "
 				+ _locations[i].getLocationDirective());
 			_upload = getRoot() + _upload;
 			return ;
@@ -263,11 +264,6 @@ std::string Server::getError404(void)
 int Server::getSocketFD(void)
 {
 	return (this->_serverFd);
-}
-
-std::string Server::getResponse(void)
-{
-	return (_response);
 }
 
 std::string Server::getServerName(void)
@@ -364,7 +360,13 @@ void Server::setLocationsRegex(std::string serverContent)
 	}
 }
 
-
+void Server::linkHandlerResponseRequest(request_t *request,
+	response_t *response)
+{
+	for (size_t i = 0; i < MAX_EVENTS; i++)
+		getHttpHandler(i)->connectToRequestResponse(&request[i], &response[i],
+			i);
+}
 
 Server::Server(std::string serverContent)
 {
@@ -380,36 +382,36 @@ Server::Server(std::string serverContent)
 	logger.log(INFO, "Server port: " + std::to_string(_port));
 }
 
-void Server::makeResponseForRedirect(int index)
+void Server::makeResponseForRedirect(int idx)
 {
 	std::string header;
 	std::string body;
 	logger.log(DEBUG, "in makeResponseForRedirect");
 	// Use 302 Found for temporary redirects,
-		// or 301 Moved Permanently for permanent redirects
-	getHttpHandler(index)->getResponse()->status = httpStatusCode::MovedPermanently;
-		// or 301 for permanent
-	std::string message = getHttpStatusMessage(getHttpHandler(index)->getResponse()->status);
+	// or 301 Moved Permanently for permanent redirects
+	getHttpHandler(idx)->getResponse()->status = httpStatusCode::MovedPermanently;
+	// or 301 for permanent
+	std::string message = getHttpStatusMessage(getHttpHandler(idx)->getResponse()->status);
 	header = "HTTP/1.1 " + message + "\r\n";
-	std::string redirectUrl = getHttpHandler(index)->getFoundDirective()->getReturn();
+	std::string redirectUrl = getHttpHandler(idx)->getFoundDirective()->getReturn();
 	if (redirectUrl.substr(0, 4) != "http")
 	{
 		redirectUrl = "http://" + redirectUrl;
-			// Ensure the URL includes the protocol
+		// Ensure the URL includes the protocol
 	}
 	header += "Location: " + redirectUrl + "\r\n";
 	header += "Content-Type: text/html\r\n";
 	header += "Content-Length: 0"
 				"\r\n";
 	header += "\r\n";
-	_response = header + body;
+	getHttpHandler(idx)->getResponse()->response = header + body;
 }
 
-void Server::makeResponse(char *buffer, int index)
+void Server::makeResponse(char *buffer, int idx)
 {
 	std::string header;
 	std::string body;
-	std::string message = getHttpStatusMessage(getHttpHandler(index)->getResponse()->status);
+	std::string message = getHttpStatusMessage(getHttpHandler(idx)->getResponse()->status);
 	header = "HTTP/1.1 " + message + "\r\n";
 	if (buffer)
 	{
@@ -419,17 +421,18 @@ void Server::makeResponse(char *buffer, int index)
 	else
 		header += "Content-Length: 0";
 	header += "\r\n";
-	_response = header + body;
+	getHttpHandler(idx)->getResponse()->response = header + body;
 }
 
-void Server::readFile(int index)
+void Server::readFile(int idx)
 {
 	int	file;
 	int	rdbytes;
 
 	logger.log(DEBUG, "Request URL in readFile() "
-		+ getHttpHandler(index)->getRequest()->requestURL);
-	file = open(getHttpHandler(index)->getRequest()->requestURL.c_str(), O_RDONLY);
+		+ getHttpHandler(idx)->getRequest()->requestURL);
+	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
+			O_RDONLY);
 	if (file == -1)
 	{
 		perror("opening file of responseURL");
@@ -438,14 +441,40 @@ void Server::readFile(int index)
 	rdbytes = read(file, _buffer, 1000000);
 	_buffer[rdbytes] = '\0';
 	close(file);
-	makeResponse(_buffer, index);
+	makeResponse(_buffer, idx);
+}
+
+void Server::sendFavIconResponse(const int &idx, int &socket)
+{
+	std::string buffer("HTTP/1.1 404 Not Found\r\n\r\n"
+		+ std::string(PAGE_404));
+	logger.log(RESPONSE, buffer);
+	if (send(socket, buffer.c_str(), buffer.size(), 0) == -1)
+	{
+		std::cerr << "send failed with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
+		logger.log(ERR, "[500] Failed to send response to client, send()");
+	}
+	getHttpHandler(idx)->cleanHttpHandler();
+}
+
+void Server::sendNotFoundResponse(const int &idx, int &socket)
+{
+	if (this->getHttpHandler(idx)->getResponse()->status == httpStatusCode::NotFound
+		&& !this->getError404().empty())
+	{
+		this->getHttpHandler(idx)->getRequest()->requestURL = this->getRoot()
+			+ this->getError404();
+		this->readFile(idx);
+	}
+	else
+		this->makeResponse(PAGE_404, idx);
+	this->sendResponse(idx, socket);
+	getHttpHandler(idx)->cleanHttpHandler();
 }
 
 Server::~Server()
 {
 	for (size_t i = 0; i < MAX_EVENTS; i++)
-	{
-			delete	_http_handler[i];
-	}
+		delete _http_handler[i];
 	free(_buffer);
 }
