@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:13:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 13:15:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class HttpHandler
 	void methodCheck(void);
 	void fileCheck();
 	void setDelete();
+	void setHeaderChecked(bool boolean);
 	void checkLocationMethod(void);
 	Locations *getFoundDirective(void);
 	request_t *getRequest(void);

@@ -99,9 +99,17 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
-	parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
-		std::string(buffer, bytes_read), idx, bytes_read);
-	_servers[0].getHttpHandler(idx)->handleRequest(_servers[0]);
+	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
+	if (_servers[0].getHttpHandler(idx)->getHeaderChecked() == false)
+	{
+		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
+			std::string(buffer, bytes_read), idx);
+		_servers[0].getHttpHandler(idx)->handleRequest(_servers[0]);
+		_servers[0].getHttpHandler(idx)->setHeaderChecked(true);
+	}
+	else
+		_servers[0].getHttpHandler(idx)->getRequest()->requestBody = std::string(buffer,
+				bytes_read);
 }
 
 void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)

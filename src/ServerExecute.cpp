@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:54:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 13:20:17 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,8 +177,8 @@ void Server::setFileInServer(int index)
 			// }
 			bytesWritten = write(file, fileContent.data(), fileContent.size());
 			// close(file);
-			logger.log(DEBUG, std::to_string(bytesWritten) + "|"
-				+ std::to_string(getHttpHandler(index)->getRequest()->contentLength));
+			if (bytesWritten < BUFFERSIZE - 1)
+				throw CreatedException();
 			// if (bytesWritten == getHttpHandler(index)->getRequest()->contentLength)
 			// {
 			// 	getHttpHandler(index)->getResponse()->status = httpStatusCode::Created;

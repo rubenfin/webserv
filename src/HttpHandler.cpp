@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:22:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/03 13:15:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,4 +331,9 @@ bool HttpHandler::getRedirect(void)
 bool HttpHandler::getHeaderChecked(void)
 {
 	return (_headerChecked);
+}
+
+void HttpHandler::setHeaderChecked(bool boolean)
+{
+	_headerChecked = boolean;
 }
