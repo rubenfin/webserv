@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 13:38:35 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 14:55:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -438,7 +438,7 @@ void Server::readFile(int idx)
 		perror("opening file of responseURL");
 		return ;
 	}
-	rdbytes = read(file, _buffer, BUFFERSIZE);
+	rdbytes = read(file, _buffer, BUFFERSIZE - 1);
 	_buffer[rdbytes] = '\0';
 	close(file);
 	makeResponse(_buffer, idx);
@@ -477,4 +477,5 @@ Server::~Server()
 	for (size_t i = 0; i < MAX_EVENTS; i++)
 		delete _http_handler[i];
 	free(_buffer);
+	delete this->_address;
 }

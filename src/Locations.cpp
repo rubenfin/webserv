@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/07/21 14:16:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 15:03:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ std::string Locations::getLocationDirective(void)
 
 MethodsLoc Locations::getMethods(void)
 {
-	return(_allowedMethods);
+	return (_allowedMethods);
 }
 
 std::string Locations::getAlias(void)
@@ -83,7 +83,7 @@ std::string Locations::getReturn(void)
 	return (_return);
 }
 
-bool 		Locations::getAutoIndex(void)
+bool Locations::getAutoIndex(void)
 {
 	return (_autoindex);
 }
@@ -117,21 +117,24 @@ Locations::Locations(const Locations *other)
 
 std::string Locations::extractValueUntilNL(std::string toSearch)
 {
-    std::size_t keywordPos = _locationContent.find(toSearch);
-    if (keywordPos != std::string::npos)
-    {
-        std::size_t beginLocation = keywordPos + toSearch.size();
-        while (beginLocation < _locationContent.size() && std::isspace(_locationContent[beginLocation]) && _locationContent[beginLocation] != '\n')
-            ++beginLocation;
-        std::size_t endLocation = beginLocation;
-        while (endLocation < _locationContent.size() && _locationContent[endLocation] != '\n')
-            ++endLocation;
-        std::string directory = _locationContent.substr(beginLocation, endLocation - beginLocation);
-        return directory;
-    }
-    return "";
+	std::size_t keywordPos = _locationContent.find(toSearch);
+	if (keywordPos != std::string::npos)
+	{
+		std::size_t beginLocation = keywordPos + toSearch.size();
+		while (beginLocation < _locationContent.size()
+			&& std::isspace(_locationContent[beginLocation])
+			&& _locationContent[beginLocation] != '\n')
+			++beginLocation;
+		std::size_t endLocation = beginLocation;
+		while (endLocation < _locationContent.size()
+			&& _locationContent[endLocation] != '\n')
+			++endLocation;
+		std::string directory = _locationContent.substr(beginLocation,
+				endLocation - beginLocation);
+		return (directory);
+	}
+	return ("");
 }
-
 
 std::string Locations::extractValue(std::string toSearch)
 {
@@ -171,24 +174,41 @@ void Locations::setCgi_pass(void)
 
 void Locations::setReturn(void)
 {
-	_return = extractValue("return");
+	_return =  extractValue("return");
 }
 
 std::string Locations::getRoot(void)
 {
-	return(_root);
+	return (_root);
 }
 std::string Locations::getIndex(void)
 {
-	return(_index);
+	return (_index);
 }
 std::string Locations::getCgi_pass(void)
 {
-	return(_cgi_pass);
+	return (_cgi_pass);
 }
 
-Locations::Locations()
+std::string _locationContent;
+std::string _methodsList;
+std::string _locationDirective;
+MethodsLoc	_allowedMethods;
+std::string _root;
+std::string _index;
+std::string _cgi_pass;
+std::string _alias;
+std::string _url;
+std::string _return ;
+bool		_autoindex;
+
+Locations::Locations() : _locationContent(""), _methodsList(""),
+	_locationDirective(""), _root(""), _index(""), _cgi_pass(""), _alias(""),
+	_url(""), _return(""), _autoindex(false)
 {
+	_allowedMethods.GET = false;
+	_allowedMethods.DELETE = false;
+	_allowedMethods.POST = false;
 }
 
 Locations::~Locations()

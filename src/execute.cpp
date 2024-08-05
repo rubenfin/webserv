@@ -6,7 +6,6 @@ void	handleSigInt(int signal)
 	{
 		logger.log(ERR, "closed Webserv with SIGINT");
 		interrupted = 1;
-		exit(EXIT_FAILURE);
 	}
 }
 
@@ -118,7 +117,7 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 void Webserv::removeFdFromEpoll(int &socket)
 {
 
-	if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, socket, NULL) == -1)
+	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, socket, NULL) == -1)
 	{
 		perror("");
 		std::cout << "failed to remove fd from epoll" << std::endl;
@@ -215,17 +214,20 @@ int Webserv::execute(void)
 				catch (const FavIconException)
 				{
 					_servers[0].sendFavIconResponse(idx, client_socket);
+					removeFdFromEpoll(client_socket);
 					close(client_socket);
 				}
 				catch (const NotFoundException &e)
 				{
 					_servers[0].sendNotFoundResponse(idx, client_socket);
+					removeFdFromEpoll(client_socket);
 					close(client_socket);
 				}
 				catch (const HttpException &e)
 				{
 					_servers[0].makeResponse(e.getPageContent(), idx);
 					_servers[0].sendResponse(idx, client_socket);
+					removeFdFromEpoll(client_socket);
 					close(client_socket);
 				}
 			}
