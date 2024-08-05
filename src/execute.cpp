@@ -115,6 +115,17 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read;
 }
 
+void Webserv::removeFdFromEpoll(int &socket)
+{
+
+	if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, socket, NULL) == -1)
+	{
+		perror("");
+		std::cout << "failed to remove fd from epoll" << std::endl;
+		close(socket);
+	}
+}
+
 void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 {
 	eventConfig.events = EPOLLIN | EPOLLET;

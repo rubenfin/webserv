@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 13:16:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 13:45:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ static void	setHttpVersion(request_t *req)
 	if (firstSpace == std::string::npos)
 	{
 		req->http_v = "invalid";
+		throw FavIconException();
 		return ;
 	}
 	std::size_t secondSpace = req->firstLine.find(" ", firstSpace + 1);
