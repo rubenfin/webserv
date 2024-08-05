@@ -100,16 +100,17 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
-	if (_servers[0].getHttpHandler(idx)->getHeaderChecked() == false)
+	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
 			std::string(buffer, bytes_read), idx);
 		_servers[0].getHttpHandler(idx)->handleRequest(_servers[0]);
-		_servers[0].getHttpHandler(idx)->setHeaderChecked(true);
+		if (bytes_read == BUFFERSIZE - 1)
+			_servers[0].getHttpHandler(idx)->setChunked(true);
+		return	;
 	}
-	else
-		_servers[0].getHttpHandler(idx)->getRequest()->requestBody = std::string(buffer,
-				bytes_read);
+	_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
+			bytes_read);
 }
 
 void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)

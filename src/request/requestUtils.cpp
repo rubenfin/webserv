@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:56:05 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 11:23:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void 	resetRequestFile(file_t &file)
 	file.fileContentDisposition = "";
 	file.fileContentLength = 0;
 	file.fileContentType = "";
-	file.fileEndBoundaryFound = false;
+	file.fileChecked = false;
 	file.fileExists = false;
 	file.fileName = "";
 }
@@ -44,6 +44,7 @@ void	resetRequest(request_t &request)
 	request.requestFile = "";
 	request.contentType = "";
 	request.method = ERROR;
+	request.currentBytesRead = 0;
 	resetRequestFile(request.file);
 }
 

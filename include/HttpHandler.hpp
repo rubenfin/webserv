@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/03 13:15:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 10:54:56 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class HttpHandler
 	bool _hasRedirect;
 	bool _returnAutoIndex;
 	bool _headerChecked;
+	bool _isChunked;
 
   public:
 	HttpHandler();
@@ -49,6 +50,7 @@ class HttpHandler
 	void fileCheck();
 	void setDelete();
 	void setHeaderChecked(bool boolean);
+	void setChunked(bool boolean);
 	void checkLocationMethod(void);
 	Locations *getFoundDirective(void);
 	request_t *getRequest(void);
@@ -60,6 +62,7 @@ class HttpHandler
 	bool getRedirect(void);
 	bool getReturnAutoIndex(void);
 	bool getHeaderChecked(void);
+	bool getChunked(void);
 	void connectToRequestResponse(request_t *request, response_t *response, int idx);
 	void cleanHttpHandler();
 };

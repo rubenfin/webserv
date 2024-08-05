@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/03 13:15:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 10:55:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,7 +333,17 @@ bool HttpHandler::getHeaderChecked(void)
 	return (_headerChecked);
 }
 
+bool HttpHandler::getChunked(void)
+{
+	return (_isChunked);
+}
+
 void HttpHandler::setHeaderChecked(bool boolean)
 {
 	_headerChecked = boolean;
+}
+
+void HttpHandler::setChunked(bool boolean)
+{
+	_isChunked = boolean;
 }

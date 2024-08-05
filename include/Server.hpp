@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:47:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 11:19:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,13 +97,14 @@ class Server
 	void makeResponse(char *buffer, int index);
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
-	void setFileInServer(int index);
-	void deleteFileInServer(int index);
+	void setFileInServer(int idx);
+	void deleteFileInServer(int idx);
 	std::string returnAutoIndex(std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
 	void sendNotFoundResponse(const int& idx, int &socket);
 	void linkHandlerResponseRequest(request_t *request, response_t *response);
+	void checkFileDetails(const int &idx, int &file);
 	~Server();
 };
