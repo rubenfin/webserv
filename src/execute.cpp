@@ -28,7 +28,7 @@ void Webserv::serverActions(const int &idx, int &socket)
 	else
 		_servers[0].readFile(idx);
 	if (_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead < BUFFERSIZE
-		- 1)
+		- 1 && !_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		_servers[0].sendResponse(idx, socket);
 	}
@@ -108,10 +108,11 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 		_servers[0].getHttpHandler(idx)->handleRequest(_servers[0]);
 		if (bytes_read == BUFFERSIZE - 1)
 			_servers[0].getHttpHandler(idx)->setChunked(true);
-		return	;
 	}
-	_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
-			bytes_read);
+	else
+		_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
+				bytes_read);
+	_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read;
 }
 
 void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 12:49:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 13:38:35 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void Server::setServer(int epollFd)
 	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
 	for (size_t i = 0; i < MAX_EVENTS; i++)
 		_http_handler[i] = new HttpHandler;
-	_buffer = (char *)malloc(1000000 * sizeof(char));
+	_buffer = (char *)malloc(BUFFERSIZE * sizeof(char));
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -438,7 +438,7 @@ void Server::readFile(int idx)
 		perror("opening file of responseURL");
 		return ;
 	}
-	rdbytes = read(file, _buffer, 1000000);
+	rdbytes = read(file, _buffer, BUFFERSIZE);
 	_buffer[rdbytes] = '\0';
 	close(file);
 	makeResponse(_buffer, idx);

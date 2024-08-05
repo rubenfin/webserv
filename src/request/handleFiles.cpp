@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 11:09:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 13:17:37 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,14 +63,16 @@ void findFileContent(request_t *req, file_t *requestFile)
         start += 4;
     }
     
-    std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
-    if (end != std::string::npos) {
-        logger.log(WARNING, "Did not find any ending boundary");
-        end = req->requestBody.rfind("\r\n", end);
-    }
-    requestFile->fileEndBoundaryFound = true;
-    requestFile->fileContent = req->requestBody.substr(start, end -start);
-    requestFile->fileContentLength = requestFile->fileContent.size();
+    // std::size_t end = req->requestBody.find(requestFile->fileBoundary + "--");
+    // if (end != std::string::npos) {
+    //     logger.log(WARNING, "Did not find any ending boundary");
+    //     end = req->requestBody.rfind("\r\n", end);
+    // }
+    // requestFile->fileEndBoundaryFound = true;
+    // requestFile->fileContent = req->requestBody.substr(start, end -start);
+    // requestFile->fileContentLength = requestFile->fileContent.size();
+    requestFile->fileContent = req->requestBody.substr(start);
+    std::cout << requestFile->fileContent << std::endl;
 }
 
 

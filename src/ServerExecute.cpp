@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 11:21:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 13:24:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,15 +157,16 @@ void Server::checkFileDetails(const int &idx, int &file)
 				"File with same name already exists and has been overwritten");
 			file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		}
+		else
+			file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	}
 	getHttpHandler(idx)->getRequest()->file.fileChecked = true;
 }
 
 void Server::setFileInServer(int idx)
 {
+	int 	bytesWritten;
 	int		file;
-	ssize_t	bytesWritten;
-
 	std::string &fileContent = getHttpHandler(idx)->getRequest()->file.fileContent;
 	std::string fullPath = getUpload() + "/"
 		+ getHttpHandler(idx)->getRequest()->file.fileName;
@@ -184,8 +185,9 @@ void Server::setFileInServer(int idx)
 		// }
 		bytesWritten = write(file, fileContent.data(), fileContent.size());
 		// close(file);
-		if (getHttpHandler(idx)->getRequest()->currentBytesRead < BUFFERSIZE
-			- 1)
+		std::cout << getHttpHandler(idx)->getRequest()->currentBytesRead << std::endl;
+		std::cout  << getHttpHandler(idx)->getRequest()->totalBytesRead  << "|" << getHttpHandler(idx)->getRequest()->contentLength << std::endl;
+		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
 			throw CreatedException();
 		}
