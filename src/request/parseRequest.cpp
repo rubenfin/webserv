@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 14:45:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 18:10:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ static void	setHttpVersion(request_t *req)
 	if (firstSpace == std::string::npos)
 	{
 		req->http_v = "invalid";
-		throw FavIconException();
 		return ;
 	}
 	std::size_t secondSpace = req->firstLine.find(" ", firstSpace + 1);
@@ -154,9 +153,8 @@ void	parse_request(request_t *req, std::string buffer, const int& idx)
 {
 	req->requestContent = buffer;
     logger.log(DEBUG, 	"size of requestContent at start: " + std::to_string(req->requestContent.size()));
-	if (req->requestContent.size() == 0)
-		throw NotFoundException();
 	req->file.fileExists = false;
+	std::cerr << req->requestContent << std::endl;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
 	setRequestURL(req);

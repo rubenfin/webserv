@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 13:17:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 16:54:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,16 @@ void setFile(request_t *req, file_t *requestFile)
 	requestFile->fileBoundary = trim(extractValue(req, "Content-Type: multipart/form-data; boundary="));
 	if (!requestFile->fileBoundary.empty())
 	{
-		requestFile->fileContentDisposition = trim(extractValue(req, "Content-Disposition: "));
+        try
+    {requestFile->fileContentDisposition = trim(extractValue(req, "Content-Disposition: "));
 		trimLastChar(requestFile->fileContentDisposition);
 		requestFile->fileName = trim(extractValue(req, "filename="));
 		trimFirstChar(requestFile->fileName);
 		trimLastChar(requestFile->fileName);
-		findFileContent(req, &req->file);
+		findFileContent(req, &req->file);}
+        catch(const std::exception &e)
+        {
+            std::cout << "hier" << std::endl;
+        }
     }
 }

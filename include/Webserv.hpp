@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 14:21:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 18:07:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ class Webserv
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
 	void serverActions(const int&idx, int& socket);
-	void readFromSocketError(const int &err, const int &idx, const int &socket);
+	void readFromSocketError(const int &err, const int &idx, int &socket);
 	void readFromSocketSuccess(const int &idx, const char *buffer, const int& bytes_read);
-	int acceptClienSocket(int &client_socket, socklen_t addrlen, const int &i);
+	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i);
 	void cleanHandlerRequestResponse();
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);

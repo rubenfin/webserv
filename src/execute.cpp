@@ -30,6 +30,9 @@ void Webserv::serverActions(const int &idx, int &socket)
 		- 1 && !_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		_servers[0].sendResponse(idx, socket);
+		removeFdFromEpoll(socket);
+		close(socket);
+
 	}
 }
 
@@ -43,28 +46,26 @@ void Server::clientConnectionFailed(int client_socket, int idx)
 		logger.log(ERR, "[500] Failed to send response to client");
 }
 
-int	make_socket_non_blocking(int &sfd)
+int	makeSocketNonBlocking(int &sfd)
 {
 	int	flags;
 
 	flags = fcntl(sfd, F_GETFL, 0);
 	if (flags == -1)
 	{
-		close(sfd);
 		perror("fcntl first if");
 		return (0);
 	}
 	flags |= O_NONBLOCK;
 	if (fcntl(sfd, F_SETFL, flags) == -1)
 	{
-		close(sfd);
 		perror("fcntl second if");
 		return (0);
 	}
 	return (1);
 }
 
-int Webserv::acceptClienSocket(int &client_socket, socklen_t addrlen,
+int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
 	const int &i)
 {
 	client_socket = accept(_servers[0].getSocketFD(),
@@ -79,7 +80,7 @@ int Webserv::acceptClienSocket(int &client_socket, socklen_t addrlen,
 }
 
 void Webserv::readFromSocketError(const int &err, const int &idx,
-	const int &socket)
+	int &socket)
 {
 	if (err == -1)
 	{
@@ -87,19 +88,23 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 		_servers[0].getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
 		_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler(idx)->getResponse()->status),
 			idx);
+		removeFdFromEpoll(socket);
 		close(socket);
 	}
 	else if (err == 0)
 	{
-		logger.log(WARNING, "Closed client_tmp: " + std::to_string(socket));
+		logger.log(WARNING, "Removed socket " + std::to_string(socket) + " from epoll because 0 bytes read");
+		removeFdFromEpoll(socket);
 		close(socket);
 	}
+
 }
 
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
+	std::cerr << _servers[0].getHttpHandler(idx)->getChunked() << std::endl;
 	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
@@ -160,6 +165,12 @@ void Webserv::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 	}
 }
 
+int fd_is_valid(int fd)
+{
+    return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}
+
+
 int Webserv::execute(void)
 {
 	int					client_socket;
@@ -185,10 +196,13 @@ int Webserv::execute(void)
 		{
 			if (eventList[idx].data.fd == _servers[0].getServerFd())
 			{
-				if (!acceptClienSocket(client_socket, addrlen, idx))
+				if (!acceptClientSocket(client_socket, addrlen, idx))
 					break ;
-				if (!make_socket_non_blocking(client_tmp))
+				if (!makeSocketNonBlocking(client_socket))
+				{
+					close(client_socket);
 					continue ;
+				}
 				addFdToReadEpoll(eventConfig, client_socket);
 			}
 			else
@@ -199,15 +213,18 @@ int Webserv::execute(void)
 					if (eventList[idx].events & EPOLLIN)
 					{
 						bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
-						buffer[bytes_read] = '\0';
+						std::cerr << bytes_read << std::endl;
 						if (bytes_read < 1)
 							readFromSocketError(bytes_read, idx, client_tmp);
+						buffer[bytes_read] = '\0';
 						readFromSocketSuccess(idx, buffer, bytes_read);
 						setFdReadyForWrite(eventConfig, client_tmp);
 					}
 					else if (eventList[idx].events & EPOLLOUT)
 					{
 						serverActions(idx, client_tmp);
+						if (!fd_is_valid(client_tmp))
+							continue ;
 						setFdReadyForRead(eventConfig, client_tmp);
 					}
 				}
@@ -238,3 +255,4 @@ int Webserv::execute(void)
 		+ _servers[0].getPortString());
 	return (0);
 }
+

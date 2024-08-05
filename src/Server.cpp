@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 14:55:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 17:46:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -429,7 +429,8 @@ void Server::readFile(int idx)
 	int	file;
 	int	rdbytes;
 
-	logger.log(DEBUG, "Request URL in readFile() "
+
+	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
 	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
 			O_RDONLY);
