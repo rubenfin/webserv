@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 10:55:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/05 11:56:20 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,6 +288,7 @@ void HttpHandler::cleanHttpHandler()
 	_hasRedirect = false;
 	_returnAutoIndex = false;
 	_headerChecked = false;
+	_isChunked = false;
 }
 
 void HttpHandler::connectToRequestResponse(request_t *request, response_t *response, int idx)

@@ -33,6 +33,7 @@ void Webserv::serverActions(const int &idx, int &socket)
 		_servers[0].sendResponse(idx, socket);
 	}
 }
+
 void Server::clientConnectionFailed(int client_socket, int idx)
 {
 	logger.log(ERR, "[500] Error in accept()");
