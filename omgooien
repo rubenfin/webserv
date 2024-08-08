@@ -1,0 +1,4 @@
+setten van servers
+1 epoll_wait
+connecties kunnen maken met meerdere server_fd
+read en write blijft volgensmij zelfde omdat het gwn weer in epoll wordt gegooid

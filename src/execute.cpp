@@ -30,7 +30,6 @@ void Webserv::serverActions(const int &idx, int &socket)
 		- 1 && !_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		_servers[0].sendResponse(idx, socket);
-
 	}
 }
 
@@ -77,8 +76,7 @@ int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
 	return (1);
 }
 
-void Webserv::readFromSocketError(const int &err, const int &idx,
-	int &socket)
+void Webserv::readFromSocketError(const int &err, const int &idx, int &socket)
 {
 	if (err == -1)
 	{
@@ -91,11 +89,11 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 	}
 	else if (err == 0)
 	{
-		logger.log(WARNING, "Removed socket " + std::to_string(socket) + " from epoll because 0 bytes read");
+		logger.log(DEBUG, "Removed socket " + std::to_string(socket)
+			+ " from epoll because 0 bytes read");
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
-
 }
 
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
@@ -119,7 +117,6 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 
 void Webserv::removeFdFromEpoll(int &socket)
 {
-
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, socket, NULL) == -1)
 	{
 		perror("");
@@ -163,24 +160,65 @@ void Webserv::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 	}
 }
 
-int fd_is_valid(int fd)
+int	fd_is_valid(int fd)
 {
-    return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+	return (fcntl(fd, F_GETFD) != -1 || errno != EBADF);
 }
 
+void Webserv::readWriteServer(struct epoll_event *eventList, int idx, int client_socket, struct epoll_event eventConfig)
+{
+	int		client_tmp;
+	ssize_t	bytes_read;
+	char	buffer[BUFFERSIZE];
+
+	try
+	{
+		client_tmp = eventList[idx].data.fd;
+		if (eventList[idx].events & EPOLLIN)
+		{
+			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
+			std::cerr << bytes_read << std::endl;
+			if (bytes_read < 1)
+			{
+				readFromSocketError(bytes_read, idx, client_tmp);
+				return;
+			}
+			buffer[bytes_read] = '\0';
+			readFromSocketSuccess(idx, buffer, bytes_read);
+			setFdReadyForWrite(eventConfig, client_tmp);
+		}
+		else if (eventList[idx].events & EPOLLOUT)
+		{
+			serverActions(idx, client_tmp);
+			if (!fd_is_valid(client_tmp))
+				return;
+			setFdReadyForRead(eventConfig, client_tmp);
+		}
+	}
+	catch (const FavIconException)
+	{
+		_servers[0].sendFavIconResponse(idx, client_socket);
+	}
+	catch (const NotFoundException &e)
+	{
+		_servers[0].sendNotFoundResponse(idx, client_socket);
+	}
+	catch (const HttpException &e)
+	{
+		_servers[0].makeResponse(e.getPageContent(), idx);
+		_servers[0].sendResponse(idx, client_socket);
+	}
+}
 
 int Webserv::execute(void)
 {
 	int					client_socket;
-	char				buffer[BUFFERSIZE];
-	ssize_t				bytes_read;
 	socklen_t			addrlen;
 	request_t			request[MAX_EVENTS];
 	response_t			response[MAX_EVENTS];
 	int					eventCount;
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
-	int					client_tmp;
 
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
@@ -195,7 +233,8 @@ int Webserv::execute(void)
 			if (eventList[idx].data.fd == _servers[0].getServerFd())
 			{
 				if (!acceptClientSocket(client_socket, addrlen, idx))
-					continue; ;
+					continue ;
+				;
 				if (!makeSocketNonBlocking(client_socket))
 				{
 					close(client_socket);
@@ -205,43 +244,7 @@ int Webserv::execute(void)
 			}
 			else
 			{
-				try
-				{
-					client_tmp = eventList[idx].data.fd;
-					if (eventList[idx].events & EPOLLIN)
-					{
-						bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
-						std::cerr << bytes_read << std::endl;
-						if (bytes_read < 1)
-						{
-							readFromSocketError(bytes_read, idx, client_tmp);
-							continue ;
-						}
-						buffer[bytes_read] = '\0';
-						readFromSocketSuccess(idx, buffer, bytes_read);
-						setFdReadyForWrite(eventConfig, client_tmp);
-					}
-					else if (eventList[idx].events & EPOLLOUT)
-					{
-						serverActions(idx, client_tmp);
-						if (!fd_is_valid(client_tmp))
-							continue ;
-						setFdReadyForRead(eventConfig, client_tmp);
-					}
-				}
-				catch (const FavIconException)
-				{
-					_servers[0].sendFavIconResponse(idx, client_socket);
-				}
-				catch (const NotFoundException &e)
-				{
-					_servers[0].sendNotFoundResponse(idx, client_socket);
-				}
-				catch (const HttpException &e)
-				{
-					_servers[0].makeResponse(e.getPageContent(), idx);
-					_servers[0].sendResponse(idx, client_socket);
-				}
+				readWriteServer(eventList, idx, client_socket, eventConfig);
 			}
 		}
 	}
@@ -250,4 +253,3 @@ int Webserv::execute(void)
 		+ _servers[0].getPortString());
 	return (0);
 }
-

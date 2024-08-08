@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   main.cpp                                           :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/01 13:27:30 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 14:50:29 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/08 15:38:09 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ Logger &logger = Logger::getInstance();
 
 int	main(int argc, char **argv, char **env)
 {
-	logger.setWorking(true);
+	logger.setWorking(false);
 	if (argc == 2)
 	{
 		std::string filename(argv[1]);
