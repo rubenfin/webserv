@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 18:07:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/08 15:52:52 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
+#include <fstream>
 
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 4096

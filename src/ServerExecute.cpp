@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 17:56:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/08 15:53:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ void Server::cgi(char **env, int idx)
 	return ;
 }
 
-void Server::checkFileDetails(const int &idx, int &file)
+void Server::checkFileDetails(const int &idx, std::ofstream &file)
 {
 	if (_upload.empty())
 	{
@@ -140,7 +140,11 @@ void Server::checkFileDetails(const int &idx, int &file)
 		std::string uploadPath = getUpload();
 		if (access(uploadPath.c_str(), F_OK) != 0)
 		{
-			mkdir(uploadPath.c_str(), 0775);
+			if (mkdir(uploadPath.c_str(), 0775) == -1)
+			{
+				logger.log(ERR, "[500] Upload directory not found and was unable to make one");	
+				throw InternalServerErrorException();
+			}
 			logger.log(WARNING, "Made upload dir");
 		}
 		std::string fileName = getHttpHandler(idx)->getRequest()->file.fileName;
@@ -155,10 +159,10 @@ void Server::checkFileDetails(const int &idx, int &file)
 		{
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
-			file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			file.open(fullPath, std::ios::out | std::ios::in | std::ios::binary | std::ios::trunc);
 		}
 		else
-			file = open(fullPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			file.open(fullPath, std::ios::out | std::ios::in | std::ios::binary);
 	}
 	getHttpHandler(idx)->getRequest()->file.fileChecked = true;
 }
@@ -166,51 +170,29 @@ void Server::checkFileDetails(const int &idx, int &file)
 void Server::setFileInServer(int idx)
 {
 	int 	bytesWritten;
-	int		file;
+	std::ofstream	file;
 	std::string &fileContent = getHttpHandler(idx)->getRequest()->file.fileContent;
 	std::string fullPath = getUpload() + "/"
 		+ getHttpHandler(idx)->getRequest()->file.fileName;
 	if (!getHttpHandler(idx)->getRequest()->file.fileChecked)
 		checkFileDetails(idx, file);
 	logger.log(DEBUG, "in setFileInServer");
-	file = open(fullPath.c_str(), O_WRONLY | O_APPEND, 0644);
-	if (file != -1)
+	file.open(fullPath, std::ios::out | std::ios::in | std::ios::app | std::ios::binary);
+	if (!file.is_open())
 	{
-		// size_t pos = 0;
-		// while ((pos = fileContent.find(getHttpHandler(idx)->getRequest()->file.fileBoundary
-		// 			+ "--")) != std::string::npos) {
-		// // 		fileContent.erase(pos,
-		// 			getHttpHandler(idx)->getRequest()->file.fileBoundary.length()
-		// 			+ 2);
-		// }
+		
 		bytesWritten = write(file, fileContent.data(), fileContent.size());
-		// close(file);
 		std::cout << getHttpHandler(idx)->getRequest()->currentBytesRead << std::endl;
 		std::cout  << getHttpHandler(idx)->getRequest()->totalBytesRead  << "|" << getHttpHandler(idx)->getRequest()->contentLength << std::endl;
-		close(file);
+		file.close();
 		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
 			throw CreatedException();
 		}
 	}
-	// if (bytesWritten == getHttpHandler(idx)->getRequest()->contentLength)
-	// {
-	// 	getHttpHandler(idx)->getResponse()->status = httpStatusCode::Created;
-	// 	makeResponse((char *)PAGE_201, idx);
-	// 	logger.log(INFO, "Uploaded a file to " + uploadPath + " called "
-	// 		+ fileName);
-	// }
-	// else
-	// {
-	// 	logger.log(ERR,
-	// 		"[500] Failed to write the entire file content: "
-	// 		+ fullPath);
-	// 	getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-	// 	throw InternalServerErrorException();
-	// }
 	else
 	{
-		logger.log(ERR, "[500] Failed to create the file: " + fullPath);
+		logger.log(ERR, "[500] Failed to create/open the file: " + fullPath);
 		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}

@@ -102,7 +102,6 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
-	std::cerr << _servers[0].getHttpHandler(idx)->getChunked() << std::endl;
 	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
@@ -211,7 +210,6 @@ int Webserv::execute(void)
 					if (eventList[idx].events & EPOLLIN)
 					{
 						bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
-						std::cerr << bytes_read << std::endl;
 						if (bytes_read < 1)
 						{
 							readFromSocketError(bytes_read, idx, client_tmp);
