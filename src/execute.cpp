@@ -32,7 +32,6 @@ void Webserv::serverActions(const int &idx, int &socket)
 		_servers[0].sendResponse(idx, socket);
 		removeFdFromEpoll(socket);
 		close(socket);
-
 	}
 }
 
@@ -43,7 +42,9 @@ void Server::clientConnectionFailed(int client_socket, int idx)
 	if (send(client_socket,
 			getHttpHandler(idx)->getResponse()->response.c_str(),
 			getHttpHandler(idx)->getResponse()->response.size(), 0) == -1)
-		logger.log(ERR, "[500] Failed to send response to client");
+	{
+		logger.log(ERR, "[500] Failed to send client connection failed");
+	}
 }
 
 int	makeSocketNonBlocking(int &sfd)
@@ -79,8 +80,7 @@ int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
 	return (1);
 }
 
-void Webserv::readFromSocketError(const int &err, const int &idx,
-	int &socket)
+void Webserv::readFromSocketError(const int &err, const int &idx, int &socket)
 {
 	if (err == -1)
 	{
@@ -93,11 +93,11 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 	}
 	else if (err == 0)
 	{
-		logger.log(WARNING, "Removed socket " + std::to_string(socket) + " from epoll because 0 bytes read");
+		logger.log(WARNING, "Removed socket " + std::to_string(socket)
+			+ " from epoll because 0 bytes read");
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
-
 }
 
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
@@ -121,11 +121,9 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 
 void Webserv::removeFdFromEpoll(int &socket)
 {
-
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, socket, NULL) == -1)
 	{
-		perror("");
-		std::cout << "failed to remove fd from epoll" << std::endl;
+		perror("failed to remove fd from epoll");
 		close(socket);
 	}
 }
@@ -165,11 +163,10 @@ void Webserv::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 	}
 }
 
-int fd_is_valid(int fd)
+int	fd_is_valid(int fd)
 {
-    return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+	return (fcntl(fd, F_GETFD) != -1 || errno != EBADF);
 }
-
 
 int Webserv::execute(void)
 {
@@ -210,6 +207,11 @@ int Webserv::execute(void)
 				try
 				{
 					client_tmp = eventList[idx].data.fd;
+					if (!fd_is_valid(client_tmp))
+					{
+						std::cout << "client_tmp is not valid in after init" << std::endl;
+						continue ;
+					}
 					if (eventList[idx].events & EPOLLIN)
 					{
 						bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
@@ -224,7 +226,10 @@ int Webserv::execute(void)
 					{
 						serverActions(idx, client_tmp);
 						if (!fd_is_valid(client_tmp))
+						{
+							std::cout << "client_tmp is not valid in EPOLLOUT" << std::endl;
 							continue ;
+						}
 						setFdReadyForRead(eventConfig, client_tmp);
 					}
 				}
@@ -255,4 +260,3 @@ int Webserv::execute(void)
 		+ _servers[0].getPortString());
 	return (0);
 }
-

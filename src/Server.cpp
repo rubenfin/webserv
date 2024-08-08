@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 17:46:26 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/08 14:23:32 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,7 +453,7 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 	if (send(socket, buffer.c_str(), buffer.size(), 0) == -1)
 	{
 		std::cerr << "send failed with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
-		logger.log(ERR, "[500] Failed to send response to client, send()");
+		logger.log(ERR, "[500] Failed to send favicon as response, send()");
 	}
 	getHttpHandler(idx)->cleanHttpHandler();
 }

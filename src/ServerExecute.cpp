@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   ServerExecute.cpp                                  :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 17:56:00 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   ServerExecute.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/31 12:24:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/08 14:40:17 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,6 +307,7 @@ void Server::sendResponse(const int &idx, int &socket)
 			strlen(getHttpHandler(idx)->getResponse()->response.c_str()), 0) ==
 		-1)
 	{
+		perror("");
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	}
 	getHttpHandler(idx)->cleanHttpHandler();
