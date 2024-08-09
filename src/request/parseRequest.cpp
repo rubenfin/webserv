@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 14:00:42 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 14:33:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ static void setRequestURL(request_t *req)
 	}
 	if (req->firstLine.find("/favicon.ico") != std::string::npos)
 	{
-		logger.log(WARNING, "Found a /favicon.ico send back 404");
+		logger.log(DEBUG, "Found a /favicon.ico send back 404");
 		throw FavIconException();
 	}
 	startPos = req->firstLine.find("/", startPos);

@@ -90,7 +90,7 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 	}
 	else if (err == 0)
 	{
-		logger.log(WARNING, "Removed socket " + std::to_string(socket) + " from epoll because 0 bytes read");
+		logger.log(INFO, "Removed socket " + std::to_string(socket) + " from epoll because 0 bytes read");
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
@@ -214,7 +214,6 @@ int Webserv::execute(void)
 							readFromSocketError(bytes_read, idx, client_tmp);
 							continue ;
 						}
-						logger.log(ERR, "bytesread= " + std::to_string(bytes_read));
 						buffer[bytes_read] = '\0';
 						readFromSocketSuccess(idx, buffer, bytes_read);
 						setFdReadyForWrite(eventConfig, client_tmp);
@@ -228,18 +227,18 @@ int Webserv::execute(void)
 				catch (const FavIconException)
 				{
 					_servers[0].sendFavIconResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_socket);
+					setFdReadyForRead(eventConfig, client_tmp);
 				}
 				catch (const NotFoundException &e)
 				{
 					_servers[0].sendNotFoundResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_socket);
+					setFdReadyForRead(eventConfig, client_tmp);
 				}
 				catch (const HttpException &e)
 				{
 					_servers[0].makeResponse(e.getPageContent(), idx);
 					_servers[0].sendResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_socket);
+					setFdReadyForRead(eventConfig, client_tmp);
 				}
 			}
 		}

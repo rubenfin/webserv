@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 13:22:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 14:46:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -413,6 +413,8 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	header = "HTTP/1.1 " + message + "\r\n";
 	if (getHttpHandler(idx)->getRequest()->requestFile.find("jpg") != std::string::npos)
 		header += "Content-Type: image/jpg\r\n";
+	else if (getHttpHandler(idx)->getRequest()->requestFile.find("png") != std::string::npos)
+		header += "Content-Type: image/png\r\n";
 	if (buffer != "")
 	{
 		header += "Content-Length: " + std::to_string(buffer.length()) + "\r\n";
