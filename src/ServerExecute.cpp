@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/08 15:53:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 09:59:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,17 +159,15 @@ void Server::checkFileDetails(const int &idx, std::ofstream &file)
 		{
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
-			file.open(fullPath, std::ios::out | std::ios::in | std::ios::binary | std::ios::trunc);
+			file.open(fullPath, std::ios::trunc);
+			file.close();
 		}
-		else
-			file.open(fullPath, std::ios::out | std::ios::in | std::ios::binary);
 	}
 	getHttpHandler(idx)->getRequest()->file.fileChecked = true;
 }
 
 void Server::setFileInServer(int idx)
 {
-	int 	bytesWritten;
 	std::ofstream	file;
 	std::string &fileContent = getHttpHandler(idx)->getRequest()->file.fileContent;
 	std::string fullPath = getUpload() + "/"
@@ -178,15 +176,15 @@ void Server::setFileInServer(int idx)
 		checkFileDetails(idx, file);
 	logger.log(DEBUG, "in setFileInServer");
 	file.open(fullPath, std::ios::out | std::ios::in | std::ios::app | std::ios::binary);
-	if (!file.is_open())
+	if (file.is_open())
 	{
-		
-		bytesWritten = write(file, fileContent.data(), fileContent.size());
+		file << fileContent;
 		std::cout << getHttpHandler(idx)->getRequest()->currentBytesRead << std::endl;
 		std::cout  << getHttpHandler(idx)->getRequest()->totalBytesRead  << "|" << getHttpHandler(idx)->getRequest()->contentLength << std::endl;
-		file.close();
+		
 		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
+			file.close();
 			throw CreatedException();
 		}
 	}
