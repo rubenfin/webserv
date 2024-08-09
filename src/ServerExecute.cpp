@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 09:59:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 11:05:11 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ void Server::execute_CGI_script(int *fds, const char *script, char **env,
 void Server::cgi(char **env, int idx)
 {
 	pid_t	pid;
+	char 	buf[BUFFERSIZE];
 	int		fds[2];
 
 	logger.log(DEBUG, "in CGI");
@@ -117,10 +118,11 @@ void Server::cgi(char **env, int idx)
 	{
 		close(fds[1]);
 		getHttpHandler(idx)->getResponse()->contentLength = read(fds[0],
-				_buffer, 9999);
-		_buffer[getHttpHandler(idx)->getResponse()->contentLength] = '\0';
+				buf, BUFFERSIZE);
+		buf[getHttpHandler(idx)->getResponse()->contentLength] = '\0';
 		close(fds[0]);
-		makeResponse(_buffer, idx);
+		std::string buffer(buf, getHttpHandler(idx)->getResponse()->contentLength);
+		makeResponse(buffer, idx);
 		waitpid(pid, NULL, 0);
 	}
 	return ;
@@ -185,6 +187,7 @@ void Server::setFileInServer(int idx)
 		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
 			file.close();
+			getHttpHandler(idx)->getResponse()->status = httpStatusCode::Created;
 			throw CreatedException();
 		}
 	}

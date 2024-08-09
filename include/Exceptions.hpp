@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/03 11:42:55 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 11:47:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class name ## Exception : public HttpException { \
 public: \
     name ## Exception() : HttpException(code, #name, content) {} \
 };
+
 
 DEFINE_HTTP_EXCEPTION(Created, 201, PAGE_201)
 DEFINE_HTTP_EXCEPTION(Accepted, 202, PAGE_202)

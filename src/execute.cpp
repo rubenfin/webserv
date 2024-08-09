@@ -30,7 +30,6 @@ void Webserv::serverActions(const int &idx, int &socket)
 		- 1 && !_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		_servers[0].sendResponse(idx, socket);
-
 	}
 }
 
@@ -215,6 +214,7 @@ int Webserv::execute(void)
 							readFromSocketError(bytes_read, idx, client_tmp);
 							continue ;
 						}
+						logger.log(ERR, "bytesread= " + std::to_string(bytes_read));
 						buffer[bytes_read] = '\0';
 						readFromSocketSuccess(idx, buffer, bytes_read);
 						setFdReadyForWrite(eventConfig, client_tmp);
@@ -222,23 +222,24 @@ int Webserv::execute(void)
 					else if (eventList[idx].events & EPOLLOUT)
 					{
 						serverActions(idx, client_tmp);
-						if (!fd_is_valid(client_tmp))
-							continue ;
 						setFdReadyForRead(eventConfig, client_tmp);
 					}
 				}
 				catch (const FavIconException)
 				{
 					_servers[0].sendFavIconResponse(idx, client_socket);
+					setFdReadyForRead(eventConfig, client_socket);
 				}
 				catch (const NotFoundException &e)
 				{
 					_servers[0].sendNotFoundResponse(idx, client_socket);
+					setFdReadyForRead(eventConfig, client_socket);
 				}
 				catch (const HttpException &e)
 				{
 					_servers[0].makeResponse(e.getPageContent(), idx);
 					_servers[0].sendResponse(idx, client_socket);
+					setFdReadyForRead(eventConfig, client_socket);
 				}
 			}
 		}

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/08 15:52:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 13:04:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ class Server
 	std::string 		_serverContent;
 	std::string 		_portString;
 	std::string 		_methodsList;
-	char				*_buffer;
 	int					_serverFd;
 	std::string 		_serverName;
 	int					_port;
@@ -94,7 +93,7 @@ class Server
 	void initializeAddress();
 	void bindAdressSocket();
 	void listenToSocket();
-	void makeResponse(char *buffer, int index);
+	void makeResponse(const std::string &buffer, int index);
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
 	void setFileInServer(int idx);

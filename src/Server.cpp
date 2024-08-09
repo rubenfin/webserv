@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 17:46:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 13:22:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,6 @@ void Server::setServer(int epollFd)
 	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
 	for (size_t i = 0; i < MAX_EVENTS; i++)
 		_http_handler[i] = new HttpHandler;
-	_buffer = (char *)malloc(BUFFERSIZE * sizeof(char));
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -407,28 +406,42 @@ void Server::makeResponseForRedirect(int idx)
 	getHttpHandler(idx)->getResponse()->response = header + body;
 }
 
-void Server::makeResponse(char *buffer, int idx)
+void Server::makeResponse(const std::string &buffer, int idx)
 {
 	std::string header;
-	std::string body;
 	std::string message = getHttpStatusMessage(getHttpHandler(idx)->getResponse()->status);
 	header = "HTTP/1.1 " + message + "\r\n";
-	if (buffer)
+	if (getHttpHandler(idx)->getRequest()->requestFile.find("jpg") != std::string::npos)
+		header += "Content-Type: image/jpg\r\n";
+	if (buffer != "")
 	{
-		body = buffer;
-		header += "Content-Length: " + std::to_string(body.length()) + "\r\n";
+		header += "Content-Length: " + std::to_string(buffer.length()) + "\r\n";
 	}
 	else
 		header += "Content-Length: 0";
 	header += "\r\n";
-	getHttpHandler(idx)->getResponse()->response = header + body;
+	
+	getHttpHandler(idx)->getResponse()->response = header + buffer;
+}
+
+long long getFileSize(const std::string &filename)
+{
+	struct stat sb;
+
+	if (stat(filename.c_str(), &sb) == -1) {
+		perror("stat");
+		throw InternalServerErrorException();
+	}
+	else {
+		return ((long long) sb.st_size);
+	}
 }
 
 void Server::readFile(int idx)
 {
 	int	file;
-	int	rdbytes;
-
+	int	read_bytes;
+	char buffer[getFileSize(getHttpHandler(idx)->getRequest()->requestURL)];
 
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
@@ -439,10 +452,10 @@ void Server::readFile(int idx)
 		perror("opening file of responseURL");
 		return ;
 	}
-	rdbytes = read(file, _buffer, BUFFERSIZE - 1);
-	_buffer[rdbytes] = '\0';
+	read_bytes = read(file, buffer, getFileSize(getHttpHandler(idx)->getRequest()->requestURL));
+	buffer[read_bytes] = '\0';
 	close(file);
-	makeResponse(_buffer, idx);
+	makeResponse(std::string(buffer, read_bytes), idx);
 }
 
 void Server::sendFavIconResponse(const int &idx, int &socket)
@@ -477,6 +490,5 @@ Server::~Server()
 {
 	for (size_t i = 0; i < MAX_EVENTS; i++)
 		delete _http_handler[i];
-	free(_buffer);
 	delete this->_address;
 }
