@@ -62,13 +62,13 @@ int	makeSocketNonBlocking(int &sfd)
 	return (1);
 }
 
-int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen , Server *newConnection, const int &i)
+int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen , int serverConnectIndex, const int &i)
 {
-	client_socket = accept(newConnection.getSocketFD(),
-			(struct sockaddr *)newConnection.getAddress(), &addrlen);
+	client_socket = accept(_servers[serverConnectIndex].getSocketFD(),
+			(struct sockaddr *)_servers[serverConnectIndex].getAddress(), &addrlen);
 	if (client_socket == -1)
 	{
-		newConnection.clientConnectionFailed(client_socket, i);
+		_servers[serverConnectIndex].clientConnectionFailed(client_socket, i);
 		logger.log(ERR, "Accept client socket failed, break in main loop");
 		return (0);
 	}
@@ -98,8 +98,10 @@ void Webserv::readFromSocketError(const int &err, const int &idx, int &socket)
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
+	
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
-	std::cerr << _servers[0].getHttpHandler(idx)->getChunked() << std::endl;
+	std::cout << "request ----->" << _servers[0].getHttpHandler(idx)->getRequest()->requestContent << std::endl;
+	// std::cerr << _servers[0].getHttpHandler(idx)->getChunked() << std::endl;
 	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
 		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
@@ -217,6 +219,7 @@ int Webserv::execute(void)
 	int					eventCount;
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
+	int serverConnectIndex;
 
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
@@ -225,13 +228,13 @@ int Webserv::execute(void)
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{
-		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
+		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 100);
 		for (int idx = 0; idx < eventCount; ++idx)
 		{
-			Server* newConnection = checkForNewConnection(eventList[idx].data.fd);
-			if (newConnection != NULL)
+			serverConnectIndex = checkForNewConnection(eventList[idx].data.fd); 
+			if (serverConnectIndex >= 0)
 			{
-				if (!acceptClientSocket(client_socket, addrlen, newConnection, idx))
+				if (!acceptClientSocket(client_socket, addrlen, serverConnectIndex, idx))
 					continue ;
 				;
 				if (!makeSocketNonBlocking(client_socket))

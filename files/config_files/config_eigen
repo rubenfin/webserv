@@ -70,7 +70,7 @@ server {
 
 server {
 	server_name webserv
-	listen 8000
+	listen 8001
 
 	root files/response_files/
 	error_page 404 /404.html

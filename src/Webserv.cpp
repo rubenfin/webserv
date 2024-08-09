@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/09 13:54:45 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/09 14:05:20 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,14 +110,14 @@ void Webserv::setupServers(socklen_t &addrlen)
 	}
 }
 
-Server* Webserv::checkForNewConnection(int eventFd)
+int Webserv::checkForNewConnection(int eventFd)
 {
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		if (eventFd == _servers[i].getServerFd())
-			return &_servers[i];
+			return i;
 	}
-	return NULL;
+	return -1;
 }
 
 void Webserv::cleanHandlerRequestResponse()
