@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 14:33:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 16:41:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,15 +60,16 @@ static void	setHttpVersion(request_t *req)
 
 static void	setMethod(request_t *req)
 {
-	if (req->firstLine.find("GET") != std::string::npos)
+	req->firstLine.insert(0, 1, ' ');
+	if (req->firstLine.find(" GET ") != std::string::npos)
 		req->method = GET;
-	else if (req->firstLine.find("POST") != std::string::npos)
+	else if (req->firstLine.find(" POST ") != std::string::npos)
 		req->method = POST;
-	else if (req->firstLine.find("DELETE") != std::string::npos)
+	else if (req->firstLine.find(" DELETE ") != std::string::npos)
 		req->method = DELETE;
 	else
 		req->method = ERROR;
-	// TODO: Throw an exception if no method found?
+	req->firstLine = trim(req->firstLine);
 }
 
 static void setRequestURL(request_t *req)

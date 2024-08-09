@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 14:44:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/09 16:13:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,11 @@ void	setFile(request_t *req, file_t *requestFile)
 
 	cLength = trim(extractValue(req, "Content-Length: "));
 	if (req->method == POST && cLength != "0")
+	{
+		if (cLength == "")
+			throw BadRequestException();
 		req->contentLength = std::stoi(cLength);
+	}
 	else
 	{
 		req->contentLength = 0;
