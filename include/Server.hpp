@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.hpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 18:07:19 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/08/09 13:34:10 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,17 +39,17 @@ struct					Methods
 class Server
 {
   protected:
-	std::string 		_error404;
-	std::string 		_serverContent;
-	std::string 		_portString;
-	std::string 		_methodsList;
+	std::string _error404;
+	std::string _serverContent;
+	std::string _portString;
+	std::string _methodsList;
 	char				*_buffer;
 	int					_serverFd;
-	std::string 		_serverName;
+	std::string _serverName;
 	int					_port;
-	std::string 		_root;
-	std::string 		_index;
-	std::string			_upload;
+	std::string _root;
+	std::string _index;
+	std::string _upload;
 	Methods				_allowedMethods;
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
@@ -58,7 +58,8 @@ class Server
 
   public:
 	void cgi(char **env, int index);
-	void execute_CGI_script(int *fds, const char *script, char **env, int index);
+	void execute_CGI_script(int *fds, const char *script, char **env,
+		int index);
 	void getLocationStack(std::string locationContent);
 	std::string extractValue(const std::string &searchString);
 	std::string extractValueUntilLocation(const std::string &searchString);
@@ -103,7 +104,7 @@ class Server
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
-	void sendNotFoundResponse(const int& idx, int &socket);
+	void sendNotFoundResponse(const int &idx, int &socket);
 	void linkHandlerResponseRequest(request_t *request, response_t *response);
 	void checkFileDetails(const int &idx, int &file);
 	~Server();

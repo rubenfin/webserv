@@ -67,3 +67,73 @@ server {
 		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 }
+
+server {
+	server_name webserv
+	listen 8000
+
+	root files/response_files/
+	error_page 404 /404.html
+	upload /uploads
+	allow_methods GET
+
+	location / {
+		autoindex on
+		allow_methods GET POST
+	}
+
+	location /cgi-bin {
+		allow_methods GET POST
+		index test_cgi.py
+	}
+	
+	location /upload_file {
+		allow_methods GET POST
+		index upload.html
+	}
+
+	location /redirect {
+		allow_methods GET
+		return www.youtube.com
+	}
+
+	location /get_request {
+		allow_methods GET
+		alias /hallo
+		index test.html
+	}
+
+	location /get_request/GET_nested {
+		autoindex on
+		allow_methods GET
+	}
+
+	location /post_test {
+		index test.html
+		allow_methods GET POST
+	}
+
+	location /delete_test {
+		index delete.html
+		allow_methods POST DELETE GET
+		client_body_buffer_ size 100
+	}
+
+	location /directory {
+		allow_methods GET
+		root YoupiBanane/
+		index youpi.bad_extension
+	}
+
+	location /uploads {
+		allow_methods GET DELETE POST
+		autoindex on
+		cgi_pass test_linux/ubuntu_cgi_tester
+	}
+
+	location /uploads2 {
+		allow_methods GET DELETE POST
+		autoindex on
+		cgi_pass test_linux/ubuntu_cgi_tester
+	}
+}

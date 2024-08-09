@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.cpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/02 16:42:21 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/09 13:54:45 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,10 +100,24 @@ void Webserv::setEnv(char **env)
 
 void Webserv::setupServers(socklen_t &addrlen)
 {
-	addrlen = sizeof(_servers[0].getAddress());
-	_servers[0].setServer(_epollFd);
-	logger.log(INFO, "Server " + _servers[0].getServerName()
-		+ " started on port " + _servers[0].getPortString());
+	std::cout << "amount of servers = " << _servers.size() << std::endl;
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		addrlen = sizeof(_servers[0].getAddress());
+		_servers[i].setServer(_epollFd);
+		logger.log(INFO, "Server " + _servers[0].getServerName()
+			+ " started on port " + _servers[0].getPortString());
+	}
+}
+
+Server* Webserv::checkForNewConnection(int eventFd)
+{
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		if (eventFd == _servers[i].getServerFd())
+			return &_servers[i];
+	}
+	return NULL;
 }
 
 void Webserv::cleanHandlerRequestResponse()

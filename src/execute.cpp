@@ -62,14 +62,13 @@ int	makeSocketNonBlocking(int &sfd)
 	return (1);
 }
 
-int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
-	const int &i)
+int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen , Server *newConnection, const int &i)
 {
-	client_socket = accept(_servers[0].getSocketFD(),
-			(struct sockaddr *)_servers[0].getAddress(), &addrlen);
+	client_socket = accept(newConnection.getSocketFD(),
+			(struct sockaddr *)newConnection.getAddress(), &addrlen);
 	if (client_socket == -1)
 	{
-		_servers[0].clientConnectionFailed(client_socket, i);
+		newConnection.clientConnectionFailed(client_socket, i);
 		logger.log(ERR, "Accept client socket failed, break in main loop");
 		return (0);
 	}
@@ -177,7 +176,6 @@ void Webserv::readWriteServer(struct epoll_event *eventList, int idx, int client
 		if (eventList[idx].events & EPOLLIN)
 		{
 			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
-			std::cerr << bytes_read << std::endl;
 			if (bytes_read < 1)
 			{
 				readFromSocketError(bytes_read, idx, client_tmp);
@@ -230,9 +228,10 @@ int Webserv::execute(void)
 		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
 		for (int idx = 0; idx < eventCount; ++idx)
 		{
-			if (eventList[idx].data.fd == _servers[0].getServerFd())
+			Server* newConnection = checkForNewConnection(eventList[idx].data.fd);
+			if (newConnection != NULL)
 			{
-				if (!acceptClientSocket(client_socket, addrlen, idx))
+				if (!acceptClientSocket(client_socket, addrlen, newConnection, idx))
 					continue ;
 				;
 				if (!makeSocketNonBlocking(client_socket))

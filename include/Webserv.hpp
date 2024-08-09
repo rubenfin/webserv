@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/08 15:58:27 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/09 13:57:06 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,9 @@ class Webserv
 	void readWriteServer(struct epoll_event *eventList, int idx, int client_socket, struct epoll_event eventConfig);
 	void readFromSocketError(const int &err, const int &idx, int &socket);
 	void readFromSocketSuccess(const int &idx, const char *buffer, const int& bytes_read);
-	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i);
+	int acceptClientSocket(int &client_socket, socklen_t addrlen, Server *newConnection, const int &i);
 	void cleanHandlerRequestResponse();
+	Server *checkForNewConnection(int eventFd);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
