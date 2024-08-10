@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/08/09 13:34:10 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/10 14:18:43 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class Server
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
-	HttpHandler			*_http_handler[MAX_EVENTS];
+	HttpHandler			*_http_handler;
 
   public:
 	void cgi(char **env, int index);
@@ -74,6 +74,7 @@ class Server
 	void setSockedFD();
 	void setServer(int epollFd);
 	void setEnv(char **&env, int index);
+	void setHttpHandler(HttpHandler *newHttpHandler);
 	int getServerFd(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
@@ -87,7 +88,7 @@ class Server
 	std::string getMethodsList(void);
 	struct sockaddr_in *getAddress(void);
 	std::vector<Locations> getLocation(void);
-	HttpHandler *getHttpHandler(int index);
+	HttpHandler getHttpHandler(int index);
 	std::string getError404(void);
 	void setLocationsRegex(std::string serverContent);
 	Server(std::string serverContent);
@@ -105,7 +106,7 @@ class Server
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
 	void sendNotFoundResponse(const int &idx, int &socket);
-	void linkHandlerResponseRequest(request_t *request, response_t *response);
 	void checkFileDetails(const int &idx, int &file);
+	void allocateHttpHandler();
 	~Server();
 };

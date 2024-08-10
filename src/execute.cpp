@@ -224,7 +224,6 @@ int Webserv::execute(void)
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
 	this->setupServers(addrlen);
-	_servers[0].linkHandlerResponseRequest(request, response);
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{

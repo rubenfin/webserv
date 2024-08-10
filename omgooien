@@ -2,3 +2,8 @@ setten van servers
 1 epoll_wait
 connecties kunnen maken met meerdere server_fd
 read en write blijft volgensmij zelfde omdat het gwn weer in epoll wordt gegooid
+
+
+nu voor zaterdag!!
+
+gwn via het begin constructer aanpassen met 2d arrays for the request en response

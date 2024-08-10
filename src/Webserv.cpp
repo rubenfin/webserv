@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/09 14:05:20 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/10 13:42:39 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,10 @@ void Webserv::setupServers(socklen_t &addrlen)
 	std::cout << "amount of servers = " << _servers.size() << std::endl;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
-		addrlen = sizeof(_servers[0].getAddress());
+		addrlen = sizeof(_servers[i].getAddress());
 		_servers[i].setServer(_epollFd);
-		logger.log(INFO, "Server " + _servers[0].getServerName()
-			+ " started on port " + _servers[0].getPortString());
+		logger.log(INFO, "Server " + _servers[i].getServerName()
+			+ " started on port " + _servers[i].getPortString());
 	}
 }
 
@@ -123,7 +123,7 @@ int Webserv::checkForNewConnection(int eventFd)
 void Webserv::cleanHandlerRequestResponse()
 {
 	for (size_t i = 0; i < MAX_EVENTS; i++)
-		_servers[0].getHttpHandler(i)->cleanHttpHandler();
+		_servers[i].getHttpHandler(i)->cleanHttpHandler();
 }
 
 Webserv::~Webserv()

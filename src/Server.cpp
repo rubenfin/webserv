@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/09 13:34:44 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/10 14:20:36 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,8 +86,6 @@ void Server::setServer(int epollFd)
 	bindAdressSocket();
 	listenToSocket();
 	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
-	for (size_t i = 0; i < MAX_EVENTS; i++)
-		_http_handler[i] = new HttpHandler;
 	_buffer = (char *)malloc(BUFFERSIZE * sizeof(char));
 }
 
@@ -256,6 +254,38 @@ void Server::setSockedFD()
 	this->_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
+void Server::setHttpHandler(HttpHandler *newHttpHandler)
+{
+	_http_handler = newHttpHandler;
+}
+
+// void Webserv::linkHandlerResponseRequest()
+// {
+// 	HttpHandler	*tmp[MAX_EVENTS];
+// 	request_t	*request[MAX_EVENTS];
+// 	response_t	*response[MAX_EVENTS];
+
+// 	for (size_t i = 0; i < MAX_EVENTS; i++)
+// 	{
+// 		tmp[i] = new HttpHandler;
+// 	}
+// 	for (size_t i = 0; i < MAX_EVENTS; i++)
+// 	{
+// 		request[i] = new request_t;
+// 	}
+// 	for (size_t i = 0; i < MAX_EVENTS; i++)
+// 	{
+// 		response[i] = new response_t;
+// 	}
+// 	for (size_t i = 0; i < MAX_EVENTS; i++)
+// 	{
+// 		tmp[i]->connectToRequestResponse(request[i], response[i]);
+// 	}
+// 	for (size_t i = 0; i < _servers.size(); i++)
+// 	{
+// 		_servers[i].setHttpHandler(tmp);
+// 	}
+// }
 std::string Server::getError404(void)
 {
 	return (_error404);
@@ -314,9 +344,9 @@ std::vector<Locations> Server::getLocation(void)
 	return (_locations);
 }
 
-HttpHandler *Server::getHttpHandler(int index)
+HttpHandler Server::getHttpHandler(int index)
 {
-	return (_http_handler[index]);
+	return (_http_handler[index]);  
 }
 
 struct sockaddr_in *Server::getAddress(void)
@@ -360,12 +390,15 @@ void Server::setLocationsRegex(std::string serverContent)
 	}
 }
 
-void Server::linkHandlerResponseRequest(request_t *request,
-	response_t *response)
+void Server::allocateHttpHandler(void)
 {
+	_http_handler = new HttpHandler[MAX_EVENTS];
 	for (size_t i = 0; i < MAX_EVENTS; i++)
-		getHttpHandler(i)->connectToRequestResponse(&request[i], &response[i],
-			i);
+	{
+		_http_handler[i].setRequest();
+		_http_handler[i].setResponse();
+	}
+	
 }
 
 Server::Server(std::string serverContent)
@@ -379,6 +412,7 @@ Server::Server(std::string serverContent)
 	setError404();
 	setLocationsRegex(serverContent);
 	setUpload();
+	allocateHttpHandler();
 	logger.log(INFO, "Server port: " + std::to_string(_port));
 }
 
@@ -429,7 +463,6 @@ void Server::readFile(int idx)
 	int	file;
 	int	rdbytes;
 
-
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
 	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
@@ -475,8 +508,6 @@ void Server::sendNotFoundResponse(const int &idx, int &socket)
 
 Server::~Server()
 {
-	for (size_t i = 0; i < MAX_EVENTS; i++)
-		delete _http_handler[i];
 	free(_buffer);
 	delete this->_address;
 }

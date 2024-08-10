@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/09 14:08:11 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/08/10 14:14:17 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ class Webserv
 	int _epollFd;
 	epoll_event _event;
 	std::string _response;
-	HttpHandler *_handler;
 	std::vector<Server> _servers;
 	char **_environmentVariables;
 
@@ -76,6 +75,7 @@ class Webserv
 	int acceptClientSocket(int &client_socket, socklen_t addrlen, int serverConnectionIndex, const int &i);
 	void cleanHandlerRequestResponse();
 	int checkForNewConnection(int eventFd);
+	// void linkHandlerResponseRequest();
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpHandler.cpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 11:56:20 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 20:01:28 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/08/10 14:12:09 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,6 +246,17 @@ void HttpHandler::setBooleans(void)
 	}
 }
 
+void HttpHandler::setRequest(void)
+{
+	_request = new request_t;
+}
+
+void HttpHandler::setResponse(void)
+{
+	_response = new response_t;
+}
+
+
 void HttpHandler::checkLocationMethod(void)
 {
 	// std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
@@ -291,9 +302,8 @@ void HttpHandler::cleanHttpHandler()
 	_isChunked = false;
 }
 
-void HttpHandler::connectToRequestResponse(request_t *request, response_t *response, int idx)
+void HttpHandler::connectToRequestResponse(request_t *request, response_t *response)
 {
-	this->_idx = idx;
 	_request = request;
 	_response = response;
 }

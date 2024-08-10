@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpHandler.hpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 10:54:56 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 20:00:39 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/08/10 14:10:40 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ struct response_t;
 class HttpHandler
 {
   private:
-	int _idx;
 	request_t *_request;
 	response_t *_response;
 	Locations *_foundDirective;
@@ -51,6 +50,8 @@ class HttpHandler
 	void setDelete();
 	void setHeaderChecked(bool boolean);
 	void setChunked(bool boolean);
+	void setRequest(void);
+	void setResponse(void);
 	void checkLocationMethod(void);
 	Locations *getFoundDirective(void);
 	request_t *getRequest(void);
@@ -63,6 +64,6 @@ class HttpHandler
 	bool getReturnAutoIndex(void);
 	bool getHeaderChecked(void);
 	bool getChunked(void);
-	void connectToRequestResponse(request_t *request, response_t *response, int idx);
+	void connectToRequestResponse(request_t *request, response_t *response);
 	void cleanHttpHandler();
 };
