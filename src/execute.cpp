@@ -97,6 +97,19 @@ void Webserv::readFromSocketError(const int &err, const int &idx,
 
 }
 
+void removingEndingBoundary(std::string &str, const std::string &boundary)
+{
+    size_t found = str.rfind(boundary); // Find the last occurrence of the boundary
+    if (found != std::string::npos && found == str.length() - boundary.length() - 2)
+    {
+		logger.log(INFO, "Removed ending boundary" + boundary);
+        str.erase(found, boundary.length() + 2); 
+		// Remove the boundary plus the trailing "--"
+    }
+	logger.log(INFO, "Did not remove ending boundary" + boundary);
+}
+
+
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
@@ -110,8 +123,12 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 			_servers[0].getHttpHandler(idx)->setChunked(true);
 	}
 	else
+	{
 		_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
+		removingEndingBoundary(_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent, _servers[0].getHttpHandler(idx)->getRequest()->file.fileBoundary);
+	}
+
 	_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read;
 }
 
