@@ -34,7 +34,6 @@ server {
 	}
 
 	location /get_request/GET_nested {
-		autoindex on
 		allow_methods GET
 	}
 

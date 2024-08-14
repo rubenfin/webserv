@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 11:56:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/14 15:36:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,9 @@ void HttpHandler::combineRightUrl(void)
 		else
 		{
 			logger.log(ERR,
-				"[404] No index found in config file and no autoindex in current directive");
-			getResponse()->status = httpStatusCode::NotFound;
-			throw NotFoundException();
+				"[403] No index found in config file and no autoindex in current directive");
+			getResponse()->status = httpStatusCode::Forbidden;
+			throw ForbiddenException();
 		}
 	}
 	else if (_foundDirective->getRoot() != "")
@@ -112,9 +112,9 @@ void HttpHandler::combineRightUrl(void)
 			else
 			{
 				logger.log(ERR,
-					"[404] No index foundDirective in config file and no autoindex in foundDirective");
-				getResponse()->status = httpStatusCode::NotFound;
-				throw NotFoundException();
+					"[403] No index foundDirective in config file and no autoindex in foundDirective");
+				getResponse()->status = httpStatusCode::Forbidden;
+				throw ForbiddenException();
 			}
 		}
 	}
