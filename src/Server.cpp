@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 11:57:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/14 13:00:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -430,8 +430,9 @@ long long getFileSize(const std::string &filename)
 {
 	struct stat sb;
 
-	if (stat(filename.c_str(), &sb) == -1) {
+	if (stat(filename.data(), &sb) == -1) {
 		perror("stat");
+		std::cout << filename << std::endl;
 		throw InternalServerErrorException();
 	}
 	else {
