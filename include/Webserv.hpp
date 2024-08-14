@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/08 15:52:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/14 11:54:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@
 #include <fstream>
 
 // need to check this might be only for GET and not POST and DELETE
-#define BUFFERSIZE 4096
+#define BUFFERSIZE 1024
 #define MAX_FDS 1024
 #define MAX_EVENTS 16
 

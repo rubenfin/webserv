@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 11:05:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/14 11:48:39 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,7 +287,7 @@ void Server::sendResponse(const int &idx, int &socket)
 	logger.log(INFO, "Inside sendResponse");
 	logger.log(RESPONSE, getHttpHandler(idx)->getResponse()->response);
 	if (send(socket, getHttpHandler(idx)->getResponse()->response.c_str(),
-			strlen(getHttpHandler(idx)->getResponse()->response.c_str()), 0) ==
+			getHttpHandler(idx)->getResponse()->response.size(), 0) ==
 		-1)
 	{
 		logger.log(ERR, "[500] Failed to send response to client, send()");

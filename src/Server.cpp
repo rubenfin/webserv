@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 14:57:29 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/14 11:57:52 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -423,7 +423,7 @@ void Server::makeResponse(const std::string &buffer, int idx)
 		header += "Content-Length: 0";
 	header += "\r\n";
 	
-	getHttpHandler(idx)->getResponse()->response = header + buffer;
+	getHttpHandler(idx)->getResponse()->response = header + buffer + "\r\n";
 }
 
 long long getFileSize(const std::string &filename)
@@ -443,8 +443,9 @@ void Server::readFile(int idx)
 {
 	int	file;
 	int	read_bytes;
-	char buffer[getFileSize(getHttpHandler(idx)->getRequest()->requestURL)];
+	char *buffer;
 
+	buffer = (char *)malloc(getFileSize(getHttpHandler(idx)->getRequest()->requestURL) * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
 	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
@@ -458,6 +459,7 @@ void Server::readFile(int idx)
 	buffer[read_bytes] = '\0';
 	close(file);
 	makeResponse(std::string(buffer, read_bytes), idx);
+	free(buffer);
 }
 
 void Server::sendFavIconResponse(const int &idx, int &socket)
