@@ -144,8 +144,10 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 		parse_request(_servers[0].getHttpHandler(idx)->getRequest(),
 			std::string(buffer, bytes_read), idx);
 		_servers[0].getHttpHandler(idx)->handleRequest(_servers[0]);
+
 		if (bytes_read == BUFFERSIZE - 1)
 			_servers[0].getHttpHandler(idx)->setChunked(true);
+		_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read - ( _servers[0].getHttpHandler(idx)->getRequest()->requestContent.size() - _servers[0].getHttpHandler(idx)->getRequest()->requestBody.size() );
 	}
 	else
 	{
@@ -153,9 +155,9 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 		_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
 		removeBoundaryLine(_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent, trim(_servers[0].getHttpHandler(idx)->getRequest()->file.fileBoundary));
+		_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read;
 	}
 
-	_servers[0].getHttpHandler(idx)->getRequest()->totalBytesRead += bytes_read;
 }
 
 void Webserv::removeFdFromEpoll(int &socket)
