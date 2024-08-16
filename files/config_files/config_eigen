@@ -30,11 +30,12 @@ server {
 	location /get_request {
 		allow_methods GET
 		alias /hallo
-		index test.html
+		index alias.html
 	}
 
 	location /get_request/GET_nested {
 		allow_methods GET
+		autoindex on;
 	}
 
 	location /post_test {
@@ -57,12 +58,10 @@ server {
 	location /uploads {
 		allow_methods GET DELETE POST
 		autoindex on
-		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 
 	location /uploads2 {
 		allow_methods GET DELETE POST
 		autoindex on
-		cgi_pass test_linux/ubuntu_cgi_tester
 	}
 }

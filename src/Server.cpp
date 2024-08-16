@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 13:00:12 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/16 12:54:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -426,13 +426,14 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	getHttpHandler(idx)->getResponse()->response = header + buffer + "\r\n";
 }
 
-long long getFileSize(const std::string &filename)
+long long Server::getFileSize(const std::string &filename, const int& idx)
 {
 	struct stat sb;
 
 	if (stat(filename.data(), &sb) == -1) {
 		perror("stat");
-		std::cout << filename << std::endl;
+		logger.log(ERR, "[500] stat said " + filename + " is not a file");
+		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}
 	else {
@@ -446,7 +447,7 @@ void Server::readFile(int idx)
 	int	read_bytes;
 	char *buffer;
 
-	buffer = (char *)malloc(getFileSize(getHttpHandler(idx)->getRequest()->requestURL) * sizeof(char));
+	buffer = (char *)malloc(getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx) * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
 	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
@@ -456,7 +457,7 @@ void Server::readFile(int idx)
 		perror("opening file of responseURL");
 		return ;
 	}
-	read_bytes = read(file, buffer, getFileSize(getHttpHandler(idx)->getRequest()->requestURL));
+	read_bytes = read(file, buffer, getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx));
 	buffer[read_bytes] = '\0';
 	close(file);
 	makeResponse(std::string(buffer, read_bytes), idx);

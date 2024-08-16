@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/09 13:04:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/16 12:53:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ class Server
 	HttpHandler *getHttpHandler(int index);
 	std::string getError404(void);
 	void setLocationsRegex(std::string serverContent);
+	long long getFileSize(const std::string &filename, const int& idx);
 	Server(std::string serverContent);
 	void setSocketOptions(const int &opt);
 	void initializeAddress();

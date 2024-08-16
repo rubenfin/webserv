@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/05 10:54:56 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/16 13:41:25 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ class HttpHandler
 	void combineRightUrl(void);
 	void handleRequest(Server &serverAddresss);
 	void httpVersionCheck(void);
-	int pathCheck(void);
+	void totalPathCheck(void);
+	int pathCheck(const std::string& dir, const std::string& file);
 	void methodCheck(void);
 	void fileCheck();
 	void setDelete();

@@ -6,14 +6,14 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/14 15:36:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/16 13:44:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
 HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr),
-	_foundDirective(nullptr), _server(nullptr),  _isCgi(false),
+	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
 	_hasRedirect(false)
 {
 }
@@ -49,8 +49,12 @@ Locations *HttpHandler::findMatchingDirective(void)
 
 void HttpHandler::combineRightUrl(void)
 {
+	if (_foundDirective)
+		std::cout << RED << _foundDirective->getAlias() << RESET << std::endl;
+	// No location directive found
 	if (!_foundDirective)
 	{
+		// File in root of server, not inside any directory
 		if (checkIfFile(getServer()->getRoot() + getRequest()->requestURL))
 		{
 			getRequest()->requestURL = getServer()->getRoot()
@@ -63,6 +67,29 @@ void HttpHandler::combineRightUrl(void)
 			throw NotFoundException();
 		}
 	}
+	else if (_foundDirective->getAlias() != "")
+	{
+		logger.log(INFO, "Alias has been found, changing paths");
+		if (!_foundDirective->getIndex().empty())
+			getRequest()->requestURL = _server->getRoot()
+				+ _foundDirective->getAlias() + "/"
+				+ _foundDirective->getIndex();
+		else if (_foundDirective->getAutoIndex())
+		{
+			getRequest()->requestURL = _server->getRoot() +_foundDirective->getAlias();
+			_returnAutoIndex = true;
+			logger.log(WARNING, "No index found in foundDirective,  now trying autoindex");
+		}
+		else if (_hasRedirect)
+			return ;
+		else
+		{
+			logger.log(ERR,
+				"[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?");
+			getResponse()->status = httpStatusCode::Forbidden;
+			throw ForbiddenException();
+		}
+	}
 	else if (_foundDirective->getLocationDirective() == "/")
 	{
 		if (!_server->getIndex().empty())
@@ -71,10 +98,11 @@ void HttpHandler::combineRightUrl(void)
 		{
 			getRequest()->requestURL = _server->getRoot();
 			_returnAutoIndex = true;
-			logger.log(WARNING, "No index found in config file and now trying to use autoindex for /");
+			logger.log(WARNING,
+				"No index found in config file and now trying to use autoindex for /");
 		}
-		else if(_hasRedirect)
-			return;
+		else if (_hasRedirect)
+			return ;
 		else
 		{
 			logger.log(ERR,
@@ -103,12 +131,13 @@ void HttpHandler::combineRightUrl(void)
 					+ _foundDirective->getIndex();
 			else if (_foundDirective->getAutoIndex())
 			{
-				getRequest()->requestURL = _server->getRoot() + getRequest()->requestURL;
+				getRequest()->requestURL = _server->getRoot()
+					+ getRequest()->requestURL;
 				_returnAutoIndex = true;
 				logger.log(WARNING, "No index found in foundDirective, now trying autoindex");
 			}
 			else if (_hasRedirect)
-				return;
+				return ;
 			else
 			{
 				logger.log(ERR,
@@ -150,18 +179,18 @@ void HttpHandler::httpVersionCheck(void)
 	}
 }
 
-int HttpHandler::pathCheck(void)
+int HttpHandler::pathCheck(const std::string& dir, const std::string& file)
 {
-	std::string dir = getServer()->getRoot() + getRequest()->requestDirectory;
-	std::string file = getServer()->getRoot() + getRequest()->requestDirectory
-		+ getRequest()->requestFile;
-	if (!checkIfDir(dir))
+	if (!dir.empty())
 	{
-		logger.log(ERR, "[404] Directory doesn't exist");
-		getResponse()->status = httpStatusCode::NotFound;
-		throw NotFoundException();
+		if (!checkIfDir(dir))
+		{
+			logger.log(ERR, "[404] Directory doesn't exist");
+			getResponse()->status = httpStatusCode::NotFound;
+			throw NotFoundException();
+		}
 	}
-	if (getRequest()->requestFile != "")
+	if (!file.empty() && file != dir)
 	{
 		if (!checkIfFile(file))
 		{
@@ -219,12 +248,10 @@ void HttpHandler::checkRequestData(void)
 {
 	httpVersionCheck();
 	methodCheck();
-	pathCheck();
 	if (getRequest()->method == POST && getRequest()->file.fileExists)
 		fileCheck();
 	if (getRequest()->method == DELETE)
 		setDelete();
-	
 }
 void	deleteFoundDirective(Locations *_foundDirective)
 {
@@ -291,13 +318,29 @@ void HttpHandler::cleanHttpHandler()
 	_isChunked = false;
 }
 
-void HttpHandler::connectToRequestResponse(request_t *request, response_t *response, int idx)
+void HttpHandler::connectToRequestResponse(request_t *request,
+	response_t *response, int idx)
 {
 	this->_idx = idx;
 	_request = request;
 	_response = response;
 }
 
+void HttpHandler::totalPathCheck(void)
+{
+	if (_foundDirective->getAlias().empty())
+	{
+		pathCheck(getServer()->getRoot() + getRequest()->requestDirectory, getServer()->getRoot() + getRequest()->requestDirectory
+			+ getRequest()->requestFile);
+	}
+	else 
+	{
+		pathCheck(_server->getRoot()
+			+ _foundDirective->getAlias(), _server->getRoot()
+			+ _foundDirective->getAlias() + "/"
+			+ _foundDirective->getIndex());
+	}
+}
 
 void HttpHandler::handleRequest(Server &serverAddress)
 {
@@ -308,7 +351,10 @@ void HttpHandler::handleRequest(Server &serverAddress)
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	if (_foundDirective)
+	{
 		checkLocationMethod();
+		totalPathCheck();
+	}
 	setBooleans();
 	combineRightUrl();
 	// deleteFoundDirective(_foundDirective);

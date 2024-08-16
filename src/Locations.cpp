@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/05 15:03:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/16 11:51:49 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void Locations::setMethods(void)
 
 void Locations::setAlias(void)
 {
-	_alias = extractValue("alias ");
+	_alias = trim(extractValue("alias "));
 }
 
 void Locations::setAutoIndex(void)
@@ -60,6 +60,7 @@ void Locations::getLocationRegex(void)
 	setCgi_pass();
 	setMethods();
 	setReturn();
+	setAlias();
 	setAutoIndex();
 }
 

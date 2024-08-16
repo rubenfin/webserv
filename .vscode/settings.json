@@ -76,6 +76,7 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "stacktrace": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "any": "cpp"
     }
 }
