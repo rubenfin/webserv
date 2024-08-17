@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/18 14:28:52 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 15:40:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 11:50:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #define PAGE_404 (char *)"<h1>404 - Not Found </h1>"
 #define PAGE_405 (char *)"<h1>405 - Method Not Allowed </h1>"
 #define PAGE_409 (char *)"<h1>409 - Conflict </h1>"
+#define PAGE_413 (char *)"<h1>413 - Payload Too Large </h1>"
 #define PAGE_500 (char *)"<h1>500 - Internal Server Error </h1>"
 #define PAGE_501 (char *)"<h1>501 - Not Implemented </h1>"
 #define PAGE_502 (char *)"<h1>502 - Bad Gateway </h1>"
@@ -42,6 +43,7 @@ enum class httpStatusCode {
     NotFound = 404,
     MethodNotAllowed = 405,
     Conflict = 409,
+    PayloadTooLarge = 413,
     InternalServerError = 500,
     NotImplemented = 501,
     BadGateway = 502,

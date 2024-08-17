@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/07/21 13:53:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 10:55:48 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Locations
 	std::string _alias;
 	std::string _url;
 	std::string _return;
+	long long 	_client_body_size;
 	bool 		_autoindex;
 
   public:
@@ -52,6 +53,7 @@ class Locations
 	void setAlias(void);
 	void setReturn(void);
 	void setAutoIndex(void);
+	void setClientBodySize(void);
 	std::string getRoot(void);
 	std::string getIndex(void);
 	std::string getCgi_pass(void);
@@ -59,6 +61,7 @@ class Locations
 	std::string getAlias(void);
 	std::string getReturn(void);
 	bool 		getAutoIndex(void);
+	long long  	getClientBodySize(void);
 	std::string extractValue(std::string toSearch);
 	std::string extractValueUntilNL(std::string toSearch);
 	void printLocationsContent(void);

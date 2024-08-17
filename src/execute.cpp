@@ -138,6 +138,7 @@ void removeBoundaryLine(std::string &str, const std::string &boundary)
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
+
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
 	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
@@ -208,6 +209,7 @@ void Webserv::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 
 int fd_is_valid(int fd)
 {
+	errno = 0;
     return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
 }
 
@@ -260,6 +262,7 @@ int Webserv::execute(void)
 							continue ;
 						}
 						buffer[bytes_read] = '\0';
+						_servers[0].getHttpHandler(idx)->setCurrentSocket(client_tmp);
 						readFromSocketSuccess(idx, buffer, bytes_read);
 						setFdReadyForWrite(eventConfig, client_tmp);
 					}

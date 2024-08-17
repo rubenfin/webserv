@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/16 12:54:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 14:23:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -421,7 +421,9 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	}
 	else
 		header += "Content-Length: 0";
-	header += "\r\n";
+	if (getHttpHandler(idx)->getResponse()->status == httpStatusCode::PayloadTooLarge)
+		header += "Connection: close";
+	header += "\r\n\r\n";
 	
 	getHttpHandler(idx)->getResponse()->response = header + buffer + "\r\n";
 }
@@ -446,8 +448,9 @@ void Server::readFile(int idx)
 	int	file;
 	int	read_bytes;
 	char *buffer;
-
-	buffer = (char *)malloc(getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx) * sizeof(char));
+	long long fileSize = getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx);
+	
+	buffer = (char *)malloc(fileSize * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
 	file = open(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
@@ -457,7 +460,7 @@ void Server::readFile(int idx)
 		perror("opening file of responseURL");
 		return ;
 	}
-	read_bytes = read(file, buffer, getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx));
+	read_bytes = read(file, buffer, fileSize);
 	buffer[read_bytes] = '\0';
 	close(file);
 	makeResponse(std::string(buffer, read_bytes), idx);

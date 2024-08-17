@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/16 13:41:25 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 14:16:07 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class HttpHandler
 	response_t *_response;
 	Locations *_foundDirective;
 	Server *_server;
+	int _currentSocket;
 	bool _isCgi;
 	bool _hasRedirect;
 	bool _returnAutoIndex;
@@ -53,11 +54,13 @@ class HttpHandler
 	void setHeaderChecked(bool boolean);
 	void setChunked(bool boolean);
 	void checkLocationMethod(void);
+	void checkClientBodySize();
 	Locations *getFoundDirective(void);
 	request_t *getRequest(void);
 	response_t *getResponse(void);
 	Server *getServer(void);
 	Locations *findMatchingDirective(void);
+	void setCurrentSocket(int fd);
 	void setBooleans(void);
 	bool getCgi(void);
 	bool getRedirect(void);

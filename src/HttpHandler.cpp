@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/16 13:44:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 14:44:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -335,10 +335,33 @@ void HttpHandler::totalPathCheck(void)
 	}
 	else 
 	{
+		std::cout << getRequest()->requestURL  << "|" << _foundDirective->getLocationDirective() << std::endl;
+		if (getRequest()->requestURL != _foundDirective->getLocationDirective() && getRequest()->requestURL != _foundDirective->getLocationDirective() + "/")
+		{
+			logger.log(ERR, "[404] Directory doesn't completely match in alias");
+			getResponse()->status = httpStatusCode::NotFound;
+			throw NotFoundException();
+		}
 		pathCheck(_server->getRoot()
 			+ _foundDirective->getAlias(), _server->getRoot()
 			+ _foundDirective->getAlias() + "/"
 			+ _foundDirective->getIndex());
+	}
+}
+
+void HttpHandler::setCurrentSocket(int fd)
+{
+	_currentSocket = fd;
+}
+
+void HttpHandler::checkClientBodySize(void)
+{
+	logger.log(ERR, std::to_string(getRequest()->contentLength) + "|" + std::to_string(_foundDirective->getClientBodySize()));
+	if (getRequest()->contentLength != 0 && static_cast<long long>(getRequest()->contentLength) > _foundDirective->getClientBodySize())
+	{
+		logger.log(ERR, "[413] Content-Length exceeded client body size limit");
+		getResponse()->status = httpStatusCode::PayloadTooLarge;
+		throw PayloadTooLargeException();
 	}
 }
 
@@ -354,6 +377,7 @@ void HttpHandler::handleRequest(Server &serverAddress)
 	{
 		checkLocationMethod();
 		totalPathCheck();
+		checkClientBodySize();
 	}
 	setBooleans();
 	combineRightUrl();

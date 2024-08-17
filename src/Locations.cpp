@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/16 11:51:49 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 14:15:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,35 @@ void Locations::setAutoIndex(void)
 	std::cout << (extractValue("autoindex ")) << _autoindex << std::endl;
 }
 
+void Locations::setClientBodySize(void)
+{
+	std::string bodySizeM = trim(extractValue("client_body_size "));
+	if (bodySizeM.empty())
+	{
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size = 5000000;
+		return;
+	}
+	else if (!bodySizeM.empty() && bodySizeM.back() != 'M')
+	{
+		logger.log(ERR, "Client body size can only be set in megabytes, please end with M");
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size = 5000000;
+		return;
+	}
+	bodySizeM.pop_back();
+	logger.log(ERR, bodySizeM);
+	if (std::stoll(bodySizeM) > 100)
+	{
+		logger.log(ERR, "Client body size exceeded, max body size is 100MB");
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size = 5000000;
+		return;
+	}
+	_client_body_size = std::stoll(bodySizeM) * 1048576;
+	logger.log(ERR, std::to_string(_client_body_size));
+}
+
 void Locations::getLocationRegex(void)
 {
 	_locationDirective = extractValue("location");
@@ -62,6 +91,7 @@ void Locations::getLocationRegex(void)
 	setReturn();
 	setAlias();
 	setAutoIndex();
+	setClientBodySize();
 }
 
 std::string Locations::getLocationDirective(void)
@@ -87,6 +117,11 @@ std::string Locations::getReturn(void)
 bool Locations::getAutoIndex(void)
 {
 	return (_autoindex);
+}
+
+long long Locations::getClientBodySize(void)
+{
+	return (_client_body_size);
 }
 
 Locations::Locations(std::string locationContent)
@@ -190,18 +225,6 @@ std::string Locations::getCgi_pass(void)
 {
 	return (_cgi_pass);
 }
-
-std::string _locationContent;
-std::string _methodsList;
-std::string _locationDirective;
-MethodsLoc	_allowedMethods;
-std::string _root;
-std::string _index;
-std::string _cgi_pass;
-std::string _alias;
-std::string _url;
-std::string _return ;
-bool		_autoindex;
 
 Locations::Locations() : _locationContent(""), _methodsList(""),
 	_locationDirective(""), _root(""), _index(""), _cgi_pass(""), _alias(""),

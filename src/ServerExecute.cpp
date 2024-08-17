@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 14:23:14 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 13:31:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,7 +290,7 @@ void Server::sendResponse(const int &idx, int &socket)
 			getHttpHandler(idx)->getResponse()->response.size(), 0) ==
 		-1)
 	{
-		logger.log(ERR, "[500] Failed to send response to client, send()");
+		logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
 	}
 	getHttpHandler(idx)->cleanHttpHandler();
 }

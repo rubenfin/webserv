@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 11:47:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/17 11:50:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ DEFINE_HTTP_EXCEPTION(NotFound, 404, PAGE_404)
 DEFINE_HTTP_EXCEPTION(FavIcon, 404, PAGE_404)
 DEFINE_HTTP_EXCEPTION(MethodNotAllowed, 405, PAGE_405)
 DEFINE_HTTP_EXCEPTION(Conflict, 409, PAGE_409)
+DEFINE_HTTP_EXCEPTION(PayloadTooLarge, 413, PAGE_413)
 DEFINE_HTTP_EXCEPTION(InternalServerError, 500, PAGE_500)
 DEFINE_HTTP_EXCEPTION(NotImplemented, 501, PAGE_501)
 DEFINE_HTTP_EXCEPTION(BadGateway, 502, PAGE_502)
