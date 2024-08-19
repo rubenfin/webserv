@@ -77,6 +77,7 @@
         "thread": "cpp",
         "stacktrace": "cpp",
         "future": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "typeindex": "cpp"
     }
 }

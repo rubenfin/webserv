@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 14:15:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/19 14:26:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,15 +57,15 @@ void Locations::setClientBodySize(void)
 	std::string bodySizeM = trim(extractValue("client_body_size "));
 	if (bodySizeM.empty())
 	{
-		logger.log(INFO, "Default client body size used (5MB)");
-		_client_body_size = 5000000;
+		logger.log(INFO, "No location client_body_size set, size set equal to server size");
+		_client_body_size = 5242880;
 		return;
 	}
 	else if (!bodySizeM.empty() && bodySizeM.back() != 'M')
 	{
 		logger.log(ERR, "Client body size can only be set in megabytes, please end with M");
-		logger.log(INFO, "Default client body size used (5MB)");
-		_client_body_size = 5000000;
+		logger.log(INFO, "Client body size set equal to server size");
+		_client_body_size = 5242880;
 		return;
 	}
 	bodySizeM.pop_back();
@@ -73,8 +73,8 @@ void Locations::setClientBodySize(void)
 	if (std::stoll(bodySizeM) > 100)
 	{
 		logger.log(ERR, "Client body size exceeded, max body size is 100MB");
-		logger.log(INFO, "Default client body size used (5MB)");
-		_client_body_size = 5000000;
+		logger.log(INFO, "Client body size set equal to server size");
+		_client_body_size = 5242880;
 		return;
 	}
 	_client_body_size = std::stoll(bodySizeM) * 1048576;

@@ -5,8 +5,8 @@
 /*                                                     +:+                    */
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2024/06/25 11:26:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 11:50:41 by rfinneru      ########   odam.nl         */
+/*   Created: 2024/08/19 15:12:06 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/08/19 16:29:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,38 @@
 #define EXCEPTIONS_HPP
 
 #include "HttpHandler.hpp"
+#include "Error.hpp"
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <cstring>
 
+// Base HttpException class
 class HttpException : public std::runtime_error {
 protected:
     int statusCode;
     char * pageContent;
 
-public:
-    HttpException(int code, const std::string& message, char *content)
-        : std::runtime_error(message), statusCode(code), pageContent(content) {}
+    // Declare the static map, but don't define it here
+    static std::unordered_map<std::string, char*> customPages;
 
-    int getStatusCode() const { return statusCode; }
-    char * getPageContent() const { return pageContent; }
+public:
+    HttpException(int code, const std::string& message, char *defaultContent);
+    int getStatusCode() const;
+    char * getPageContent() const;
+
+    static void setCustomPage(const std::string& exceptionName, const char* content);
 };
 
-#define DEFINE_HTTP_EXCEPTION(name, code, content) \
+// Macro to define specific HTTP exceptions
+#define DEFINE_HTTP_EXCEPTION(name, code, defaultContent) \
 class name ## Exception : public HttpException { \
 public: \
-    name ## Exception() : HttpException(code, #name, content) {} \
+    name ## Exception() : HttpException(code, #name, defaultContent) {} \
 };
 
-
+// Define specific HTTP exceptions with default content
 DEFINE_HTTP_EXCEPTION(Created, 201, PAGE_201)
 DEFINE_HTTP_EXCEPTION(Accepted, 202, PAGE_202)
 DEFINE_HTTP_EXCEPTION(NoContent, 204, PAGE_204)
@@ -58,4 +66,3 @@ DEFINE_HTTP_EXCEPTION(HttpVersionNotSupported, 505, PAGE_505)
 extern void makeResponse(char *buffer, int index);
 
 #endif
-

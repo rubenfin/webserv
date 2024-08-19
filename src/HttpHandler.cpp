@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/17 14:44:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/19 12:46:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,8 @@ void HttpHandler::combineRightUrl(void)
 			_returnAutoIndex = true;
 			logger.log(WARNING,
 				"No index found in config file and now trying to use autoindex for /");
+			std::cout << "BOOLEAN IN HANDLER " << _returnAutoIndex << _idx << std::endl;
+				return ;
 		}
 		else if (_hasRedirect)
 			return ;
@@ -280,7 +282,7 @@ void HttpHandler::checkLocationMethod(void)
 	// std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
 	if (getRequest()->method == GET)
 	{
-		if (!_foundDirective->getMethods().GET)
+		if (!getFoundDirective()->getMethods().GET)
 		{
 			logger.log(ERR, "[405] Method not allowed in location");
 			getResponse()->status = httpStatusCode::MethodNotAllowed;
@@ -310,6 +312,7 @@ void HttpHandler::checkLocationMethod(void)
 void HttpHandler::cleanHttpHandler()
 {
 	_server = nullptr;
+	_foundDirective = nullptr;
 	resetRequestResponse(*_request, *_response);
 	_isCgi = false;
 	_hasRedirect = false;
@@ -378,8 +381,8 @@ void HttpHandler::handleRequest(Server &serverAddress)
 		checkLocationMethod();
 		totalPathCheck();
 		checkClientBodySize();
+		setBooleans();
 	}
-	setBooleans();
 	combineRightUrl();
 	// deleteFoundDirective(_foundDirective);
 }

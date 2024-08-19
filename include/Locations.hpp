@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 16:11:43 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/17 10:55:48 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/19 14:26:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 #include <string>
 #include <unordered_set>
 
+class Server;
+
 struct			MethodsLoc
 {
 	bool		GET;
@@ -30,6 +32,7 @@ struct			MethodsLoc
 class Locations
 {
   private:
+	Server* 	_server;
 	std::string _locationContent;
 	std::string _methodsList;
 	std::string _locationDirective;
@@ -44,6 +47,7 @@ class Locations
 	bool 		_autoindex;
 
   public:
+	void linkServer(Server *server);
 	void printMethods(void);
 	std::string getLocationDirective(void);
 	void setRoot(void);

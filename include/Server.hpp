@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/16 12:53:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/19 17:20:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ struct					Methods
 class Server
 {
   protected:
-	std::string 		_error404;
 	std::string 		_serverContent;
 	std::string 		_portString;
 	std::string 		_methodsList;
@@ -53,6 +52,7 @@ class Server
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
 	socklen_t			_addrlen;
+	long long			_client_body_size_server;
 	HttpHandler			*_http_handler[MAX_EVENTS];
 
   public:
@@ -67,7 +67,8 @@ class Server
 	void setIndex(void);
 	void setMethods(void);
 	void setUpload(void);
-	void setError404(void);
+	void setError(const std::string& errorPageNumber, const std::string& exceptionName);
+	void setErrors(void);
 	void printMethods(void);
 	void setSockedFD();
 	void setServer(int epollFd);
@@ -87,6 +88,7 @@ class Server
 	std::vector<Locations> getLocation(void);
 	HttpHandler *getHttpHandler(int index);
 	std::string getError404(void);
+	long long getClientBodySize(void);
 	void setLocationsRegex(std::string serverContent);
 	long long getFileSize(const std::string &filename, const int& idx);
 	Server(std::string serverContent);
@@ -98,6 +100,7 @@ class Server
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
 	void setFileInServer(int idx);
+	void setClientBodySize(void);
 	void deleteFileInServer(int idx);
 	std::string returnAutoIndex(std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);

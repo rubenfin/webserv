@@ -11,6 +11,7 @@ void	handleSigInt(int signal)
 
 void Webserv::serverActions(const int &idx, int &socket)
 {
+	std::cout << RED <<  _servers[0].getHttpHandler(idx)->getReturnAutoIndex() << " idx: " << idx <<  RESET << std::endl;
 	if (_servers[0].getHttpHandler(idx)->getReturnAutoIndex())
 	{
 		_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(_servers[0].getHttpHandler(idx)->getRequest()->requestURL).c_str(),
@@ -132,13 +133,9 @@ void removeBoundaryLine(std::string &str, const std::string &boundary)
     }
 }
 
-
-
-
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read)
 {
-
 	_servers[0].getHttpHandler(idx)->getRequest()->currentBytesRead = bytes_read;
 	if (!_servers[0].getHttpHandler(idx)->getChunked())
 	{
@@ -152,7 +149,6 @@ void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
 	}
 	else
 	{
-
 		_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
 		removeBoundaryLine(_servers[0].getHttpHandler(idx)->getRequest()->file.fileContent, trim(_servers[0].getHttpHandler(idx)->getRequest()->file.fileBoundary));
@@ -275,11 +271,6 @@ int Webserv::execute(void)
 				catch (const FavIconException)
 				{
 					_servers[0].sendFavIconResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_tmp);
-				}
-				catch (const NotFoundException &e)
-				{
-					_servers[0].sendNotFoundResponse(idx, client_socket);
 					setFdReadyForRead(eventConfig, client_tmp);
 				}
 				catch (const HttpException &e)

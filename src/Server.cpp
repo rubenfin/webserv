@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 14:23:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/19 17:40:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,11 +238,79 @@ void Server::setMethods(void)
 		_allowedMethods.DELETE = true;
 }
 
-void Server::setError404(void)
+void Server::setError(const std::string& errorPageNumber, const std::string& exceptionName)
 {
-	_error404 = extractValue("error_page 404 ");
+    std::string errorPage = trim(extractValue("error_page " + errorPageNumber + " "));
+    
+    if (errorPage.empty())
+    {
+        std::cerr << "No error page specified for error code " << errorPageNumber << std::endl;
+        return;
+    }
+
+    std::ifstream file(getRoot() + errorPage, std::ios::binary | std::ios::ate);
+    if (file.is_open())
+    {
+        std::streamsize size = file.tellg();
+        file.seekg(0, std::ios::beg);
+        
+        // Allocate buffer with the file size
+        char* buffer = new char[size + 1]; // +1 for null terminator
+        
+        // Read file contents into buffer
+        if (file.read(buffer, size))
+        {
+            buffer[size] = '\0'; // Null-terminate the buffer
+            HttpException::setCustomPage(exceptionName, buffer);
+        }
+        else
+        {
+            std::cerr << "Failed to read file: " << getRoot() + errorPage << std::endl;
+        }
+        
+        // Clean up
+        delete[] buffer;
+        file.close();
+    }
+    else
+    {
+        std::cerr << "Failed to open file: " << getRoot() + errorPage << std::endl;
+    }
 }
 
+void Server::setErrors(void)
+{
+	std::unordered_map<std::string, std::string> errorPages = {
+		{"200", "OK"},                          // 200 OK
+		{"201", "Created"},                     // 201 Created
+		{"202", "Accepted"},                    // 202 Accepted
+		{"204", "NoContent"},                  // 204 No Content
+		{"301", "MovedPermanently"},           // 301 Moved Permanently
+		{"302", "Found"},                       // 302 Found
+		{"304", "NotModified"},                // 304 Not Modified
+		{"400", "BadRequest"},                 // 400 Bad Request
+		{"401", "Unauthorized"},                // 401 Unauthorized
+		{"403", "Forbidden"},                   // 403 Forbidden
+		{"404", "NotFound"},                   // 404 Not Found
+		{"405", "MethodNotAllowed"},          // 405 Method Not Allowed
+		{"409", "Conflict"},                    // 409 Conflict
+		{"413", "PayloadTooLarge"},           // 413 Payload Too Large
+		{"500", "InternalServerError"},       // 500 Internal Server Error
+		{"501", "NotImplemented"},             // 501 Not Implemented
+		{"502", "BadGateway"},                 // 502 Bad Gateway
+		{"503", "ServiceUnavailable"},         // 503 Service Unavailable
+		{"505", "HTTPVersionNonSupported"}   // 505 HTTP Version Not Supported
+};
+
+    
+    for (const auto& errorPagePair : errorPages)
+    {
+        const std::string& statusCode = errorPagePair.first;
+        const std::string& exceptionName = errorPagePair.second;
+		
+        setError(statusCode, exceptionName);
+    }
+}
 void Server::printMethods(void)
 {
 	std::cout << "GET Methods == " << _allowedMethods.GET << std::endl;
@@ -253,11 +321,6 @@ void Server::printMethods(void)
 void Server::setSockedFD()
 {
 	this->_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-}
-
-std::string Server::getError404(void)
-{
-	return (_error404);
 }
 
 int Server::getSocketFD(void)
@@ -282,6 +345,11 @@ socklen_t Server::getAddrlen(void)
 int Server::getPort(void)
 {
 	return (_port);
+}
+
+long long Server::getClientBodySize(void)
+{
+	return (_client_body_size_server);
 }
 
 std::string Server::getRoot(void)
@@ -367,6 +435,35 @@ void Server::linkHandlerResponseRequest(request_t *request,
 			i);
 }
 
+void Server::setClientBodySize(void)
+{
+	std::string bodySizeM = trim(extractValueUntilLocation("client_body_size "));
+	if (bodySizeM.empty())
+	{
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size_server = 5242880;
+		return ;
+	}
+	else if (!bodySizeM.empty() && bodySizeM.back() != 'M')
+	{
+		logger.log(ERR, "Server client body size can only be set in megabytes, please end with M");
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size_server = 5242880;
+		return ;
+	}
+	bodySizeM.pop_back();
+	logger.log(ERR, "SERVER" + bodySizeM);
+	if (std::stoll(bodySizeM) > 100)
+	{
+		logger.log(ERR, "Server client body size exceeded, max body size is 100MB");
+		logger.log(INFO, "Default client body size used (5MB)");
+		_client_body_size_server = 5242880;
+		return ;
+	}
+	_client_body_size_server = std::stoll(bodySizeM) * 1048576;
+	logger.log(ERR, std::to_string(_client_body_size_server));
+}
+
 Server::Server(std::string serverContent)
 {
 	_serverContent = serverContent;
@@ -375,7 +472,8 @@ Server::Server(std::string serverContent)
 	setRoot();
 	setIndex();
 	setMethods();
-	setError404();
+	setErrors();
+	setClientBodySize();
 	setLocationsRegex(serverContent);
 	setUpload();
 	logger.log(INFO, "Server port: " + std::to_string(_port));
@@ -421,35 +519,36 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	}
 	else
 		header += "Content-Length: 0";
-	if (getHttpHandler(idx)->getResponse()->status == httpStatusCode::PayloadTooLarge)
-		header += "Connection: close";
 	header += "\r\n\r\n";
-	
 	getHttpHandler(idx)->getResponse()->response = header + buffer + "\r\n";
 }
 
-long long Server::getFileSize(const std::string &filename, const int& idx)
+long long Server::getFileSize(const std::string &filename, const int &idx)
 {
-	struct stat sb;
+	struct stat	sb;
 
-	if (stat(filename.data(), &sb) == -1) {
+	logger.log(DEBUG, filename + " getting checked by stat");
+	if (stat(filename.data(), &sb) == -1)
+	{
 		perror("stat");
-		logger.log(ERR, "[500] stat said " + filename + " is not a file");
+		logger.log(ERR, "[500] stat said |" + filename + "| is not a file");
 		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}
-	else {
-		return ((long long) sb.st_size);
+	else
+	{
+		return ((long long)sb.st_size);
 	}
 }
 
 void Server::readFile(int idx)
 {
-	int	file;
-	int	read_bytes;
-	char *buffer;
-	long long fileSize = getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx);
-	
+	int			file;
+	int			read_bytes;
+	char		*buffer;
+	long long	fileSize;
+
+	fileSize = getFileSize(getHttpHandler(idx)->getRequest()->requestURL, idx);
 	buffer = (char *)malloc(fileSize * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx)->getRequest()->requestURL);
@@ -477,21 +576,6 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 		std::cerr << "send failed with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	}
-	getHttpHandler(idx)->cleanHttpHandler();
-}
-
-void Server::sendNotFoundResponse(const int &idx, int &socket)
-{
-	if (this->getHttpHandler(idx)->getResponse()->status == httpStatusCode::NotFound
-		&& !this->getError404().empty())
-	{
-		this->getHttpHandler(idx)->getRequest()->requestURL = this->getRoot()
-			+ this->getError404();
-		this->readFile(idx);
-	}
-	else
-		this->makeResponse(PAGE_404, idx);
-	this->sendResponse(idx, socket);
 	getHttpHandler(idx)->cleanHttpHandler();
 }
 

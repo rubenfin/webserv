@@ -1,6 +1,7 @@
 server {
 	server_name webserv
 	listen 8000
+	client_body_size 1M
 
 	root files/response_files/
 	error_page 404 /404.html
@@ -47,13 +48,6 @@ server {
 	location /delete_test {
 		index delete.html
 		allow_methods POST DELETE GET
-		client_body_size 10M
-	}
-
-	location /directory {
-		allow_methods GET
-		root YoupiBanane/
-		index youpi.bad_extension
 	}
 
 	location /uploads {
