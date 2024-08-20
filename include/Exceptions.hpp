@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/19 15:12:06 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/19 16:29:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 10:31:56 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #define EXCEPTIONS_HPP
 
 #include "HttpHandler.hpp"
-#include "Error.hpp"
 #include <exception>
 #include <stdexcept>
 #include <string>
