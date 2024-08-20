@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/19 12:46:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 17:55:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,7 @@ void HttpHandler::combineRightUrl(void)
 				+ getRequest()->requestURL;
 		}
 		else
-		{
-			logger.log(ERR, "[404] No directory found");
-			getResponse()->status = httpStatusCode::NotFound;
-			throw NotFoundException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[404] No directory found", httpStatusCode::NotFound, NotFoundException());
 	}
 	else if (_foundDirective->getAlias() != "")
 	{
@@ -83,12 +79,7 @@ void HttpHandler::combineRightUrl(void)
 		else if (_hasRedirect)
 			return ;
 		else
-		{
-			logger.log(ERR,
-				"[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?");
-			getResponse()->status = httpStatusCode::Forbidden;
-			throw ForbiddenException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?", httpStatusCode::Forbidden, ForbiddenException());
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 	{
@@ -106,12 +97,7 @@ void HttpHandler::combineRightUrl(void)
 		else if (_hasRedirect)
 			return ;
 		else
-		{
-			logger.log(ERR,
-				"[403] No index found in config file and no autoindex in current directive");
-			getResponse()->status = httpStatusCode::Forbidden;
-			throw ForbiddenException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[403] No index found in config file and no autoindex in current directive", httpStatusCode::Forbidden, ForbiddenException());
 	}
 	else if (_foundDirective->getRoot() != "")
 	{
@@ -141,12 +127,7 @@ void HttpHandler::combineRightUrl(void)
 			else if (_hasRedirect)
 				return ;
 			else
-			{
-				logger.log(ERR,
-					"[403] No index foundDirective in config file and no autoindex in foundDirective");
-				getResponse()->status = httpStatusCode::Forbidden;
-				throw ForbiddenException();
-			}
+				getServer()->logThrowStatus(_idx, ERR, "[403] No index foundDirective in config file and no autoindex in foundDirective", httpStatusCode::Forbidden, ForbiddenException());
 		}
 	}
 	// logger.log(DEBUG, "requestURL result --> " + getRequest()->requestURL);
@@ -186,20 +167,13 @@ int HttpHandler::pathCheck(const std::string& dir, const std::string& file)
 	if (!dir.empty())
 	{
 		if (!checkIfDir(dir))
-		{
-			logger.log(ERR, "[404] Directory doesn't exist");
-			getResponse()->status = httpStatusCode::NotFound;
-			throw NotFoundException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[404] Directory doesn't exist", httpStatusCode::NotFound, NotFoundException());
 	}
 	if (!file.empty() && file != dir)
 	{
 		if (!checkIfFile(file))
-		{
-			logger.log(ERR, "[404] File doesn't exist");
-			getResponse()->status = httpStatusCode::NotFound;
-			throw NotFoundException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[404] File doesn't exist", httpStatusCode::NotFound, NotFoundException());
+
 	}
 	return (1);
 }
@@ -207,23 +181,14 @@ int HttpHandler::pathCheck(const std::string& dir, const std::string& file)
 void HttpHandler::methodCheck(void)
 {
 	if (getRequest()->method == ERROR)
-	{
-		logger.log(ERR, "[400] Only available methods are GET, POST and DELETE");
-		getResponse()->status = httpStatusCode::BadRequest;
-		throw BadRequestException();
-	}
+		getServer()->logThrowStatus(_idx, ERR, "[400] Only available methods are GET, POST and DELETE", httpStatusCode::BadRequest, BadRequestException());
 }
 
 void HttpHandler::fileCheck()
 {
 	if (getRequest()->file.fileName.size() > 256
 		|| hasSpecialCharacters(getRequest()->file.fileName))
-	{
-		logger.log(ERR,
-			"[400] Filename has too many characters or has special characters");
-		getResponse()->status = httpStatusCode::BadRequest;
-		throw BadRequestException();
-	}
+		getServer()->logThrowStatus(_idx, ERR, "[400] Filename has too many characters or has special characters", httpStatusCode::BadRequest, BadRequestException());
 }
 
 void HttpHandler::setDelete()
@@ -263,57 +228,36 @@ void	deleteFoundDirective(Locations *_foundDirective)
 void HttpHandler::setBooleans(void)
 {
 	if (_foundDirective && !_foundDirective->getReturn().empty())
-	{
 		_hasRedirect = true;
-		// std::cout << _foundDirective << _foundDirective->getReturn() << std::endl;
-	}
 	else if (_foundDirective
 		&& _foundDirective->getLocationDirective() == "/cgi-bin")
-	{
 		_isCgi = true;
-		// std::cout << "CGI IS NOW SET TO TRUE" << std::endl;
-	}
 }
 
 void HttpHandler::checkLocationMethod(void)
 {
-	// std::cout << "GET" << _foundDirective->getMethods().GET << std::endl;
-	// std::cout << "POST" << _foundDirective->getMethods().POST << std::endl;
-	// std::cout << "DELETE" << _foundDirective->getMethods().DELETE << std::endl;
 	if (getRequest()->method == GET)
 	{
 		if (!getFoundDirective()->getMethods().GET)
-		{
-			logger.log(ERR, "[405] Method not allowed in location");
-			getResponse()->status = httpStatusCode::MethodNotAllowed;
-			throw MethodNotAllowedException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 	else if (getRequest()->method == POST)
 	{
 		if (!_foundDirective->getMethods().POST)
-		{
-			logger.log(ERR, "[405] Method not allowed in location");
-			getResponse()->status = httpStatusCode::MethodNotAllowed;
-			throw MethodNotAllowedException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 	else if (getRequest()->method == DELETE)
 	{
 		if (!_foundDirective->getMethods().DELETE)
-		{
-			logger.log(ERR, "[405] Method not allowed in location");
-			getResponse()->status = httpStatusCode::MethodNotAllowed;
-			throw MethodNotAllowedException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 }
 
 void HttpHandler::cleanHttpHandler()
 {
+	resetRequestResponse(*_request, *_response);
 	_server = nullptr;
 	_foundDirective = nullptr;
-	resetRequestResponse(*_request, *_response);
 	_isCgi = false;
 	_hasRedirect = false;
 	_returnAutoIndex = false;
@@ -325,8 +269,8 @@ void HttpHandler::connectToRequestResponse(request_t *request,
 	response_t *response, int idx)
 {
 	this->_idx = idx;
-	_request = request;
-	_response = response;
+	this->_request = request;
+	this->_response = response;
 }
 
 void HttpHandler::totalPathCheck(void)
@@ -340,11 +284,7 @@ void HttpHandler::totalPathCheck(void)
 	{
 		std::cout << getRequest()->requestURL  << "|" << _foundDirective->getLocationDirective() << std::endl;
 		if (getRequest()->requestURL != _foundDirective->getLocationDirective() && getRequest()->requestURL != _foundDirective->getLocationDirective() + "/")
-		{
-			logger.log(ERR, "[404] Directory doesn't completely match in alias");
-			getResponse()->status = httpStatusCode::NotFound;
-			throw NotFoundException();
-		}
+			getServer()->logThrowStatus(_idx, ERR, "[404] Directory doesn't completely match in alias", httpStatusCode::NotFound, NotFoundException());
 		pathCheck(_server->getRoot()
 			+ _foundDirective->getAlias(), _server->getRoot()
 			+ _foundDirective->getAlias() + "/"
@@ -359,13 +299,8 @@ void HttpHandler::setCurrentSocket(int fd)
 
 void HttpHandler::checkClientBodySize(void)
 {
-	logger.log(ERR, std::to_string(getRequest()->contentLength) + "|" + std::to_string(_foundDirective->getClientBodySize()));
 	if (getRequest()->contentLength != 0 && static_cast<long long>(getRequest()->contentLength) > _foundDirective->getClientBodySize())
-	{
-		logger.log(ERR, "[413] Content-Length exceeded client body size limit");
-		getResponse()->status = httpStatusCode::PayloadTooLarge;
-		throw PayloadTooLargeException();
-	}
+		getServer()->logThrowStatus(_idx, ERR, "[413] Content-Length exceeded client body size limit", httpStatusCode::PayloadTooLarge, PayloadTooLargeException());
 }
 
 void HttpHandler::handleRequest(Server &serverAddress)
@@ -384,7 +319,6 @@ void HttpHandler::handleRequest(Server &serverAddress)
 		setBooleans();
 	}
 	combineRightUrl();
-	// deleteFoundDirective(_foundDirective);
 }
 
 Locations *HttpHandler::getFoundDirective(void)

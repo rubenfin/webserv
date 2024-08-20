@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/20 16:59:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 17:58:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,13 +169,10 @@ void Server::setFileInServer(int idx)
 	if (file.is_open())
 	{
 		file << fileContent;
-		std::cout << getHttpHandler(idx)->getRequest()->currentBytesRead << std::endl;
-		std::cout  << getHttpHandler(idx)->getRequest()->totalBytesRead  << "|" << getHttpHandler(idx)->getRequest()->contentLength << std::endl;
-		
 		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
 			file.close();
-			logThrowStatus(idx, INFO, "[201] Done uploading file, read all the bytes" + fullPath, httpStatusCode::Created, CreatedException());
+			logThrowStatus(idx, INFO, "[201] Done uploading file, read all the bytes " + fullPath, httpStatusCode::Created, CreatedException());
 		}
 	}
 	else
