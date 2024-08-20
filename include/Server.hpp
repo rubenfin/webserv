@@ -6,12 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/19 17:20:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 16:55:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "Exceptions.hpp"
 #include "HttpHandler.hpp"
 #include "Locations.hpp"
 #include "Webserv.hpp"
@@ -28,6 +29,7 @@
 
 class					Locations;
 class					HttpHandler;
+class					HttpException;
 
 struct					Methods
 {
@@ -39,15 +41,15 @@ struct					Methods
 class Server
 {
   protected:
-	std::string 		_serverContent;
-	std::string 		_portString;
-	std::string 		_methodsList;
+	std::string _serverContent;
+	std::string _portString;
+	std::string _methodsList;
 	int					_serverFd;
-	std::string 		_serverName;
+	std::string _serverName;
 	int					_port;
-	std::string 		_root;
-	std::string 		_index;
-	std::string			_upload;
+	std::string _root;
+	std::string _index;
+	std::string _upload;
 	Methods				_allowedMethods;
 	std::vector<Locations> _locations;
 	struct sockaddr_in	*_address;
@@ -57,8 +59,12 @@ class Server
 
   public:
 	void cgi(char **env, int index);
-	void execute_CGI_script(int *fds, const char *script, char **env, int index);
+	void execute_CGI_script(int *fds, const char *script, char **env,
+		int index);
 	void getLocationStack(std::string locationContent);
+	void logThrowStatus(const int &idx, const level &lvl,
+		const std::string &msg, const httpStatusCode &status,
+		HttpException exception);
 	std::string extractValue(const std::string &searchString);
 	std::string extractValueUntilLocation(const std::string &searchString);
 	void setServerName(void);
@@ -67,12 +73,13 @@ class Server
 	void setIndex(void);
 	void setMethods(void);
 	void setUpload(void);
-	void setError(const std::string& errorPageNumber, const std::string& exceptionName);
+	void setError(const std::string &errorPageNumber,
+		const std::string &exceptionName);
 	void setErrors(void);
 	void printMethods(void);
 	void setSockedFD();
 	void setServer(int epollFd);
-	void setEnv(char **&env, int index);
+	char **makeEnv(int idx);
 	int getServerFd(void);
 	std::string getServerName(void);
 	std::string getPortString(void);
@@ -90,7 +97,7 @@ class Server
 	std::string getError404(void);
 	long long getClientBodySize(void);
 	void setLocationsRegex(std::string serverContent);
-	long long getFileSize(const std::string &filename, const int& idx);
+	long long getFileSize(const std::string &filename, const int &idx);
 	Server(std::string serverContent);
 	void setSocketOptions(const int &opt);
 	void initializeAddress();
@@ -106,7 +113,7 @@ class Server
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
-	void sendNotFoundResponse(const int& idx, int &socket);
+	void sendNotFoundResponse(const int &idx, int &socket);
 	void linkHandlerResponseRequest(request_t *request, response_t *response);
 	void checkFileDetails(const int &idx, std::ofstream &file);
 	~Server();

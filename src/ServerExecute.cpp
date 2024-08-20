@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 13:31:27 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 16:59:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,48 +14,42 @@
 
 volatile sig_atomic_t	interrupted;
 
-void Server::setEnv(char **&env, int idx)
+char **Server::makeEnv(int idx)
 {
-	char	**savedEnv;
-	int		existingEnvCount;
-
-	std::vector<std::string> addedEnv;
+	std::vector<std::string> addingEnv;
 	std::string currMethod;
-	savedEnv = env;
-	// Determine the current method
+	
 	if (getHttpHandler(idx)->getRequest()->method == GET)
 		currMethod = "GET";
 	else if (getHttpHandler(idx)->getRequest()->method == POST)
 		currMethod = "POST";
 	else if (getHttpHandler(idx)->getRequest()->method == DELETE)
 		currMethod = "DELETE";
-	// Add new environment variables
-	addedEnv.push_back("REQUEST_METHOD=" + currMethod);
-	addedEnv.push_back("QUERY_STRING="
+	addingEnv.push_back("REQUEST_METHOD=" + currMethod);
+	addingEnv.push_back("QUERY_STRING="
 		+ getHttpHandler(idx)->getRequest()->requestBody);
 	std::map<std::string,
 		std::string>::iterator contentTypeIt = getHttpHandler(idx)->getRequest()->header.find("Content-Type");
 	if (contentTypeIt != getHttpHandler(idx)->getRequest()->header.end())
-		addedEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
+		addingEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
 	std::map<std::string,
 		std::string>::iterator contentLengthIt = getHttpHandler(idx)->getRequest()->header.find("Content-Length");
 	if (contentLengthIt != getHttpHandler(idx)->getRequest()->header.end())
-		addedEnv.push_back("CONTENT_LENGTH=" + contentLengthIt->second);
-	addedEnv.push_back("SERVER_NAME=" + getServerName());
-	addedEnv.push_back("SERVER_PORT=" + std::to_string(getPort()));
-	addedEnv.push_back("SCRIPT_NAME="
+		addingEnv.push_back("CONTENT_LENGTH=" + contentLengthIt->second);
+	addingEnv.push_back("SERVER_NAME=" + getServerName());
+	addingEnv.push_back("SERVER_PORT=" + std::to_string(getPort()));
+	addingEnv.push_back("SCRIPT_NAME="
 		+ getHttpHandler(idx)->getRequest()->requestFile);
-	addedEnv.push_back("PATH_INFO="
+	addingEnv.push_back("PATH_INFO="
 		+ getHttpHandler(idx)->getRequest()->requestURL);
-	existingEnvCount = 0;
-	while (savedEnv[existingEnvCount] != nullptr)
-		existingEnvCount++;
-	env = new char *[existingEnvCount + addedEnv.size() + 1];
-	for (size_t i = 0; i < addedEnv.size(); ++i)
-		env[i] = strdup(addedEnv[i].c_str());
-	for (int i = 0; i < existingEnvCount; ++i)
-		env[addedEnv.size() + i] = strdup(savedEnv[i]);
-	env[addedEnv.size() + existingEnvCount] = nullptr;
+	
+	char ** env;
+	env = new char *[addingEnv.size() + 1];
+	for (size_t i = 0; i < addingEnv.size(); ++i)
+		env[i] = strdup(addingEnv[i].c_str());
+	env[addingEnv.size()] = nullptr;
+	
+	return (env);
 }
 
 void Server::execute_CGI_script(int *fds, const char *script, char **env,
@@ -63,9 +57,10 @@ void Server::execute_CGI_script(int *fds, const char *script, char **env,
 {
 	char	*exec_args[] = {(char *)script, nullptr};
 
+	env = nullptr;
 	logger.log(INFO, "Executing CGI script");
 	close(fds[0]);
-	setEnv(env, idx);
+	env = makeEnv(idx);
 	// Redirect both STDOUT and STDERR
 	dup2(fds[1], STDOUT_FILENO);
 	dup2(fds[1], STDERR_FILENO);
@@ -73,7 +68,7 @@ void Server::execute_CGI_script(int *fds, const char *script, char **env,
 	if (getHttpHandler(idx)->getRequest()->method == POST)
 	{
 		write(STDIN_FILENO,
-			getHttpHandler(idx)->getRequest()->requestBody.c_str(),
+			getHttpHandler(idx)->getRequest()->requestBody.data(),
 			getHttpHandler(idx)->getRequest()->requestBody.size());
 		// close(STDIN_FILENO);  // Close STDIN after writing
 	}
@@ -84,33 +79,36 @@ void Server::execute_CGI_script(int *fds, const char *script, char **env,
 	exit(EXIT_FAILURE);
 }
 
+int	check_status(int status)
+{
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	return (127);
+}
+
+void Server::logThrowStatus(const int& idx, const level& lvl, const std::string& msg, const httpStatusCode& status, HttpException exception)
+{
+	logger.log(lvl, msg);
+	getHttpHandler(idx)->getResponse()->status = status;
+	throw exception;
+}
+
 void Server::cgi(char **env, int idx)
 {
 	pid_t	pid;
 	char 	buf[BUFFERSIZE];
 	int		fds[2];
+	int 	status;
 
 	logger.log(DEBUG, "in CGI");
 	if (access(getHttpHandler(idx)->getRequest()->requestURL.c_str(),
 			X_OK) != 0)
-	{
-		logger.log(ERR, "[403] Script doesn't have executable rights");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
+		logThrowStatus(idx, ERR, "[403] Script doesn't have executable rights", httpStatusCode::Forbidden, ForbiddenException());
 	if (pipe(fds) == -1)
-	{
-		logger.log(ERR, "[500] Pipe has failed");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-		throw InternalServerErrorException();
-	}
+		logThrowStatus(idx, ERR, "[500] Pipe has failed", httpStatusCode::InternalServerError, InternalServerErrorException());
 	pid = fork();
 	if (pid == -1)
-	{
-		logger.log(ERR, "[500] Fork has failed");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-		throw InternalServerErrorException();
-	}
+		logThrowStatus(idx, ERR, "[500] Fork has failed", httpStatusCode::InternalServerError, InternalServerErrorException());
 	else if (pid == 0)
 		execute_CGI_script(fds,
 			getHttpHandler(idx)->getRequest()->requestURL.c_str(), env, idx);
@@ -121,9 +119,11 @@ void Server::cgi(char **env, int idx)
 				buf, BUFFERSIZE);
 		buf[getHttpHandler(idx)->getResponse()->contentLength] = '\0';
 		close(fds[0]);
+		waitpid(pid, &status, 0);
+		if (status != 0)
+			logThrowStatus(idx, ERR, "[500] Script has executed and returned with an error status", httpStatusCode::InternalServerError, InternalServerErrorException());
 		std::string buffer(buf, getHttpHandler(idx)->getResponse()->contentLength);
 		makeResponse(buffer, idx);
-		waitpid(pid, NULL, 0);
 	}
 	return ;
 }
@@ -131,32 +131,20 @@ void Server::cgi(char **env, int idx)
 void Server::checkFileDetails(const int &idx, std::ofstream &file)
 {
 	if (_upload.empty())
-	{
-		logger.log(ERR,
-			"[403] Tried uploading without setting an upload directory");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
+		logThrowStatus(idx, ERR, "[403] Tried uploading without setting an upload directory", httpStatusCode::Forbidden, ForbiddenException());
 	else
 	{
 		std::string uploadPath = getUpload();
 		if (access(uploadPath.c_str(), F_OK) != 0)
 		{
 			if (mkdir(uploadPath.c_str(), 0775) == -1)
-			{
-				logger.log(ERR, "[500] Upload directory not found and was unable to make one");	
-				throw InternalServerErrorException();
-			}
+				logThrowStatus(idx, ERR, "[500] Upload directory not found and was unable to make one", httpStatusCode::InternalServerError, InternalServerErrorException());
 			logger.log(WARNING, "Made upload dir");
 		}
 		std::string fileName = getHttpHandler(idx)->getRequest()->file.fileName;
 		std::string fullPath = uploadPath + "/" + fileName;
 		if (fileName.empty())
-		{
-			logger.log(ERR, "[403] No file has been uploaded");
-			getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-			throw ForbiddenException();
-		}
+			logThrowStatus(idx, ERR, "[403] No file has been uploaded", httpStatusCode::Forbidden, ForbiddenException());
 		else if (access(fullPath.c_str(), F_OK) == 0)
 		{
 			logger.log(WARNING,
@@ -187,16 +175,12 @@ void Server::setFileInServer(int idx)
 		if (getHttpHandler(idx)->getRequest()->totalBytesRead >= getHttpHandler(idx)->getRequest()->contentLength)
 		{
 			file.close();
-			getHttpHandler(idx)->getResponse()->status = httpStatusCode::Created;
-			throw CreatedException();
+			logThrowStatus(idx, INFO, "[201] Done uploading file, read all the bytes" + fullPath, httpStatusCode::Created, CreatedException());
 		}
 	}
 	else
-	{
-		logger.log(ERR, "[500] Failed to create/open the file: " + fullPath);
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-		throw InternalServerErrorException();
-	}
+		logThrowStatus(idx, ERR, "[500] Failed to create/open the file: " + fullPath, httpStatusCode::InternalServerError, InternalServerErrorException());
+	
 }
 
 void Server::deleteFileInServer(int idx)
@@ -208,78 +192,31 @@ void Server::deleteFileInServer(int idx)
 		+ getHttpHandler(idx)->getRequest()->file.fileName;
 	fileNameSize = getHttpHandler(idx)->getRequest()->file.fileName.size();
 	if (getUpload().empty())
-	{
-		logger.log(ERR,
-			"[403] No upload location has been set,can't delete file");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
+		logThrowStatus(idx, ERR, "[403] No upload location has been set, can't delete file", httpStatusCode::Forbidden, ForbiddenException());
 	else if (filePath.find("../") != std::string::npos)
-	{
-		logger.log(ERR,
-			"[403] You can only stay in the designated upload folder");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
+		logThrowStatus(idx, ERR, "[403] You can only stay in the designated upload folder", httpStatusCode::Forbidden, ForbiddenException());
 	else if (access(filePath.c_str(), F_OK) == -1)
-	{
-		logger.log(ERR,
-			"[403] Tried deleting a file or directory that doesn't exist");
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-		throw ForbiddenException();
-	}
+		logThrowStatus(idx, ERR, "[403] Tried deleting a file or directory that doesn't exist", httpStatusCode::Forbidden, ForbiddenException());
 	else if (checkIfDir(getUpload() + "/"
 			+ getHttpHandler(idx)->getRequest()->file.fileName))
 	{
 		if (getHttpHandler(idx)->getRequest()->file.fileName[fileNameSize
 			- 1] != '/')
-		{
-			logger.log(ERR,
-				"[409] Tried deleting a directory with unvalid syntax  "
-				+ filePath);
-			getHttpHandler(idx)->getResponse()->status = httpStatusCode::Conflict;
-			throw ConflictException();
-		}
+			logThrowStatus(idx, ERR, "[409] Tried deleting a directory with unvalid syntax " + filePath, httpStatusCode::Conflict, ConflictException());
 		else if (access(filePath.c_str(), W_OK) == -1)
-		{
-			logger.log(ERR, "[403] Directory does not have write permissions  "
-				+ filePath);
-			getHttpHandler(idx)->getResponse()->status = httpStatusCode::Forbidden;
-			throw ForbiddenException();
-		}
+			logThrowStatus(idx, ERR, "[403] Directory does not have write permissions " + filePath, httpStatusCode::Forbidden, ForbiddenException());
 		else
 		{
 			if (remove(filePath.c_str()) == 0)
-			{
-				logger.log(INFO,
-					"[204] Succesfully deleted the file located at "
-					+ filePath);
-				getHttpHandler(idx)->getResponse()->status = httpStatusCode::NoContent;
-				throw NoContentException();
-			}
+				logThrowStatus(idx, INFO, "[204] Succesfully deleted the file located at " + filePath, httpStatusCode::NoContent, NoContentException());
 			else
-			{
-				logger.log(ERR, "[500] Could not delete the file located at "
-					+ filePath);
-				getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-				throw InternalServerErrorException();
-			}
+				logThrowStatus(idx, ERR, "[500] Could not delete the file located at " + filePath, httpStatusCode::InternalServerError, InternalServerErrorException());
 		}
 	}
 	if (remove(filePath.c_str()) == 0)
-	{
-		logger.log(INFO, "[202] Succesfully deleted the file located at "
-			+ filePath);
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::Accepted;
-		throw AcceptedException();
-	}
+		logThrowStatus(idx, INFO, "[202] Succesfully deleted the file located at " + filePath, httpStatusCode::Accepted, AcceptedException());
 	else
-	{
-		logger.log(ERR, "[500] Could not delete the file located at "
-			+ filePath);
-		getHttpHandler(idx)->getResponse()->status = httpStatusCode::InternalServerError;
-		throw InternalServerErrorException();
-	}
+		logThrowStatus(idx, ERR, "[500] Could not delete the file located at " + filePath, httpStatusCode::InternalServerError, InternalServerErrorException());
 }
 
 void Server::sendResponse(const int &idx, int &socket)
