@@ -209,19 +209,57 @@ int fd_is_valid(int fd)
     return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
 }
 
+void Webserv::readWriteServer(struct epoll_event *eventList, int idx, int client_socket, struct epoll_event eventConfig)
+{
+	int		client_tmp;
+	ssize_t	bytes_read;
+	char	buffer[BUFFERSIZE];
+
+	try
+	{
+		client_tmp = eventList[idx].data.fd;
+		if (eventList[idx].events & EPOLLIN)
+		{
+			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
+			if (bytes_read < 1)
+			{
+				readFromSocketError(bytes_read, idx, client_tmp);
+				return;
+			}
+			buffer[bytes_read] = '\0';
+			readFromSocketSuccess(idx, buffer, bytes_read);
+			setFdReadyForWrite(eventConfig, client_tmp);
+		}
+		else if (eventList[idx].events & EPOLLOUT)
+		{
+			serverActions(idx, client_tmp);
+			if (!fd_is_valid(client_tmp))
+				return;
+			setFdReadyForRead(eventConfig, client_tmp);
+		}
+	}
+	catch (const FavIconException)
+	{
+		_servers[0].sendFavIconResponse(idx, client_socket);
+	}
+	catch (const HttpException &e)
+	{
+		_servers[0].makeResponse(e.getPageContent(), idx);
+		_servers[0].sendResponse(idx, client_socket);
+	}
+}
+
 
 int Webserv::execute(void)
 {
 	int					client_socket;
-	char				buffer[BUFFERSIZE];
-	ssize_t				bytes_read;
 	socklen_t			addrlen;
 	request_t			request[MAX_EVENTS];
 	response_t			response[MAX_EVENTS];
 	int					eventCount;
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
-	int					client_tmp;
+	int serverConnectIndex;
 
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
@@ -230,13 +268,15 @@ int Webserv::execute(void)
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{
-		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
+		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 100);
 		for (int idx = 0; idx < eventCount; ++idx)
 		{
-			if (eventList[idx].data.fd == _servers[0].getServerFd())
+			serverConnectIndex = checkForNewConnection(eventList[idx].data.fd); 
+			if (serverConnectIndex >= 0)
 			{
-				if (!acceptClientSocket(client_socket, addrlen, idx))
-					continue; ;
+				if (!acceptClientSocket(client_socket, addrlen, serverConnectIndex))
+					continue ;
+				;
 				if (!makeSocketNonBlocking(client_socket))
 				{
 					close(client_socket);
@@ -246,39 +286,7 @@ int Webserv::execute(void)
 			}
 			else
 			{
-				try
-				{
-					client_tmp = eventList[idx].data.fd;
-					if (eventList[idx].events & EPOLLIN)
-					{
-						bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
-						if (bytes_read < 1)
-						{
-							readFromSocketError(bytes_read, idx, client_tmp);
-							continue ;
-						}
-						buffer[bytes_read] = '\0';
-						_servers[0].getHttpHandler(idx)->setCurrentSocket(client_tmp);
-						readFromSocketSuccess(idx, buffer, bytes_read);
-						setFdReadyForWrite(eventConfig, client_tmp);
-					}
-					else if (eventList[idx].events & EPOLLOUT)
-					{
-						serverActions(idx, client_tmp);
-						setFdReadyForRead(eventConfig, client_tmp);
-					}
-				}
-				catch (const FavIconException)
-				{
-					_servers[0].sendFavIconResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_tmp);
-				}
-				catch (const HttpException &e)
-				{
-					_servers[0].makeResponse(e.getPageContent(), idx);
-					_servers[0].sendResponse(idx, client_socket);
-					setFdReadyForRead(eventConfig, client_tmp);
-				}
+				readWriteServer(eventList, idx, client_socket, eventConfig);
 			}
 		}
 	}

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/19 17:40:05 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/21 12:05:40 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -523,6 +523,7 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	getHttpHandler(idx)->getResponse()->response = header + buffer + "\r\n";
 }
 
+
 long long Server::getFileSize(const std::string &filename, const int &idx)
 {
 	struct stat	sb;
@@ -565,6 +566,8 @@ void Server::readFile(int idx)
 	makeResponse(std::string(buffer, read_bytes), idx);
 	free(buffer);
 }
+
+
 
 void Server::sendFavIconResponse(const int &idx, int &socket)
 {

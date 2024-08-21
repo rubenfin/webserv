@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.hpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/20 18:04:49 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/08/21 12:04:50 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,9 +107,10 @@ class Server
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
 	void setFileInServer(int idx);
+	void sendNotFoundResponse(const int &idx, int &socket);
 	void setClientBodySize(void);
 	void deleteFileInServer(int idx);
-	std::string returnAutoIndex(const int& idx, std::string &uri);
+	std::string returnAutoIndex(const int &idx, std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);

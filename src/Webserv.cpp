@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.cpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/02 16:42:21 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/21 12:01:42 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,16 @@ void Webserv::setConfig(std::string fileName)
 			_servers.emplace_back(serverString);
 		}
 	}
+}
+
+int Webserv::checkForNewConnection(int eventFd)
+{
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		if (eventFd == _servers[i].getServerFd())
+			return i;
+	}
+	return -1;
 }
 
 Webserv::Webserv(std::string fileName, char **env)
