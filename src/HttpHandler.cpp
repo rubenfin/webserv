@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/20 18:03:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/21 16:17:09 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-HttpHandler::HttpHandler() : _request(nullptr), _response(nullptr),
+HttpHandler::HttpHandler() :  _connectedToSocket(-1), _request(nullptr), _response(nullptr),
 	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
 	_hasRedirect(false)
 {
@@ -346,6 +346,16 @@ bool HttpHandler::getChunked(void)
 	return (_isChunked);
 }
 
+int HttpHandler::getIdx(void)
+{
+	return(_idx);
+}
+
+int HttpHandler::getConnectedToSocket(void)
+{
+	return (_connectedToSocket);
+}
+
 void HttpHandler::setHeaderChecked(bool boolean)
 {
 	_headerChecked = boolean;
@@ -355,3 +365,9 @@ void HttpHandler::setChunked(bool boolean)
 {
 	_isChunked = boolean;
 }
+
+void HttpHandler::setConnectedToSocket(const int& fd)
+{
+	_connectedToSocket = fd;
+}
+

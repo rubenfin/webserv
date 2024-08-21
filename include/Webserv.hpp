@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/21 12:02:47 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.hpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/08/21 16:22:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,8 @@
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 8096
 #define MAX_FDS 1024
-#define MAX_EVENTS 16
+#define MAX_EVENTS 32
+#define MIN_SIZE 5
 
 extern volatile sig_atomic_t	interrupted;
 
@@ -73,9 +74,10 @@ class Webserv
 	void readFromSocketError(const int &err, const int &idx, int &socket);
 	void readFromSocketSuccess(const int &idx, const char *buffer,
 		const int &bytes_read);
+	int checkForNewConnection(int eventFd);
 	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i);
 	void cleanHandlerRequestResponse();
-void readWriteServer(struct epoll_event *eventList, int idx, int client_socket, struct epoll_event eventConfig);	int checkForNewConnection(int eventFd);
+	void readWriteServer(struct epoll_event event, HttpHandler * httpHandler, struct epoll_event eventConfig);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);

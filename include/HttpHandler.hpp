@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/19 12:28:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/21 15:47:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ struct response_t;
 class HttpHandler
 {
   private:
+	int _connectedToSocket;
 	int _idx;
 	request_t *_request;
 	response_t *_response;
@@ -53,6 +54,8 @@ class HttpHandler
 	void setDelete();
 	void setHeaderChecked(bool boolean);
 	void setChunked(bool boolean);
+	void setConnectedToSocket(const int& fd);
+	int getConnectedToSocket(void);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
 	Locations *getFoundDirective(void);
@@ -64,6 +67,7 @@ class HttpHandler
 	void setBooleans(void);
 	bool getCgi(void);
 	bool getRedirect(void);
+	int getIdx(void);
 	bool getReturnAutoIndex(void);
 	bool getHeaderChecked(void);
 	bool getChunked(void);

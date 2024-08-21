@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 13:35:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/21 16:20:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void Logger::log(level lvl, const std::string &message)
                 break;
         }
     }
-            printLog();
+            // printLog();
 }
 
 

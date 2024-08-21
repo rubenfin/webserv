@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
-/*   Updated: 2024/08/21 12:04:50 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Server.hpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
+/*   Updated: 2024/08/21 16:22:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,12 @@
 #include <netinet/in.h>
 #include <regex>
 #include <sstream>
+#include <vector>
 #include <string>
 #include <sys/socket.h>
 #include <unordered_set>
 
-#define MAX_EVENTS 16
+#define MAX_EVENTS 32
 
 class					Locations;
 class					HttpHandler;
@@ -41,21 +42,21 @@ struct					Methods
 class Server
 {
   protected:
-	std::string _serverContent;
-	std::string _portString;
-	std::string _methodsList;
-	int					_serverFd;
-	std::string _serverName;
-	int					_port;
-	std::string _root;
-	std::string _index;
-	std::string _upload;
-	Methods				_allowedMethods;
-	std::vector<Locations> _locations;
-	struct sockaddr_in	*_address;
-	socklen_t			_addrlen;
-	long long			_client_body_size_server;
-	HttpHandler			*_http_handler[MAX_EVENTS];
+	std::string 			_serverContent;
+	std::string 			_portString;
+	std::string 			_methodsList;
+	int						_serverFd;
+	std::string 			_serverName;
+	int						_port;
+	std::string 			_root;
+	std::string 			_index;
+	std::string 			_upload;
+	Methods					_allowedMethods;
+	std::vector<Locations>  _locations;
+	struct sockaddr_in		*_address;
+	socklen_t				_addrlen;
+	long long				_client_body_size_server;
+	std::vector<HttpHandler> _http_handler;
 
   public:
 	void cgi(char **env, int index);
@@ -93,8 +94,9 @@ class Server
 	std::string getMethodsList(void);
 	struct sockaddr_in *getAddress(void);
 	std::vector<Locations> getLocation(void);
-	HttpHandler *getHttpHandler(int index);
-	std::string getError404(void);
+	HttpHandler& getHttpHandler(int index);
+	HttpHandler* matchSocketToHandler(const int& socket);
+	void initSocketToHandler(const int& socket);
 	long long getClientBodySize(void);
 	void setLocationsRegex(std::string serverContent);
 	long long getFileSize(const std::string &filename, const int &idx);
@@ -107,14 +109,13 @@ class Server
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
 	void setFileInServer(int idx);
-	void sendNotFoundResponse(const int &idx, int &socket);
 	void setClientBodySize(void);
 	void deleteFileInServer(int idx);
 	std::string returnAutoIndex(const int &idx, std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
-	void linkHandlerResponseRequest(request_t *request, response_t *response);
+	void linkHandlerResponseRequest(std::vector<request_t>& requests, std::vector<response_t>& responses);
 	void checkFileDetails(const int &idx, std::ofstream &file);
 	~Server();
 };

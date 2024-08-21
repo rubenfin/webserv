@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/08/21 12:01:42 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.cpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/08/21 13:41:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ void Webserv::setupServers(socklen_t &addrlen)
 void Webserv::cleanHandlerRequestResponse()
 {
 	for (size_t i = 0; i < MAX_EVENTS; i++)
-		_servers[0].getHttpHandler(i)->cleanHttpHandler();
+		_servers[0].getHttpHandler(i).cleanHttpHandler();
 }
 
 Webserv::~Webserv()
