@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.hpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/20 17:56:57 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/21 11:42:07 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
-#include <fstream>
 
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 8096
@@ -70,13 +69,16 @@ class Webserv
 	void printParsing(void);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
-	void serverActions(const int&idx, int& socket);
+	void serverActions(const int &idx, int &socket);
 	void readFromSocketError(const int &err, const int &idx, int &socket);
-	void readFromSocketSuccess(const int &idx, const char *buffer, const int& bytes_read);
+	void readFromSocketSuccess(const int &idx, const char *buffer,
+		const int &bytes_read);
 	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i);
 	void cleanHandlerRequestResponse();
+	int checkForNewConnection(int eventFd);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);
+	void readWriteServer(struct epoll_event *eventList, int idx, int client_socket, struct epoll_event eventConfig);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
 	void setFdReadyForWrite(epoll_event &eventConfig, int &client_tmp);
 	Webserv(std::string fileName, char **env);

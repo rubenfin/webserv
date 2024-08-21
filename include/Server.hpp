@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.hpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/20 18:04:49 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/08/21 11:49:07 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ struct					Methods
 class Server
 {
   protected:
+  std::string 		_error404;
 	std::string _serverContent;
 	std::string _portString;
 	std::string _methodsList;
@@ -107,6 +108,7 @@ class Server
 	void makeResponseForRedirect(int index);
 	void readFile(int index);
 	void setFileInServer(int idx);
+	void sendNotFoundResponse(const int &idx, int &socket);
 	void setClientBodySize(void);
 	void deleteFileInServer(int idx);
 	std::string returnAutoIndex(const int& idx, std::string &uri);

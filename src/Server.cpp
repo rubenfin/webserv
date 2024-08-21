@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/19 17:40:05 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/08/21 11:48:30 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -479,6 +479,7 @@ Server::Server(std::string serverContent)
 	logger.log(INFO, "Server port: " + std::to_string(_port));
 }
 
+
 void Server::makeResponseForRedirect(int idx)
 {
 	std::string header;
@@ -579,6 +580,25 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 	getHttpHandler(idx)->cleanHttpHandler();
 }
 
+void Server::sendNotFoundResponse(const int &idx, int &socket)
+{
+	if (this->getHttpHandler(idx)->getResponse()->status == httpStatusCode::NotFound
+		&& !this->getError404().empty())
+	{
+		this->getHttpHandler(idx)->getRequest()->requestURL = this->getRoot()
+			+ this->getError404();
+		this->readFile(idx);
+	}
+	else
+		this->makeResponse(PAGE_404, idx);
+	this->sendResponse(idx, socket);
+	getHttpHandler(idx)->cleanHttpHandler();
+}
+
+std::string Server::getError404(void)
+{
+	return (_error404);
+}
 Server::~Server()
 {
 	for (size_t i = 0; i < MAX_EVENTS; i++)
