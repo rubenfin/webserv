@@ -14,7 +14,7 @@ void Webserv::serverActions(const int &idx, int &socket)
 	std::cout << RED <<  _servers[0].getHttpHandler(idx)->getReturnAutoIndex() << " idx: " << idx <<  RESET << std::endl;
 	if (_servers[0].getHttpHandler(idx)->getReturnAutoIndex())
 	{
-		_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(_servers[0].getHttpHandler(idx)->getRequest()->requestURL).c_str(),
+		_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(idx ,_servers[0].getHttpHandler(idx)->getRequest()->requestURL).c_str(),
 			idx);
 	}
 	else if (_servers[0].getHttpHandler(idx)->getRequest()->method == DELETE)

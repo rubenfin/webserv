@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/20 16:55:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/20 18:04:49 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,10 @@ class Server
 	void setFileInServer(int idx);
 	void setClientBodySize(void);
 	void deleteFileInServer(int idx);
-	std::string returnAutoIndex(std::string &uri);
+	std::string returnAutoIndex(const int& idx, std::string &uri);
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
-	void sendNotFoundResponse(const int &idx, int &socket);
 	void linkHandlerResponseRequest(request_t *request, response_t *response);
 	void checkFileDetails(const int &idx, std::ofstream &file);
 	~Server();
