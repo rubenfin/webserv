@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/21 13:54:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/22 11:46:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -586,6 +586,12 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 	}
 	getHttpHandler(idx).cleanHttpHandler();
 }
+
+std::vector<int> Server::getUsingSockets(void)
+{
+	return (_usingSockets);
+}
+
 
 Server::~Server()
 {

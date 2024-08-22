@@ -9,29 +9,29 @@ void	handleSigInt(int signal)
 	}
 }
 
-void Webserv::serverActions(const int &idx, int &socket)
+void Webserv::serverActions(const int &idx, int &socket, int server)
 {
-	std::cout << RED << _servers[0].getHttpHandler(idx).getReturnAutoIndex() << " idx: " << idx << RESET << std::endl;
-	if (_servers[0].getHttpHandler(idx).getReturnAutoIndex())
+	std::cout << RED << _servers[server].getHttpHandler(idx).getReturnAutoIndex() << " idx: " << idx << RESET << std::endl;
+	if (_servers[server].getHttpHandler(idx).getReturnAutoIndex())
 	{
-		_servers[0].makeResponse((char *)_servers[0].returnAutoIndex(idx,
-				_servers[0].getHttpHandler(idx).getRequest()->requestURL).c_str(),
+		_servers[server].makeResponse((char *)_servers[server].returnAutoIndex(idx,
+				_servers[server].getHttpHandler(idx).getRequest()->requestURL).c_str(),
 			idx);
 	}
-	else if (_servers[0].getHttpHandler(idx).getRequest()->method == DELETE)
-		_servers[0].deleteFileInServer(idx);
-	else if (_servers[0].getHttpHandler(idx).getCgi())
-		_servers[0].cgi(_environmentVariables, idx);
-	else if (_servers[0].getHttpHandler(idx).getRedirect())
-		_servers[0].makeResponseForRedirect(idx);
-	else if (_servers[0].getHttpHandler(idx).getRequest()->file.fileExists)
-		_servers[0].setFileInServer(idx);
+	else if (_servers[server].getHttpHandler(idx).getRequest()->method == DELETE)
+		_servers[server].deleteFileInServer(idx);
+	else if (_servers[server].getHttpHandler(idx).getCgi())
+		_servers[server].cgi(idx);
+	else if (_servers[server].getHttpHandler(idx).getRedirect())
+		_servers[server].makeResponseForRedirect(idx);
+	else if (_servers[server].getHttpHandler(idx).getRequest()->file.fileExists)
+		_servers[server].setFileInServer(idx);
 	else
-		_servers[0].readFile(idx);
-	if (_servers[0].getHttpHandler(idx).getRequest()->currentBytesRead < BUFFERSIZE
-		- 1 && !_servers[0].getHttpHandler(idx).getChunked())
+		_servers[server].readFile(idx);
+	if (_servers[server].getHttpHandler(idx).getRequest()->currentBytesRead < BUFFERSIZE
+		- 1 && !_servers[server].getHttpHandler(idx).getChunked())
 	{
-		_servers[0].sendResponse(idx, socket);
+		_servers[server].sendResponse(idx, socket);
 	}
 }
 
@@ -64,26 +64,40 @@ int	makeSocketNonBlocking(int &sfd)
 }
 
 int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
-	const int &i)
+	const int &i, int server)
 {
-	client_socket = accept(_servers[0].getSocketFD(),
-			(struct sockaddr *)_servers[0].getAddress(), &addrlen);
+	client_socket = accept(_servers[server].getSocketFD(),
+			(struct sockaddr *)_servers[server].getAddress(), &addrlen);
 	if (client_socket == -1)
 	{
-		_servers[0].clientConnectionFailed(client_socket, i);
+		_servers[server].clientConnectionFailed(client_socket, i);
 		logger.log(ERR, "Accept client socket failed, break in main loop");
 		return (0);
 	}
 	return (1);
 }
 
-void Webserv::readFromSocketError(const int &err, const int &idx, int &socket)
+void Server::popSocket(int socket)
+{
+    for (size_t i = 0; i < _usingSockets.size(); i++)
+    {
+        if (socket == _usingSockets[i])
+        {
+            _usingSockets.erase(_usingSockets.begin() + i);
+			logger.log(INFO, "Removed socket: " + std::to_string(socket));
+			break;
+        }
+    }
+	logger.log(ERR, "Couldn't remove socket");
+}
+
+void Webserv::readFromSocketError(const int &err, const int &idx, int &socket, int server)
 {
 	if (err == -1)
 	{
 		logger.log(ERR, "Read of client socket failed");
-		_servers[0].getHttpHandler(idx).getResponse()->status = httpStatusCode::InternalServerError;
-		_servers[0].makeResponse(getHttpStatusHTML(_servers[0].getHttpHandler(idx).getResponse()->status),
+		_servers[server].getHttpHandler(idx).getResponse()->status = httpStatusCode::InternalServerError;
+		_servers[server].makeResponse(getHttpStatusHTML(_servers[server].getHttpHandler(idx).getResponse()->status),
 			idx);
 		removeFdFromEpoll(socket);
 		close(socket);
@@ -95,7 +109,9 @@ void Webserv::readFromSocketError(const int &err, const int &idx, int &socket)
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
-	_servers[0].getHttpHandler(idx).setConnectedToSocket(-1);
+	_servers[server].popSocket(socket);
+	_servers[server].getHttpHandler(idx).setConnectedToSocket(-1);
+	
 }
 
 void	removeBoundaryLine(std::string &str, const std::string &boundary)
@@ -137,28 +153,28 @@ void	removeBoundaryLine(std::string &str, const std::string &boundary)
 }
 
 void Webserv::readFromSocketSuccess(const int &idx, const char *buffer,
-	const int &bytes_read)
+	const int &bytes_read, int server)
 {
-	_servers[0].getHttpHandler(idx).getRequest()->currentBytesRead = bytes_read;
-	if (!_servers[0].getHttpHandler(idx).getChunked())
+	_servers[server].getHttpHandler(idx).getRequest()->currentBytesRead = bytes_read;
+	if (!_servers[server].getHttpHandler(idx).getChunked())
 	{
-		parse_request(_servers[0].getHttpHandler(idx).getRequest(),
+		parse_request(_servers[server].getHttpHandler(idx).getRequest(),
 			std::string(buffer, bytes_read), idx);
-		_servers[0].getHttpHandler(idx).handleRequest(_servers[0]);
+		_servers[server].getHttpHandler(idx).handleRequest(_servers[server]);
 		if (bytes_read == BUFFERSIZE - 1)
-			_servers[0].getHttpHandler(idx).setChunked(true);
-		_servers[0].getHttpHandler(idx).getRequest()->totalBytesRead
+			_servers[server].getHttpHandler(idx).setChunked(true);
+		_servers[server].getHttpHandler(idx).getRequest()->totalBytesRead
 			+= bytes_read
-			- (_servers[0].getHttpHandler(idx).getRequest()->requestContent.size()
-				- _servers[0].getHttpHandler(idx).getRequest()->requestBody.size());
+			- (_servers[server].getHttpHandler(idx).getRequest()->requestContent.size()
+				- _servers[server].getHttpHandler(idx).getRequest()->requestBody.size());
 	}
 	else
 	{
-		_servers[0].getHttpHandler(idx).getRequest()->file.fileContent = std::string(buffer,
+		_servers[server].getHttpHandler(idx).getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
-		removeBoundaryLine(_servers[0].getHttpHandler(idx).getRequest()->file.fileContent,
-			trim(_servers[0].getHttpHandler(idx).getRequest()->file.fileBoundary));
-		_servers[0].getHttpHandler(idx).getRequest()->totalBytesRead
+		removeBoundaryLine(_servers[server].getHttpHandler(idx).getRequest()->file.fileContent,
+			trim(_servers[server].getHttpHandler(idx).getRequest()->file.fileBoundary));
+		_servers[server].getHttpHandler(idx).getRequest()->totalBytesRead
 			+= bytes_read;
 	}
 }
@@ -214,15 +230,14 @@ int	fd_is_valid(int fd)
 	return (fcntl(fd, F_GETFD) != -1 || errno != EBADF);
 }
 
-void Webserv::readWriteServer(struct epoll_event event,
-	HttpHandler *httpHandler, struct epoll_event eventConfig)
+void Webserv::readWriteServer(struct epoll_event event, struct epoll_event eventConfig, int server)
 {
 	int		client_tmp;
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
 	int		idx;
 
-	idx = httpHandler->getIdx();
+	idx = 0;
 	try
 	{
 		// std::cout << "this is a client_tmp: " <<client_tmp << std::endl;
@@ -232,16 +247,16 @@ void Webserv::readWriteServer(struct epoll_event event,
 			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
 			if (bytes_read < 1)
 			{
-				readFromSocketError(bytes_read, idx, client_tmp);
+				readFromSocketError(bytes_read, idx, client_tmp, server);
 				return ;
 			}
 			buffer[bytes_read] = '\0';
-			readFromSocketSuccess(idx, buffer, bytes_read);
+			readFromSocketSuccess(idx, buffer, bytes_read, server);
 			setFdReadyForWrite(eventConfig, client_tmp);
 		}
 		else if (event.events & EPOLLOUT)
 		{
-			serverActions(idx, client_tmp);
+			serverActions(idx, client_tmp, server);
 			if (!fd_is_valid(client_tmp))
 				return ;
 			setFdReadyForRead(eventConfig, client_tmp);
@@ -249,12 +264,12 @@ void Webserv::readWriteServer(struct epoll_event event,
 	}
 	catch (const FavIconException)
 	{
-		_servers[0].sendFavIconResponse(idx, client_tmp);
+		_servers[server].sendFavIconResponse(idx, client_tmp);
 	}
 	catch (const HttpException &e)
 	{
-		_servers[0].makeResponse(e.getPageContent(), idx);
-		_servers[0].sendResponse(idx, client_tmp);
+		_servers[server].makeResponse(e.getPageContent(), idx);
+		_servers[server].sendResponse(idx, client_tmp);
 	}
 }
 
@@ -265,6 +280,7 @@ void Server::initSocketToHandler(const int &socket)
 		if (_http_handler.at(i).getConnectedToSocket() == -1)
 		{
 			_http_handler.at(i).setConnectedToSocket(socket);
+			_usingSockets.push_back(socket);
 			return;
 		}
 	}
@@ -283,6 +299,20 @@ HttpHandler *Server::matchSocketToHandler(const int &socket)
 	return (nullptr);
 }
 
+int Webserv::findServerConnectedToSocket(const int& socket)
+{
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		for (size_t j = 0; j < _servers.at(i).getUsingSockets().size(); j++)
+		{
+			if (socket == _servers.at(i).getUsingSockets().at(j))
+			return (i);
+		}
+	}
+	logger.log(ERR, "Couldn't match socket to any server");
+	return (-1);
+}
+
 int Webserv::execute(void)
 {
 	int					client_socket;
@@ -297,7 +327,10 @@ int Webserv::execute(void)
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
 	this->setupServers(addrlen);
-	_servers[0].linkHandlerResponseRequest(request, response);
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		_servers.at(i).linkHandlerResponseRequest(request, response);
+	}
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{
@@ -308,7 +341,7 @@ int Webserv::execute(void)
 			if (serverConnectIndex >= 0)
 			{
 				if (!acceptClientSocket(client_socket, addrlen,
-						serverConnectIndex))
+						serverConnectIndex, serverConnectIndex))
 					continue ;
 				if (!makeSocketNonBlocking(client_socket))
 				{
@@ -316,24 +349,28 @@ int Webserv::execute(void)
 					continue ;
 				}
 				addFdToReadEpoll(eventConfig, client_socket);
-				_servers[0].initSocketToHandler(client_socket);
+				_servers[serverConnectIndex].initSocketToHandler(client_socket);
+
+				// std::cout << "theclientsocket: " << client_socket << std::endl;
 			}
 			else
 			{
-				std::cout << "eventlist[idx].data.fd: " << eventList[idx].data.fd << std::endl;
-				HttpHandler *currentHttpHandler = _servers[0].matchSocketToHandler(eventList[idx].data.fd);
-				// if (!currentHttpHandler)
-				// {
-				// 	_servers[0].initSocketToHandler(client_socket);
-				// 	currentHttpHandler = _servers[0].matchSocketToHandler(eventList[idx].data.fd);
-				// }
+				serverConnectIndex = findServerConnectedToSocket(eventList[idx].data.fd);
+				// std::cout << "evennlist[]: " << eventList[idx].data.fd << std::endl;
+
+				HttpHandler *currentHttpHandler = _servers[serverConnectIndex].matchSocketToHandler(eventList[idx].data.fd);
+
 				if (currentHttpHandler)
-					readWriteServer(eventList[idx], currentHttpHandler, eventConfig);
+					readWriteServer(eventList[idx], eventConfig, serverConnectIndex);
 			}
 		}
 	}
-	close(_servers[0].getSocketFD());
-	logger.log(INFO, "Server shut down at port: "
-		+ _servers[0].getPortString());
+	
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		close(_servers[i].getSocketFD());
+		logger.log(INFO, "Server shut down at port: "
+			+ _servers[i].getPortString());
+	}
 	return (0);
 }

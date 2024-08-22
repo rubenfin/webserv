@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/21 13:40:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/22 11:34:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,11 @@ char **Server::makeEnv(int idx)
 	return (env);
 }
 
-void Server::execute_CGI_script(int *fds, const char *script, char **env,
-	int idx)
+void Server::execute_CGI_script(int *fds, const char *script, int idx)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
 
-	env = nullptr;
+	char **env;
 	logger.log(INFO, "Executing CGI script");
 	close(fds[0]);
 	env = makeEnv(idx);
@@ -93,7 +92,7 @@ void Server::logThrowStatus(const int& idx, const level& lvl, const std::string&
 	throw exception;
 }
 
-void Server::cgi(char **env, int idx)
+void Server::cgi(int idx)
 {
 	pid_t	pid;
 	char 	buf[BUFFERSIZE];
@@ -111,7 +110,7 @@ void Server::cgi(char **env, int idx)
 		logThrowStatus(idx, ERR, "[500] Fork has failed", httpStatusCode::InternalServerError, InternalServerErrorException());
 	else if (pid == 0)
 		execute_CGI_script(fds,
-			getHttpHandler(idx).getRequest()->requestURL.c_str(), env, idx);
+			getHttpHandler(idx).getRequest()->requestURL.c_str(), idx);
 	else
 	{
 		close(fds[1]);

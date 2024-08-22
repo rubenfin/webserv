@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/21 16:22:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/22 11:47:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <unordered_set>
+#include <sys/epoll.h>
 
 #define MAX_EVENTS 32
 
@@ -42,6 +43,7 @@ struct					Methods
 class Server
 {
   protected:
+	std::vector<int>		_usingSockets;
 	std::string 			_serverContent;
 	std::string 			_portString;
 	std::string 			_methodsList;
@@ -59,9 +61,10 @@ class Server
 	std::vector<HttpHandler> _http_handler;
 
   public:
-	void cgi(char **env, int index);
-	void execute_CGI_script(int *fds, const char *script, char **env,
-		int index);
+	void popSocket(int socket);
+	std::vector<int> getUsingSockets(void);
+	void cgi(int index);
+	void execute_CGI_script(int *fds, const char *script, int index);
 	void getLocationStack(std::string locationContent);
 	void logThrowStatus(const int &idx, const level &lvl,
 		const std::string &msg, const httpStatusCode &status,

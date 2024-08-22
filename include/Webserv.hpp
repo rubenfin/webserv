@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/21 16:22:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/22 16:03:22 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <netinet/in.h>
 #include <regex>
 #include <signal.h>
@@ -65,19 +65,20 @@ class Webserv
 	char **_environmentVariables;
 
   public:
+	void readWriteServer(struct epoll_event event, struct epoll_event eventConfig, int server);
 	void setupServers(socklen_t &addrlen);
 	int execute(void);
 	void printParsing(void);
 	void setEnv(char **env);
 	void setConfig(std::string fileName);
-	void serverActions(const int &idx, int &socket);
-	void readFromSocketError(const int &err, const int &idx, int &socket);
+	void serverActions(const int &idx, int &socket, int server);
+	void readFromSocketError(const int &err, const int &idx, int &socket, int server);
 	void readFromSocketSuccess(const int &idx, const char *buffer,
-		const int &bytes_read);
+		const int &bytes_read, int server);
+	int findServerConnectedToSocket(const int& socket);
 	int checkForNewConnection(int eventFd);
-	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i);
+	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i, int server);
 	void cleanHandlerRequestResponse();
-	void readWriteServer(struct epoll_event event, HttpHandler * httpHandler, struct epoll_event eventConfig);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);

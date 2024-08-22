@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/21 13:41:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/22 11:58:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,16 +110,25 @@ void Webserv::setEnv(char **env)
 
 void Webserv::setupServers(socklen_t &addrlen)
 {
-	addrlen = sizeof(_servers[0].getAddress());
-	_servers[0].setServer(_epollFd);
-	logger.log(INFO, "Server " + _servers[0].getServerName()
-		+ " started on port " + _servers[0].getPortString());
+	std::cout << "amount of servers = " << _servers.size() << std::endl;
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		addrlen = sizeof(_servers[i].getAddress());
+		_servers[i].setServer(_epollFd);
+		logger.log(INFO, "Server " + _servers[i].getServerName()
+			+ " started on port " + _servers[i].getPortString());
+	}
 }
 
 void Webserv::cleanHandlerRequestResponse()
 {
-	for (size_t i = 0; i < MAX_EVENTS; i++)
-		_servers[0].getHttpHandler(i).cleanHttpHandler();
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		for (size_t j = 0; j < MAX_EVENTS; j++)
+			_servers[i].getHttpHandler(j).cleanHttpHandler();
+
+	}
+	
 }
 
 Webserv::~Webserv()
