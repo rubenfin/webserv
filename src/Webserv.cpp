@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/23 12:30:44 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 13:25:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ Webserv::Webserv(std::string fileName)
 	_epollFd = epoll_create(1);
 	setConfig(fileName);
 	interrupted = 0;
-	_socketsConnectedToServers.reserve(MAX_EVENTS);
+	// _socketsConnectedToServers.reserve(MAX_EVENTS);
 }
 
 
@@ -135,16 +135,23 @@ std::unordered_map<int, Server*> Webserv::getSocketsConnectedToServers(void)
 
 void Webserv::addSocketToServer(const int& socket, Server* server)
 {
-	std::cout << "here" << std::endl;
-	std::cout << socket << "|" << server << std::endl;
-	auto result = _socketsConnectedToServers.insert({socket, server});
-	
-	if (!result.second)
-	{
-		logger.log(ERR, "Couldn't add socket to servers connected");
-		return ;
-	}
-	logger.log(INFO, "Paired socket: " + std::to_string(socket) + " to Server with FD " + std::to_string(server->getServerFd()));
+
+    logger.log(INFO, "Trying to add socket " + std::to_string(socket) + " to server: " + std::to_string(server->getSocketFD()));
+    
+    if (_socketsConnectedToServers.find(socket) != _socketsConnectedToServers.end())
+    {
+        logger.log(WARNING, "Socket " + std::to_string(socket) + " is already connected to a server.");
+        return;
+    }
+    
+    auto result = _socketsConnectedToServers.insert({socket, server});
+    
+    if (!result.second)
+    {
+        logger.log(ERR, "Couldn't add socket to servers connected");
+        return;
+    }
+    logger.log(INFO, "Paired socket: " + std::to_string(socket) + " to Server with FD " + std::to_string(server->getServerFd()));
 }
 
 Webserv::~Webserv()

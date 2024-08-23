@@ -11,7 +11,6 @@ void	handleSigInt(int signal)
 
 void Server::serverActions(const int &idx, int &socket)
 {
-	std::cout << RED << getHttpHandler(idx).getReturnAutoIndex() << " idx: " << idx << RESET << std::endl;
 	if (getHttpHandler(idx).getReturnAutoIndex())
 	{
 		makeResponse((char *)returnAutoIndex(idx,
@@ -84,7 +83,7 @@ void Server::removeSocketAndServer(int socket)
 	if (found != (*_connectedServersPtr).end())
 	{
 		(*_connectedServersPtr).erase(found);
-		logger.log(INFO, "Removed socket: " + std::to_string(socket) + " from Server" );\
+		logger.log(INFO, "Removed socket: " + std::to_string(socket) + " from Server " + std::to_string(getServerFd()));
 		return ; 
 	}
 	logger.log(INFO, "Couldn't find socket in connectedSocketsToServers");
@@ -108,7 +107,8 @@ void Server::readFromSocketError(const int &err, const int &idx, int &socket)
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
-
+	
+	removeSocketAndServer(socket);
 	getHttpHandler(idx).setConnectedToSocket(-1);
 	
 }
@@ -336,6 +336,7 @@ int Webserv::execute(void)
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{
+		try{
 		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, -1);
 		std::cout << "eventCount: " <<  eventCount << std::endl;
 		for (int idx = 0; idx < eventCount; ++idx)
@@ -366,6 +367,10 @@ int Webserv::execute(void)
 				if (currentHttpHandler)
 					currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler);
 			}
+		}}
+		catch (const std::exception &e)
+		{
+			logger.log(ERR, "Catched an error inside loop");
 		}
 	}
 	
