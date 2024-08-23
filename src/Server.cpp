@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/22 11:46:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 12:17:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void Server::listenToSocket()
 	}
 }
 
-void Server::setServer(int epollFd)
+void Server::setServer(int *epollFd, std::unordered_map<int, Server*> *connectedServers)
 {
 	int	opt;
 
@@ -85,7 +85,9 @@ void Server::setServer(int epollFd)
 	initializeAddress();
 	bindAdressSocket();
 	listenToSocket();
-	my_epoll_add(epollFd, _serverFd, EPOLLIN | EPOLLPRI);
+	my_epoll_add((*epollFd), _serverFd, EPOLLIN | EPOLLPRI);
+	_epollFDptr = epollFd;
+	_connectedServersPtr  = connectedServers;
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -573,7 +575,6 @@ void Server::readFile(int idx)
 }
 
 
-
 void Server::sendFavIconResponse(const int &idx, int &socket)
 {
 	std::string buffer("HTTP/1.1 404 Not Found\r\n\r\n"
@@ -586,12 +587,6 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 	}
 	getHttpHandler(idx).cleanHttpHandler();
 }
-
-std::vector<int> Server::getUsingSockets(void)
-{
-	return (_usingSockets);
-}
-
 
 Server::~Server()
 {

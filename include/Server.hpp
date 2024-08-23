@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/22 11:47:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 12:21:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Locations.hpp"
 #include "Webserv.hpp"
 #include <fcntl.h>
+#include <unordered_map>
 #include <iostream>
 #include <netinet/in.h>
 #include <regex>
@@ -27,7 +28,7 @@
 #include <unordered_set>
 #include <sys/epoll.h>
 
-#define MAX_EVENTS 32
+#define MAX_EVENTS 256
 
 class					Locations;
 class					HttpHandler;
@@ -43,7 +44,8 @@ struct					Methods
 class Server
 {
   protected:
-	std::vector<int>		_usingSockets;
+	std::unordered_map<int, Server*> *_connectedServersPtr;
+	int*					_epollFDptr;
 	std::string 			_serverContent;
 	std::string 			_portString;
 	std::string 			_methodsList;
@@ -61,8 +63,15 @@ class Server
 	std::vector<HttpHandler> _http_handler;
 
   public:
-	void popSocket(int socket);
-	std::vector<int> getUsingSockets(void);
+  	void removeSocketAndServer(int socket);
+	void readFromSocketError(const int &err, const int &idx, int &socket);
+	void serverActions(const int &idx, int &socket);
+  	void readFromSocketSuccess(const int &idx, const char *buffer,
+	const int &bytes_read);
+	void removeFdFromEpoll(int &socket);
+	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
+	void setFdReadyForWrite(epoll_event &eventConfig, int &socket);
+	void readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler);
 	void cgi(int index);
 	void execute_CGI_script(int *fds, const char *script, int index);
 	void getLocationStack(std::string locationContent);
@@ -82,7 +91,7 @@ class Server
 	void setErrors(void);
 	void printMethods(void);
 	void setSockedFD();
-	void setServer(int epollFd);
+	void setServer(int *epollFd, std::unordered_map<int, Server*> *connectedServers);
 	char **makeEnv(int idx);
 	int getServerFd(void);
 	std::string getServerName(void);
@@ -99,7 +108,7 @@ class Server
 	std::vector<Locations> getLocation(void);
 	HttpHandler& getHttpHandler(int index);
 	HttpHandler* matchSocketToHandler(const int& socket);
-	void initSocketToHandler(const int& socket);
+	int initSocketToHandler(const int &socket);
 	long long getClientBodySize(void);
 	void setLocationsRegex(std::string serverContent);
 	long long getFileSize(const std::string &filename, const int &idx);

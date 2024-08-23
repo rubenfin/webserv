@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/22 16:03:22 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 12:12:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@
 // need to check this might be only for GET and not POST and DELETE
 #define BUFFERSIZE 8096
 #define MAX_FDS 1024
-#define MAX_EVENTS 32
+#define MAX_EVENTS 256
 #define MIN_SIZE 5
 
 extern volatile sig_atomic_t	interrupted;
@@ -54,35 +54,33 @@ class							HttpHandler;
 
 extern Logger &logger;
 
+/*
+	reinterpret cast to get the diffence between the stored pointes in the unordered map
+	this determines if it's a Server, Client or maybe even CGI.
+	each Client has a single HTTP (request/response) Handler. 
+*/
+
 class Webserv
 {
-  private:
+  protected:
 	int _epollFd;
 	epoll_event _event;
-	std::string _response;
 	HttpHandler *_handler;
 	std::vector<Server> _servers;
-	char **_environmentVariables;
-
+	std::unordered_map<int, Server*> _socketsConnectedToServers;
+	
   public:
-	void readWriteServer(struct epoll_event event, struct epoll_event eventConfig, int server);
+	void addSocketToServer(const int& socket, Server* server);
+	std::unordered_map<int, Server*> getSocketsConnectedToServers(void);
 	void setupServers(socklen_t &addrlen);
 	int execute(void);
 	void printParsing(void);
-	void setEnv(char **env);
-	void setConfig(std::string fileName);
-	void serverActions(const int &idx, int &socket, int server);
-	void readFromSocketError(const int &err, const int &idx, int &socket, int server);
-	void readFromSocketSuccess(const int &idx, const char *buffer,
-		const int &bytes_read, int server);
-	int findServerConnectedToSocket(const int& socket);
+	Server* findServerConnectedToSocket(const int& socket);
+	void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
 	int checkForNewConnection(int eventFd);
 	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i, int server);
 	void cleanHandlerRequestResponse();
-	void addFdToReadEpoll(epoll_event &eventConfig, int &client_socket);
-	void removeFdFromEpoll(int &socket);
-	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
-	void setFdReadyForWrite(epoll_event &eventConfig, int &client_tmp);
-	Webserv(std::string fileName, char **env);
+	void setConfig(std::string fileName);
+	Webserv(std::string fileName);
 	~Webserv();
 };

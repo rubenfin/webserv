@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/22 11:58:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 12:30:44 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ void Webserv::setConfig(std::string fileName)
 
 int Webserv::checkForNewConnection(int eventFd)
 {
+	
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		if (eventFd == _servers[i].getServerFd())
@@ -95,18 +96,14 @@ int Webserv::checkForNewConnection(int eventFd)
 	return -1;
 }
 
-Webserv::Webserv(std::string fileName, char **env)
+Webserv::Webserv(std::string fileName)
 {
 	_epollFd = epoll_create(1);
 	setConfig(fileName);
-	_environmentVariables = env;
 	interrupted = 0;
+	_socketsConnectedToServers.reserve(MAX_EVENTS);
 }
 
-void Webserv::setEnv(char **env)
-{
-	_environmentVariables = env;
-}
 
 void Webserv::setupServers(socklen_t &addrlen)
 {
@@ -114,7 +111,7 @@ void Webserv::setupServers(socklen_t &addrlen)
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		addrlen = sizeof(_servers[i].getAddress());
-		_servers[i].setServer(_epollFd);
+		_servers[i].setServer(&_epollFd, &_socketsConnectedToServers);
 		logger.log(INFO, "Server " + _servers[i].getServerName()
 			+ " started on port " + _servers[i].getPortString());
 	}
@@ -129,6 +126,25 @@ void Webserv::cleanHandlerRequestResponse()
 
 	}
 	
+}
+
+std::unordered_map<int, Server*> Webserv::getSocketsConnectedToServers(void)
+{
+	return (_socketsConnectedToServers);
+}
+
+void Webserv::addSocketToServer(const int& socket, Server* server)
+{
+	std::cout << "here" << std::endl;
+	std::cout << socket << "|" << server << std::endl;
+	auto result = _socketsConnectedToServers.insert({socket, server});
+	
+	if (!result.second)
+	{
+		logger.log(ERR, "Couldn't add socket to servers connected");
+		return ;
+	}
+	logger.log(INFO, "Paired socket: " + std::to_string(socket) + " to Server with FD " + std::to_string(server->getServerFd()));
 }
 
 Webserv::~Webserv()
