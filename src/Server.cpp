@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/23 12:17:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/23 14:36:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -587,6 +587,19 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 	}
 	getHttpHandler(idx).cleanHttpHandler();
 }
+
+void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
+{
+	eventConfig.events = EPOLLIN | EPOLLET;
+	eventConfig.data.fd = socket;
+	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, socket, &eventConfig) == -1)
+	{
+		perror("");
+		std::cout << "Connection with epoll_ctl fails!" << std::endl;
+		close(socket);
+	}
+}
+
 
 Server::~Server()
 {
