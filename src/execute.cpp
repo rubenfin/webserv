@@ -20,7 +20,9 @@ void Server::serverActions(const int &idx, int &socket)
 	else if (getHttpHandler(idx).getRequest()->method == DELETE)
 		deleteFileInServer(idx);
 	else if (getHttpHandler(idx).getCgi())
-		cgi(idx);
+	{
+		cgi(idx, socket);
+	}
 	else if (getHttpHandler(idx).getRedirect())
 		makeResponseForRedirect(idx);
 	else if (getHttpHandler(idx).getRequest()->file.fileExists)
@@ -238,12 +240,35 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
 	int		idx;
+	int		status;
 
 	idx = handler.getIdx();
 	try
 	{
 		// std::cout << "this is a client_tmp: " <<client_tmp << std::endl;
 		client_tmp = event.data.fd;
+		std::cout << "client_tmp vs connected socket to handler " <<client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
+		if (handler.getConnectedToCGI() == client_tmp)
+		{
+			auto it = _fdsRunningCGI.find(client_tmp);
+			std::cout << "trying to read CGI" << std::endl;
+			CGI_t * currCGI = it->second;
+			int br = read(currCGI->ReadFd, buffer, BUFFERSIZE);
+			buffer[br] = '\0';
+			if (br == 0)
+			{
+				close(currCGI->ReadFd);
+				resetCGI(*currCGI);
+				delete currCGI;
+				makeResponse(buffer, idx);
+				sendResponse(idx, client_tmp);
+				return;
+			}
+			waitpid(currCGI->PID, &status, 0);
+			makeResponse(buffer, idx);
+			sendResponse(idx, client_tmp);
+
+		}
 		if (event.events & EPOLLIN)
 		{
 			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
@@ -291,13 +316,19 @@ int Server::initSocketToHandler(const int &socket)
 
 HttpHandler *Server::matchSocketToHandler(const int &socket)
 {
+	static int i;
 	for (size_t i = 0; i < _http_handler.size(); i++)
 	{
+
+		// std::cout << "current Socket: " << socket << " found sockets: " << _http_handler.at(i).getConnectedToSocket() << _http_handler.at(i).getConnectedToCGI() << std::endl;
 		if (socket == _http_handler.at(i).getConnectedToSocket())
 				return (&(_http_handler.at(i)));
-
+		if (socket == _http_handler.at(i).getConnectedToCGI())
+				return (&(_http_handler.at(i)));
 	}
-	logger.log(ERR, "Couldn't match socket to handler");
+	if (!i)
+		logger.log(ERR, "Couldn't match socket to handler");
+	i++;
 	return (nullptr);
 }
 
@@ -310,10 +341,63 @@ Server* Webserv::findServerConnectedToSocket(const int& socket)
         return (found->second); 
     }
 
+	for (size_t i = 0; i < _servers.size(); i++)
+    {
+        std::map<int, CGI_t*> &fdsRunningCGI = _servers[i].getFdsRunningCGI();
+
+        for (auto it = fdsRunningCGI.begin(); it != fdsRunningCGI.end(); ++it)
+        {
+            CGI_t * currCGI = it->second;
+			// std::cout << currCGI->ReadFd << "|" << socket << std::endl;
+			if (currCGI->ReadFd == socket)
+			{
+				return(&(_servers[i]));
+			}
+        }
+    }
+
     logger.log(ERR, "Couldn't match socket to any server");
     return (nullptr);
 }
 
+void resetCGI(CGI_t &CGI)
+{
+    CGI.PID = -1;
+    CGI.ReadFd = -1;
+    CGI.isRunning = false;
+    CGI.StartTime = 0;
+}
+void Webserv::checkCGItimeouts(void)
+{
+    CGI_t *currCGI;
+    int currSocket;
+
+    for (size_t i = 0; i < _servers.size(); i++)
+    {
+        std::map<int, CGI_t*> &fdsRunningCGI = _servers[i].getFdsRunningCGI();
+
+        for (auto it = fdsRunningCGI.begin(); it != fdsRunningCGI.end(); ++it)
+        {
+            currSocket = it->first;
+            currCGI = it->second; 
+
+            if (currCGI->StartTime != 0 && time(NULL) - currCGI->StartTime > 10)
+            {
+				// std::cout << currSocket << "|" << _servers[i].getServerFd() << std::endl;
+				logger.log(ERR, "[502] CGI script has been timed out, since it lasted for longer than 10 seconds");
+				HttpHandler *currentHttpHandler = _servers[i].matchSocketToHandler(currSocket);
+				currentHttpHandler->getResponse()->status = httpStatusCode::BadGateway;
+				_servers[i].makeResponse(PAGE_502, currentHttpHandler->getIdx());
+				_servers[i].sendResponse(currentHttpHandler->getIdx(), currSocket);
+				_servers[i].removeCGIrunning(currSocket);
+				close(currCGI->ReadFd);
+				resetCGI(*currCGI);
+				delete currCGI;
+				break;
+            }
+        }
+    }
+}
 
 int Webserv::execute(void)
 {
@@ -323,22 +407,21 @@ int Webserv::execute(void)
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
 	int					serverConnectIndex;
-
+	HttpHandler *currentHttpHandler = nullptr;
 	std::vector<request_t> request;
 	std::vector<response_t> response;
 	signal(SIGINT, handleSigInt);
 	signal(SIGPIPE, SIG_IGN);
 	this->setupServers(addrlen);
 	for (size_t i = 0; i < _servers.size(); i++)
-	{
 		_servers.at(i).linkHandlerResponseRequest(request, response);
-	}
 	this->cleanHandlerRequestResponse();
 	while (!interrupted)
 	{
-		try{
-		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, -1);
-		std::cout << "eventCount: " <<  eventCount << std::endl;
+		try
+		{
+		checkCGItimeouts();
+		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
 		for (int idx = 0; idx < eventCount; ++idx)
 		{
 			serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
@@ -358,11 +441,13 @@ int Webserv::execute(void)
 			}
 			else
 			{
-				std::cout << "evenlist: " <<  eventList[idx].data.fd << std::endl;
-			  	Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
+				static int i;
+				if (!i)
+					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
+			  	i++;
+				Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
 				// std::cout << "evennlist[]: " << eventList[idx].data.fd << std::endl;
-
-				HttpHandler *currentHttpHandler = currentServer->matchSocketToHandler(eventList[idx].data.fd);
+				currentHttpHandler = currentServer->matchSocketToHandler(eventList[idx].data.fd);
 
 				if (currentHttpHandler)
 					currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler);

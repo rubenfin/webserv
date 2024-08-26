@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/23 14:42:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 17:08:49 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,10 @@ void Server::logThrowStatus(const int &idx, const level &lvl,
 	getHttpHandler(idx).getResponse()->status = status;
 }
 
-void Server::cgi(int idx)
+void Server::cgi(int idx, int socket)
 {
-	pid_t				pid;
-	char				buf[BUFFERSIZE];
+	CGI_t				*CGIinfo = new CGI_t();
 	int					fds[2];
-	struct epoll_event	eventConfig;
-	int					status;
 
 	logger.log(DEBUG, "in CGI");
 	if (access(getHttpHandler(idx).getRequest()->requestURL.c_str(), X_OK) != 0)
@@ -109,34 +106,46 @@ void Server::cgi(int idx)
 		logThrowStatus(idx, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
-	addFdToReadEpoll(eventConfig, fds[0]);
-	addFdToReadEpoll(eventConfig, fds[1]);
-	setFdReadyForRead(eventConfig, fds[0]);
-	setFdReadyForWrite(eventConfig, fds[1]);
-	pid = fork();
-	if (pid == -1)
+	CGIinfo->PID = fork();
+	if (CGIinfo->PID == -1)
 		logThrowStatus(idx, ERR, "[500] Fork has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
-	else if (pid == 0)
+	else if (CGIinfo->PID == 0)
 		execute_CGI_script(fds,
 			getHttpHandler(idx).getRequest()->requestURL.c_str(), idx);
 	else
 	{
 		close(fds[1]);
-		getHttpHandler(idx).getResponse()->contentLength = read(fds[0], buf,
-				BUFFERSIZE);
-		buf[getHttpHandler(idx).getResponse()->contentLength] = '\0';
-		close(fds[0]);
-		waitpid(pid, &status, 0);
-		if (status != 0)
-			logThrowStatus(idx, ERR,
-				"[500] Script has executed and returned with an error status",
-				httpStatusCode::InternalServerError,
-				InternalServerErrorException());
-		std::string buffer(buf,
-			getHttpHandler(idx).getResponse()->contentLength);
-		makeResponse(buffer, idx);
+		CGIinfo->ReadFd = fds[0];
+		CGIinfo->isRunning = true;
+		CGIinfo->StartTime = time(NULL);
+		fcntl(fds[0], F_SETFL, O_NONBLOCK);
+		struct epoll_event ev;
+        ev.events = EPOLLIN;
+        ev.data.fd = fds[0];
+        if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, fds[0], &ev) == -1) {
+            logThrowStatus(idx, ERR, "[500] Couldn't add FD to epoll in CGI",
+			httpStatusCode::InternalServerError,
+			InternalServerErrorException());
+        }
+		_fdsRunningCGI.insert({socket, CGIinfo});
+		std::cout << "CGI FD" << fds[0] << std::endl;
+		getHttpHandler(idx).setConnectedToCGI(fds[0]);
+		// getHttpHandler(idx).getResponse()->contentLength = read(fds[0], buf,
+				// BUFFERSIZE);
+		// buf[getHttpHandler(idx).getResponse()->contentLength] = '\0';
+		// close(fds[0]);
+		// waitpid(CGIinfo->PID, &status, 0);
+		
+		// if (check_status(status) != 0)
+		// 	logThrowStatus(idx, ERR,
+		// 		"[500] Script has executed and returned with an error status",
+		// 		httpStatusCode::InternalServerError,
+		// 		InternalServerErrorException());
+		// std::string buffer(buf,
+		// 	getHttpHandler(idx).getResponse()->contentLength);
+		// makeResponse(buffer, idx);
 	}
 	return ;
 }

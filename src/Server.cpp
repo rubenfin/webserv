@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/23 14:36:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 17:04:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +244,6 @@ void Server::setError(const std::string& errorPageNumber, const std::string& exc
     
     if (errorPage.empty())
     {
-        std::cerr << "No error page specified for error code " << errorPageNumber << std::endl;
         return;
     }
 
@@ -262,13 +261,12 @@ void Server::setError(const std::string& errorPageNumber, const std::string& exc
         {
             buffer[size] = '\0'; // Null-terminate the buffer
             HttpException::setCustomPage(exceptionName, buffer);
+        	logger.log(INFO, "Created an error page for status" + errorPageNumber);
         }
         else
         {
             std::cerr << "Failed to read file: " << getRoot() + errorPage << std::endl;
         }
-        
-        // Clean up
         delete[] buffer;
         file.close();
     }
@@ -395,6 +393,12 @@ int Server::getServerFd(void)
 {
 	return (_serverFd);
 }
+
+std::map<int, CGI_t*> &Server::getFdsRunningCGI(void)
+{
+	return (_fdsRunningCGI);
+}
+
 
 void Server::setLocationsRegex(std::string serverContent)
 {
@@ -600,6 +604,15 @@ void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 	}
 }
 
+void Server::removeCGIrunning(int socket)
+{
+	auto it = _fdsRunningCGI.find(socket);
+	if (it != _fdsRunningCGI.end())
+	{
+		logger.log(INFO, "Removed " + std::to_string(socket) + " from CGI running map");
+		_fdsRunningCGI.erase(it);
+	}
+}
 
 Server::~Server()
 {

@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/21 16:17:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 17:53:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-HttpHandler::HttpHandler() :  _connectedToSocket(-1), _request(nullptr), _response(nullptr),
+HttpHandler::HttpHandler() :  _connectedToSocket(-1), _connectedToCGI(-1), _request(nullptr), _response(nullptr),
 	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
 	_hasRedirect(false)
 {
@@ -256,6 +256,7 @@ void HttpHandler::checkLocationMethod(void)
 void HttpHandler::cleanHttpHandler()
 {
 	resetRequestResponse(*_request, *_response);
+	_connectedToCGI = -1;
 	_server = nullptr;
 	_foundDirective = nullptr;
 	_isCgi = false;
@@ -371,3 +372,12 @@ void HttpHandler::setConnectedToSocket(const int& fd)
 	_connectedToSocket = fd;
 }
 
+void HttpHandler::setConnectedToCGI(const int& fd)
+{
+	_connectedToCGI = fd;
+}
+
+int HttpHandler::getConnectedToCGI(void)
+{
+	return (_connectedToCGI);
+}

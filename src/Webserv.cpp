@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/23 13:25:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 14:02:20 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void Webserv::cleanHandlerRequestResponse()
 	
 }
 
-std::unordered_map<int, Server*> Webserv::getSocketsConnectedToServers(void)
+std::unordered_map<int, Server*> &Webserv::getSocketsConnectedToServers(void)
 {
 	return (_socketsConnectedToServers);
 }

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/21 15:47:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 17:02:07 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,9 @@ class HttpHandler
 {
   private:
 	int _connectedToSocket;
+  int _connectedToCGI;
 	int _idx;
-	request_t *_request;
+	request_t *_request; 
 	response_t *_response;
 	Locations *_foundDirective;
 	Server *_server;
@@ -42,6 +43,8 @@ class HttpHandler
 	HttpHandler();
 	~HttpHandler();
 
+  int getConnectedToCGI(void);
+  void setConnectedToCGI(const int& fd);
 	void handleRequestBody(void);
 	void checkRequestData(void);
 	void combineRightUrl(void);

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/23 14:29:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 14:50:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "Exceptions.hpp"
 #include "HttpHandler.hpp"
 #include "Locations.hpp"
+#include "CGI.hpp"
 #include "Webserv.hpp"
 #include <fcntl.h>
 #include <unordered_map>
@@ -28,11 +29,12 @@
 #include <unordered_set>
 #include <sys/epoll.h>
 
-#define MAX_EVENTS 256
+#define MAX_EVENTS 64
 
 class					Locations;
 class					HttpHandler;
 class					HttpException;
+struct					CGI_t;
 
 struct					Methods
 {
@@ -45,6 +47,7 @@ class Server
 {
   protected:
 	std::unordered_map<int, Server*> *_connectedServersPtr;
+	std::map<int, CGI_t*> _fdsRunningCGI;
 	int*					_epollFDptr;
 	std::string 			_serverContent;
 	std::string 			_portString;
@@ -63,6 +66,8 @@ class Server
 	std::vector<HttpHandler> _http_handler;
 
   public:
+ 	void removeCGIrunning(int socket);
+	std::map<int, CGI_t*> &getFdsRunningCGI(void);
   	void removeSocketAndServer(int socket);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
 	void readFromSocketError(const int &err, const int &idx, int &socket);
@@ -73,7 +78,7 @@ class Server
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
 	void setFdReadyForWrite(epoll_event &eventConfig, int &socket);
 	void readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler);
-	void cgi(int index);
+	void cgi(int index, int socket);
 	void execute_CGI_script(int *fds, const char *script, int index);
 	void getLocationStack(std::string locationContent);
 	void logThrowStatus(const int &idx, const level &lvl,
