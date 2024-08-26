@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/26 14:50:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 18:20:39 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ class Server
 	std::vector<HttpHandler> _http_handler;
 
   public:
+	void readCGI(int socket, HttpHandler& handler);
  	void removeCGIrunning(int socket);
 	std::map<int, CGI_t*> &getFdsRunningCGI(void);
   	void removeSocketAndServer(int socket);

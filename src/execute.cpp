@@ -240,35 +240,13 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
 	int		idx;
-	int		status;
 
 	idx = handler.getIdx();
 	try
 	{
 		// std::cout << "this is a client_tmp: " <<client_tmp << std::endl;
 		client_tmp = event.data.fd;
-		std::cout << "client_tmp vs connected socket to handler " <<client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
-		if (handler.getConnectedToCGI() == client_tmp)
-		{
-			auto it = _fdsRunningCGI.find(client_tmp);
-			std::cout << "trying to read CGI" << std::endl;
-			CGI_t * currCGI = it->second;
-			int br = read(currCGI->ReadFd, buffer, BUFFERSIZE);
-			buffer[br] = '\0';
-			if (br == 0)
-			{
-				close(currCGI->ReadFd);
-				resetCGI(*currCGI);
-				delete currCGI;
-				makeResponse(buffer, idx);
-				sendResponse(idx, client_tmp);
-				return;
-			}
-			waitpid(currCGI->PID, &status, 0);
-			makeResponse(buffer, idx);
-			sendResponse(idx, client_tmp);
-
-		}
+		
 		if (event.events & EPOLLIN)
 		{
 			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
@@ -316,7 +294,6 @@ int Server::initSocketToHandler(const int &socket)
 
 HttpHandler *Server::matchSocketToHandler(const int &socket)
 {
-	static int i;
 	for (size_t i = 0; i < _http_handler.size(); i++)
 	{
 
@@ -326,9 +303,7 @@ HttpHandler *Server::matchSocketToHandler(const int &socket)
 		if (socket == _http_handler.at(i).getConnectedToCGI())
 				return (&(_http_handler.at(i)));
 	}
-	if (!i)
-		logger.log(ERR, "Couldn't match socket to handler");
-	i++;
+	logger.log(ERR, "Couldn't match socket to handler");
 	return (nullptr);
 }
 
@@ -350,9 +325,7 @@ Server* Webserv::findServerConnectedToSocket(const int& socket)
             CGI_t * currCGI = it->second;
 			// std::cout << currCGI->ReadFd << "|" << socket << std::endl;
 			if (currCGI->ReadFd == socket)
-			{
 				return(&(_servers[i]));
-			}
         }
     }
 
@@ -384,7 +357,7 @@ void Webserv::checkCGItimeouts(void)
             if (currCGI->StartTime != 0 && time(NULL) - currCGI->StartTime > 10)
             {
 				// std::cout << currSocket << "|" << _servers[i].getServerFd() << std::endl;
-				logger.log(ERR, "[502] CGI script has been timed out, since it lasted for longer than 10 seconds");
+				logger.log(ERR, "[502] CGI script has been timed out, since it lasted longer than 10 seconds");
 				HttpHandler *currentHttpHandler = _servers[i].matchSocketToHandler(currSocket);
 				currentHttpHandler->getResponse()->status = httpStatusCode::BadGateway;
 				_servers[i].makeResponse(PAGE_502, currentHttpHandler->getIdx());
@@ -398,6 +371,69 @@ void Webserv::checkCGItimeouts(void)
         }
     }
 }
+
+void Server::readCGI(int client_tmp, HttpHandler &handler)
+{
+    char buffer[BUFFERSIZE];
+    int status = 0;
+    int idx = handler.getIdx();
+	int socket = handler.getConnectedToSocket();
+    std::cout << "client_tmp vs connected CGI to handler " << client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
+    if (handler.getConnectedToCGI() == client_tmp)
+    {
+        auto it = _fdsRunningCGI.find(handler.getConnectedToSocket());
+        if (it == _fdsRunningCGI.end())
+        {
+            std::cerr << "Error: CGI process not found for socket " << client_tmp << std::endl;
+            return;
+        }
+        
+        CGI_t *currCGI = it->second;
+        std::cout << "trying to read CGI" << std::endl;
+        
+        while (true) 
+        {
+            int br = read(currCGI->ReadFd, buffer, BUFFERSIZE);
+            if (br > 0) 
+            {
+                buffer[br] = '\0';
+                // Accumulate data, prepare response, or handle as needed
+                std::cout << "Read " << br << " bytes from CGI" << std::endl;
+                // You might want to accumulate this data into a larger buffer if needed
+            } 
+            else if (br == -1) 
+            {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) 
+                {
+                    // No data available right now, try again later
+                    std::cout << "No data available for now, will try later." << std::endl;
+                    break;
+                } 
+                else 
+                {
+                    // An error occurred, handle it
+                    std::cerr << "Error reading from CGI: " << strerror(errno) << std::endl;
+                    break;
+                }
+            } 
+            else if (br == 0) 
+            {
+                // EOF: the CGI process has finished sending data
+                std::cout << "EOF reached for CGI" << std::endl;
+                waitpid(currCGI->PID, &status, 0);
+                close(currCGI->ReadFd);
+                resetCGI(*currCGI);
+                delete currCGI;
+                _fdsRunningCGI.erase(it); // Don't forget to remove it from the map!
+                makeResponse(buffer, idx);
+                sendResponse(idx, socket);
+                return;
+            }
+        }
+    }
+}
+
+
 
 int Webserv::execute(void)
 {
@@ -420,39 +456,41 @@ int Webserv::execute(void)
 	{
 		try
 		{
-		checkCGItimeouts();
-		eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
-		for (int idx = 0; idx < eventCount; ++idx)
-		{
-			serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
-			if (serverConnectIndex >= 0)
+			checkCGItimeouts();
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
+			for (int idx = 0; idx < eventCount; ++idx)
 			{
-				if (!acceptClientSocket(client_socket, addrlen,
-						serverConnectIndex, serverConnectIndex))
-					continue ;
-				if (!makeSocketNonBlocking(client_socket))
+				serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
+				if (serverConnectIndex >= 0)
 				{
-					close(client_socket);
-					continue ;
+					if (!acceptClientSocket(client_socket, addrlen,
+							serverConnectIndex, serverConnectIndex))
+						continue ;
+					if (!makeSocketNonBlocking(client_socket))
+					{
+						close(client_socket);
+						continue ;
+					}
+					addFdToReadEpoll(eventConfig, client_socket);
+					if (_servers[serverConnectIndex].initSocketToHandler(client_socket))
+						addSocketToServer(client_socket, &(_servers[serverConnectIndex]));
 				}
-				addFdToReadEpoll(eventConfig, client_socket);
-				if (_servers[serverConnectIndex].initSocketToHandler(client_socket))
-					addSocketToServer(client_socket, &(_servers[serverConnectIndex]));
-			}
-			else
-			{
-				static int i;
-				if (!i)
+				else
+				{
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
-			  	i++;
-				Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
-				// std::cout << "evennlist[]: " << eventList[idx].data.fd << std::endl;
-				currentHttpHandler = currentServer->matchSocketToHandler(eventList[idx].data.fd);
-
-				if (currentHttpHandler)
-					currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler);
-			}
-		}}
+					// Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
+					Server* currentServer = &_servers[0];
+					// std::cout << "evennlist[]: " << eventList[idx].data.fd << std::endl;
+					currentHttpHandler = currentServer->matchSocketToHandler(eventList[idx].data.fd);
+					if (currentHttpHandler)
+					{
+						if (currentHttpHandler->getConnectedToCGI() == -1)
+							currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler);
+						else
+							currentServer->readCGI(eventList[idx].data.fd, *currentHttpHandler);
+					}
+				}
+			}}
 		catch (const std::exception &e)
 		{
 			logger.log(ERR, "Catched an error inside loop");

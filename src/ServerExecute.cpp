@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/26 17:08:49 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/26 18:14:22 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,6 @@ void Server::cgi(int idx, int socket)
 			InternalServerErrorException());
         }
 		_fdsRunningCGI.insert({socket, CGIinfo});
-		std::cout << "CGI FD" << fds[0] << std::endl;
 		getHttpHandler(idx).setConnectedToCGI(fds[0]);
 		// getHttpHandler(idx).getResponse()->contentLength = read(fds[0], buf,
 				// BUFFERSIZE);
