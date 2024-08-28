@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/26 18:14:22 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 13:04:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,10 +87,10 @@ void Server::logThrowStatus(const int &idx, const level &lvl,
 	const std::string &msg, const httpStatusCode &status,
 	HttpException exception)
 {
-	throw	exception;
 
 	logger.log(lvl, msg);
 	getHttpHandler(idx).getResponse()->status = status;
+	throw	exception;
 }
 
 void Server::cgi(int idx, int socket)
@@ -131,20 +131,6 @@ void Server::cgi(int idx, int socket)
         }
 		_fdsRunningCGI.insert({socket, CGIinfo});
 		getHttpHandler(idx).setConnectedToCGI(fds[0]);
-		// getHttpHandler(idx).getResponse()->contentLength = read(fds[0], buf,
-				// BUFFERSIZE);
-		// buf[getHttpHandler(idx).getResponse()->contentLength] = '\0';
-		// close(fds[0]);
-		// waitpid(CGIinfo->PID, &status, 0);
-		
-		// if (check_status(status) != 0)
-		// 	logThrowStatus(idx, ERR,
-		// 		"[500] Script has executed and returned with an error status",
-		// 		httpStatusCode::InternalServerError,
-		// 		InternalServerErrorException());
-		// std::string buffer(buf,
-		// 	getHttpHandler(idx).getResponse()->contentLength);
-		// makeResponse(buffer, idx);
 	}
 	return ;
 }
@@ -271,7 +257,7 @@ void Server::deleteFileInServer(int idx)
 
 void Server::sendResponse(const int &idx, int &socket)
 {
-	logger.log(INFO, "Inside sendResponse");
+	logger.log(INFO, "Sending response to client on socket: " + std::to_string(socket));
 	logger.log(RESPONSE, getHttpHandler(idx).getResponse()->response);
 	if (send(socket, getHttpHandler(idx).getResponse()->response.c_str(),
 			getHttpHandler(idx).getResponse()->response.size(), 0) == -1)

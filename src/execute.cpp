@@ -270,11 +270,13 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	catch (const FavIconException)
 	{
 		sendFavIconResponse(idx, client_tmp);
+		setFdReadyForRead(eventConfig, client_tmp);
 	}
 	catch (const HttpException &e)
 	{
 		makeResponse(e.getPageContent(), idx);
 		sendResponse(idx, client_tmp);
+		setFdReadyForRead(eventConfig, client_tmp);
 	}
 }
 
@@ -362,8 +364,9 @@ void Webserv::checkCGItimeouts(void)
 				currentHttpHandler->getResponse()->status = httpStatusCode::BadGateway;
 				_servers[i].makeResponse(PAGE_502, currentHttpHandler->getIdx());
 				_servers[i].sendResponse(currentHttpHandler->getIdx(), currSocket);
+				currentHttpHandler->setConnectedToCGI(-1);
 				_servers[i].removeCGIrunning(currSocket);
-				close(currCGI->ReadFd);
+				_servers[i].setFdReadyForRead(_event, currentHttpHandler->getConnectedToSocket());
 				resetCGI(*currCGI);
 				delete currCGI;
 				break;
@@ -421,10 +424,12 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
                 // EOF: the CGI process has finished sending data
                 std::cout << "EOF reached for CGI" << std::endl;
                 waitpid(currCGI->PID, &status, 0);
+				removeCGIrunning(handler.getConnectedToSocket());
+				handler.setConnectedToCGI(-1);
+				std::cout << "handler connected to CGI should be -1" << handler.getConnectedToCGI() << std::endl;
                 close(currCGI->ReadFd);
                 resetCGI(*currCGI);
                 delete currCGI;
-                _fdsRunningCGI.erase(it); // Don't forget to remove it from the map!
                 makeResponse(buffer, idx);
                 sendResponse(idx, socket);
                 return;
@@ -432,7 +437,6 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
         }
     }
 }
-
 
 
 int Webserv::execute(void)
@@ -478,9 +482,14 @@ int Webserv::execute(void)
 				else
 				{
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
-					// Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
-					Server* currentServer = &_servers[0];
-					// std::cout << "evennlist[]: " << eventList[idx].data.fd << std::endl;
+				
+					// Assuming findServerConnectedToSocket is a function to find the correct server
+					Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
+					if (!currentServer) {
+						logger.log(ERR, "No server found for socket: " + std::to_string(eventList[idx].data.fd));
+						continue;
+					}
+				
 					currentHttpHandler = currentServer->matchSocketToHandler(eventList[idx].data.fd);
 					if (currentHttpHandler)
 					{
@@ -489,19 +498,21 @@ int Webserv::execute(void)
 						else
 							currentServer->readCGI(eventList[idx].data.fd, *currentHttpHandler);
 					}
+					else {
+						logger.log(ERR, "No HTTP handler found for socket: " + std::to_string(eventList[idx].data.fd));
+					}
+				}}}
+				catch (const std::exception &e)
+				{
+					logger.log(ERR, "Caught an error inside loop: " + std::string(e.what()));
 				}
-			}}
-		catch (const std::exception &e)
-		{
-			logger.log(ERR, "Catched an error inside loop");
-		}
+		
 	}
-	
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		close(_servers[i].getSocketFD());
-		logger.log(INFO, "Server shut down at port: "
-			+ _servers[i].getPortString());
+		logger.log(INFO, "Server shut down at port: " + _servers[i].getPortString());
 	}
+
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/26 17:02:07 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 13:11:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ class HttpHandler
 	void setHeaderChecked(bool boolean);
 	void setChunked(bool boolean);
 	void setConnectedToSocket(const int& fd);
-	int getConnectedToSocket(void);
+	int& getConnectedToSocket(void);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
 	Locations *getFoundDirective(void);

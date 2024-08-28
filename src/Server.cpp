@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/26 17:04:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 11:45:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -609,7 +609,7 @@ void Server::removeCGIrunning(int socket)
 	auto it = _fdsRunningCGI.find(socket);
 	if (it != _fdsRunningCGI.end())
 	{
-		logger.log(INFO, "Removed " + std::to_string(socket) + " from CGI running map");
+		logger.log(INFO, "Removed CGI " + std::to_string(socket) + " and socket: " + std::to_string(it->first) + " from fdsRunningCGI");
 		_fdsRunningCGI.erase(it);
 	}
 }

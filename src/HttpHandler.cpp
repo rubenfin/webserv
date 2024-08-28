@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/26 18:28:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 13:11:17 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,7 +352,7 @@ int HttpHandler::getIdx(void)
 	return(_idx);
 }
 
-int HttpHandler::getConnectedToSocket(void)
+int &HttpHandler::getConnectedToSocket(void)
 {
 	return (_connectedToSocket);
 }
