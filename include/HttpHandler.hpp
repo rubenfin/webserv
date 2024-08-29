@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/28 13:11:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 10:26:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Webserv.hpp"
 #include <iostream>
 #include <string>
+#include <memory>
 
 class	Locations;
 class	Server;
@@ -26,11 +27,11 @@ class HttpHandler
 {
   private:
 	int _connectedToSocket;
-  int _connectedToCGI;
+ 	int _connectedToCGI;
 	int _idx;
 	request_t *_request; 
 	response_t *_response;
-	Locations *_foundDirective;
+	std::shared_ptr<Locations>  _foundDirective;
 	Server *_server;
 	int _currentSocket;
 	bool _isCgi;
@@ -61,11 +62,11 @@ class HttpHandler
 	int& getConnectedToSocket(void);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
-	Locations *getFoundDirective(void);
+	std::shared_ptr<Locations>  getFoundDirective(void);
 	request_t *getRequest(void);
 	response_t *getResponse(void);
 	Server *getServer(void);
-	Locations *findMatchingDirective(void);
+	std::shared_ptr<Locations> findMatchingDirective(void);
 	void setCurrentSocket(int fd);
 	void setBooleans(void);
 	bool getCgi(void);

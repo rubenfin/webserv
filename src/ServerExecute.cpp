@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 13:04:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 13:55:09 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ void Server::setFileInServer(int idx)
 			file.close();
 			logThrowStatus(idx,
 							INFO,
-							"[201] Done uploading file ,read all the bytes " + fullPath,
+							"[201] Done uploading file ,read all the bytes " + fullPath + " with size: " + std::to_string(getFileSize(fullPath, idx)),
 							httpStatusCode::Created,
 							CreatedException());
 		}

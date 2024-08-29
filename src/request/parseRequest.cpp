@@ -6,11 +6,12 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 14:26:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/28 16:23:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
+
 
 std::string extractValue(request_t *req, const std::string &toSearch)
 {
@@ -155,6 +156,7 @@ void	parse_request(request_t *req, std::string buffer, const int& idx)
 	req->requestContent = buffer;
     logger.log(DEBUG, 	"size of requestContent at start: " + std::to_string(req->requestContent.size()));
 	req->file.fileExists = false;
+	std::cerr << req->requestContent << std::endl;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
 	setRequestURL(req);

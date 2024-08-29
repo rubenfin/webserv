@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 15:10:22 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 09:42:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,16 +73,6 @@ void	printFileStruct(file_t *file)
 	logger.log(REQUEST, "fileBoundary: " + file->fileBoundary);
 }
 
-void removeTrailingCRLF(std::string &str)
-{
-    if (str.length() >= 2 && str.substr(str.length() - 2) == "\r\n")
-    {
-        str.erase(str.length() - 2); // Remove the last two characters if they are "\r\n"
-    }
-}
-
-
-
 void findFileContent(request_t *req, file_t *requestFile)
 {
     // Find the start of the content after the delimiter
@@ -124,9 +114,6 @@ void findFileContent(request_t *req, file_t *requestFile)
 
     // Extract the file content between start and end
     requestFile->fileContent = req->requestBody.substr(start, end - start);
-	removeTrailingCRLF(requestFile->fileContent);
-	removeTrailingCRLF(requestFile->fileContent);
-	std::cout << "|" << requestFile->fileContent << "|" << std::endl;
     requestFile->fileContentLength = requestFile->fileContent.size();
 
     // Uncomment this for debugging

@@ -162,22 +162,20 @@ void Server::readFromSocketSuccess(const int &idx, const char *buffer,
 		parse_request(getHttpHandler(idx).getRequest(),
 			std::string(buffer, bytes_read), idx);
 		getHttpHandler(idx).handleRequest(*this);
+
 		if (bytes_read == BUFFERSIZE - 1)
 			getHttpHandler(idx).setChunked(true);
-		getHttpHandler(idx).getRequest()->totalBytesRead
-			+= bytes_read
-			- (getHttpHandler(idx).getRequest()->requestContent.size()
-				- getHttpHandler(idx).getRequest()->requestBody.size());
+		getHttpHandler(idx).getRequest()->totalBytesRead += bytes_read - ( getHttpHandler(idx).getRequest()->requestContent.size() - getHttpHandler(idx).getRequest()->requestBody.size() );
 	}
 	else
 	{
+
 		getHttpHandler(idx).getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
-		removeBoundaryLine(getHttpHandler(idx).getRequest()->file.fileContent,
-			trim(getHttpHandler(idx).getRequest()->file.fileBoundary));
-		getHttpHandler(idx).getRequest()->totalBytesRead
-			+= bytes_read;
+		removeBoundaryLine(getHttpHandler(idx).getRequest()->file.fileContent, trim(getHttpHandler(idx).getRequest()->file.fileBoundary));
+		getHttpHandler(idx).getRequest()->totalBytesRead += bytes_read;
 	}
+
 }
 
 void Server::removeFdFromEpoll(int &socket)
@@ -218,8 +216,6 @@ void Server::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 {
 	eventConfig.events = EPOLLOUT | EPOLLET;
 	eventConfig.data.fd = socket;
-	std::cout << _epollFDptr << std::endl;
-	std::cout << *_epollFDptr << std::endl;
 
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_MOD, socket, &eventConfig) == -1)
 	{
@@ -236,7 +232,7 @@ int	fd_is_valid(int fd)
 
 void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler)
 {
-	int		client_tmp;
+	int		client_tmp = -1;
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
 	int		idx;
@@ -256,14 +252,14 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 				return ;
 			}
 			buffer[bytes_read] = '\0';
+			std::cout << bytes_read << std::endl;
+			std::cout << buffer << std::endl;
 			readFromSocketSuccess(idx, buffer, bytes_read);
 			setFdReadyForWrite(eventConfig, client_tmp);
 		}
 		else if (event.events & EPOLLOUT)
 		{
 			serverActions(idx, client_tmp);
-			if (!fd_is_valid(client_tmp))
-				return ;
 			setFdReadyForRead(eventConfig, client_tmp);
 		}
 	}
@@ -381,7 +377,7 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
     int status = 0;
     int idx = handler.getIdx();
 	int socket = handler.getConnectedToSocket();
-    std::cout << "client_tmp vs connected CGI to handler " << client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
+    // std::cout << "client_tmp vs connected CGI to handler " << client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
     if (handler.getConnectedToCGI() == client_tmp)
     {
         auto it = _fdsRunningCGI.find(handler.getConnectedToSocket());
@@ -392,7 +388,7 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
         }
         
         CGI_t *currCGI = it->second;
-        std::cout << "trying to read CGI" << std::endl;
+        // std::cout << "tryeing to read CGI" << std::endl;
         
         while (true) 
         {
@@ -401,7 +397,7 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
             {
                 buffer[br] = '\0';
                 // Accumulate data, prepare response, or handle as needed
-                std::cout << "Read " << br << " bytes from CGI" << std::endl;
+                // std::cout << "Read " << br << " bytes from CGI" << std::endl;
                 // You might want to accumulate this data into a larger buffer if needed
             } 
             else if (br == -1) 
@@ -422,11 +418,11 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
             else if (br == 0) 
             {
                 // EOF: the CGI process has finished sending data
-                std::cout << "EOF reached for CGI" << std::endl;
+                // std::cout << "EOF reached for CGI" << std::endl;
                 waitpid(currCGI->PID, &status, 0);
 				removeCGIrunning(handler.getConnectedToSocket());
 				handler.setConnectedToCGI(-1);
-				std::cout << "handler connected to CGI should be -1" << handler.getConnectedToCGI() << std::endl;
+				// std::cout << "handler connected to CGI should be -1" << handler.getConnectedToCGI() << std::endl;
                 close(currCGI->ReadFd);
                 resetCGI(*currCGI);
                 delete currCGI;
@@ -451,6 +447,7 @@ int Webserv::execute(void)
 	std::vector<request_t> request;
 	std::vector<response_t> response;
 	signal(SIGINT, handleSigInt);
+	signal(SIGQUIT, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
 	this->setupServers(addrlen);
 	for (size_t i = 0; i < _servers.size(); i++)
@@ -461,7 +458,7 @@ int Webserv::execute(void)
 		try
 		{
 			checkCGItimeouts();
-			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
 			for (int idx = 0; idx < eventCount; ++idx)
 			{
 				serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
@@ -483,7 +480,6 @@ int Webserv::execute(void)
 				{
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
 				
-					// Assuming findServerConnectedToSocket is a function to find the correct server
 					Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
 					if (!currentServer) {
 						logger.log(ERR, "No server found for socket: " + std::to_string(eventList[idx].data.fd));
@@ -498,15 +494,13 @@ int Webserv::execute(void)
 						else
 							currentServer->readCGI(eventList[idx].data.fd, *currentHttpHandler);
 					}
-					else {
+					else
 						logger.log(ERR, "No HTTP handler found for socket: " + std::to_string(eventList[idx].data.fd));
-					}
 				}}}
 				catch (const std::exception &e)
 				{
 					logger.log(ERR, "Caught an error inside loop: " + std::string(e.what()));
-				}
-		
+				}	
 	}
 	for (size_t i = 0; i < _servers.size(); i++)
 	{

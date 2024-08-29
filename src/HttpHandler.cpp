@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/28 13:11:17 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 11:09:32 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,25 +26,23 @@ void HttpHandler::handleRequestBody(void)
 {
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
 }
-
-Locations *HttpHandler::findMatchingDirective(void)
+std::shared_ptr<Locations> HttpHandler::findMatchingDirective(void)
 {
-	Locations	*currLongestLocation;
+    std::shared_ptr<Locations> currLongestLocation = nullptr;
 
-	currLongestLocation = nullptr;
-	for (size_t i = 0; i < _server->getLocation().size(); i++)
-	{
-		const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
-		if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
-		{
-			if (currLongestLocation == nullptr
-				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
-				currLongestLocation = &_server->getLocation()[i];
-		}
-	}
-	if (currLongestLocation)
-		return (currLongestLocation);
-	return (nullptr);
+    for (size_t i = 0; i < _server->getLocation().size(); i++)
+    {
+        const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
+        if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
+        {
+            if (!currLongestLocation
+                || locationDirective.size() > currLongestLocation->getLocationDirective().size())
+            {
+                currLongestLocation = std::make_shared<Locations>(_server->getLocation()[i]);
+            }
+        }
+    }
+    return currLongestLocation;
 }
 
 void HttpHandler::combineRightUrl(void)
@@ -91,7 +89,6 @@ void HttpHandler::combineRightUrl(void)
 			_returnAutoIndex = true;
 			logger.log(WARNING,
 				"No index found in config file and now trying to use autoindex for /");
-			std::cout << "BOOLEAN IN HANDLER " << _returnAutoIndex << _idx << std::endl;
 				return ;
 		}
 		else if (_hasRedirect)
@@ -322,7 +319,7 @@ void HttpHandler::handleRequest(Server &serverAddress)
 	combineRightUrl();
 }
 
-Locations *HttpHandler::getFoundDirective(void)
+std::shared_ptr<Locations>  HttpHandler::getFoundDirective(void)
 {
 	return (_foundDirective);
 }

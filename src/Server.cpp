@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 11:45:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 11:07:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ void Server::listenToSocket()
 	}
 }
 
-void Server::setServer(int *epollFd, std::unordered_map<int, Server*> *connectedServers)
+void Server::setServer(int *epollFd, std::unordered_map<int,
+	Server *> *connectedServers)
 {
 	int	opt;
 
@@ -87,7 +88,7 @@ void Server::setServer(int *epollFd, std::unordered_map<int, Server*> *connected
 	listenToSocket();
 	my_epoll_add((*epollFd), _serverFd, EPOLLIN | EPOLLPRI);
 	_epollFDptr = epollFd;
-	_connectedServersPtr  = connectedServers;
+	_connectedServersPtr = connectedServers;
 }
 
 void Server::getLocationStack(std::string locationContent)
@@ -238,76 +239,74 @@ void Server::setMethods(void)
 		_allowedMethods.DELETE = true;
 }
 
-void Server::setError(const std::string& errorPageNumber, const std::string& exceptionName)
+void Server::setError(const std::string &errorPageNumber,
+	const std::string &exceptionName)
 {
-    std::string errorPage = trim(extractValue("error_page " + errorPageNumber + " "));
-    
-    if (errorPage.empty())
-    {
-        return;
-    }
-
-    std::ifstream file(getRoot() + errorPage, std::ios::binary | std::ios::ate);
-    if (file.is_open())
-    {
-        std::streamsize size = file.tellg();
-        file.seekg(0, std::ios::beg);
-        
-        // Allocate buffer with the file size
-        char* buffer = new char[size + 1]; // +1 for null terminator
-        
-        // Read file contents into buffer
-        if (file.read(buffer, size))
-        {
-            buffer[size] = '\0'; // Null-terminate the buffer
-            HttpException::setCustomPage(exceptionName, buffer);
-        	logger.log(INFO, "Created an error page for status" + errorPageNumber);
-        }
-        else
-        {
-            std::cerr << "Failed to read file: " << getRoot() + errorPage << std::endl;
-        }
-        delete[] buffer;
-        file.close();
-    }
-    else
-    {
-        std::cerr << "Failed to open file: " << getRoot() + errorPage << std::endl;
-    }
+	std::string errorPage = trim(extractValue("error_page " + errorPageNumber
+				+ " "));
+	if (errorPage.empty())
+	{
+		return ;
+	}
+	std::ifstream file(getRoot() + errorPage, std::ios::binary | std::ios::ate);
+	if (file.is_open())
+	{
+		std::streamsize size = file.tellg();
+		file.seekg(0, std::ios::beg);
+		// Allocate buffer with the file size
+		char *buffer = new char[size + 1]; // +1 for null terminator
+		// Read file contents into buffer
+		if (file.read(buffer, size))
+		{
+			buffer[size] = '\0'; // Null-terminate the buffer
+			HttpException::setCustomPage(exceptionName, buffer);
+			logger.log(INFO, "Created an error page for status"
+				+ errorPageNumber);
+		}
+		else
+		{
+			std::cerr << "Failed to read file: " << getRoot()
+				+ errorPage << std::endl;
+		}
+		delete[] buffer;
+		file.close();
+	}
+	else
+	{
+		std::cerr << "Failed to open file: " << getRoot()
+			+ errorPage << std::endl;
+	}
 }
 
 void Server::setErrors(void)
 {
 	std::unordered_map<std::string, std::string> errorPages = {
-		{"200", "OK"},                          // 200 OK
-		{"201", "Created"},                     // 201 Created
-		{"202", "Accepted"},                    // 202 Accepted
-		{"204", "NoContent"},                  // 204 No Content
-		{"301", "MovedPermanently"},           // 301 Moved Permanently
-		{"302", "Found"},                       // 302 Found
-		{"304", "NotModified"},                // 304 Not Modified
-		{"400", "BadRequest"},                 // 400 Bad Request
-		{"401", "Unauthorized"},                // 401 Unauthorized
-		{"403", "Forbidden"},                   // 403 Forbidden
-		{"404", "NotFound"},                   // 404 Not Found
-		{"405", "MethodNotAllowed"},          // 405 Method Not Allowed
-		{"409", "Conflict"},                    // 409 Conflict
-		{"413", "PayloadTooLarge"},           // 413 Payload Too Large
-		{"500", "InternalServerError"},       // 500 Internal Server Error
-		{"501", "NotImplemented"},             // 501 Not Implemented
-		{"502", "BadGateway"},                 // 502 Bad Gateway
-		{"503", "ServiceUnavailable"},         // 503 Service Unavailable
-		{"505", "HTTPVersionNonSupported"}   // 505 HTTP Version Not Supported
-};
-
-    
-    for (const auto& errorPagePair : errorPages)
-    {
-        const std::string& statusCode = errorPagePair.first;
-        const std::string& exceptionName = errorPagePair.second;
-		
-        setError(statusCode, exceptionName);
-    }
+		{"200", "OK"},                     // 200 OK
+		{"201", "Created"},                // 201 Created
+		{"202", "Accepted"},               // 202 Accepted
+		{"204", "NoContent"},              // 204 No Content
+		{"301", "MovedPermanently"},       // 301 Moved Permanently
+		{"302", "Found"},                  // 302 Found
+		{"304", "NotModified"},            // 304 Not Modified
+		{"400", "BadRequest"},             // 400 Bad Request
+		{"401", "Unauthorized"},           // 401 Unauthorized
+		{"403", "Forbidden"},              // 403 Forbidden
+		{"404", "NotFound"},               // 404 Not Found
+		{"405", "MethodNotAllowed"},       // 405 Method Not Allowed
+		{"409", "Conflict"},               // 409 Conflict
+		{"413", "PayloadTooLarge"},        // 413 Payload Too Large
+		{"500", "InternalServerError"},    // 500 Internal Server Error
+		{"501", "NotImplemented"},         // 501 Not Implemented
+		{"502", "BadGateway"},             // 502 Bad Gateway
+		{"503", "ServiceUnavailable"},     // 503 Service Unavailable
+		{"505", "HTTPVersionNonSupported"} // 505 HTTP Version Not Supported
+	};
+	for (const auto &errorPagePair : errorPages)
+	{
+		const std::string &statusCode = errorPagePair.first;
+		const std::string &exceptionName = errorPagePair.second;
+		setError(statusCode, exceptionName);
+	}
 }
 void Server::printMethods(void)
 {
@@ -379,7 +378,7 @@ std::vector<Locations> Server::getLocation(void)
 	return (_locations);
 }
 
-HttpHandler& Server::getHttpHandler(int index)
+HttpHandler &Server::getHttpHandler(int index)
 {
 	return (_http_handler.at(index));
 }
@@ -394,11 +393,10 @@ int Server::getServerFd(void)
 	return (_serverFd);
 }
 
-std::map<int, CGI_t*> &Server::getFdsRunningCGI(void)
+std::map<int, CGI_t *> &Server::getFdsRunningCGI(void)
 {
 	return (_fdsRunningCGI);
 }
-
 
 void Server::setLocationsRegex(std::string serverContent)
 {
@@ -431,18 +429,16 @@ void Server::setLocationsRegex(std::string serverContent)
 	}
 }
 
-void Server::linkHandlerResponseRequest(std::vector<request_t>& requests,
-	std::vector<response_t>& responses)
+void Server::linkHandlerResponseRequest(std::vector<request_t> &requests,
+	std::vector<response_t> &responses)
 {
 	requests.resize(MAX_EVENTS);
 	responses.resize(MAX_EVENTS);
 	for (size_t i = 0; i < _http_handler.size(); i++)
 	{
-		_http_handler.at(i).connectToRequestResponse(&(requests.at(i)), &(responses.at(i)), i);
+		_http_handler.at(i).connectToRequestResponse(&(requests.at(i)),
+			&(responses.at(i)), i);
 	}
-	
-	std::cout << "not here" << std::endl;
-
 }
 
 void Server::setClientBodySize(void)
@@ -534,7 +530,6 @@ void Server::makeResponse(const std::string &buffer, int idx)
 	getHttpHandler(idx).getResponse()->response = header + buffer + "\r\n";
 }
 
-
 long long Server::getFileSize(const std::string &filename, const int &idx)
 {
 	struct stat	sb;
@@ -564,8 +559,7 @@ void Server::readFile(int idx)
 	buffer = (char *)malloc(fileSize * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx).getRequest()->requestURL);
-	file = open(getHttpHandler(idx).getRequest()->requestURL.c_str(),
-			O_RDONLY);
+	file = open(getHttpHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
 		perror("opening file of responseURL");
@@ -577,7 +571,6 @@ void Server::readFile(int idx)
 	makeResponse(std::string(buffer, read_bytes), idx);
 	free(buffer);
 }
-
 
 void Server::sendFavIconResponse(const int &idx, int &socket)
 {
@@ -606,10 +599,14 @@ void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 
 void Server::removeCGIrunning(int socket)
 {
-	auto it = _fdsRunningCGI.find(socket);
+	std::map<int, CGI_t *>::iterator it;
+
+	it = _fdsRunningCGI.find(socket);
 	if (it != _fdsRunningCGI.end())
 	{
-		logger.log(INFO, "Removed CGI " + std::to_string(socket) + " and socket: " + std::to_string(it->first) + " from fdsRunningCGI");
+		logger.log(INFO, "Removed CGI " + std::to_string(socket)
+			+ " and socket: " + std::to_string(it->first)
+			+ " from fdsRunningCGI");
 		_fdsRunningCGI.erase(it);
 	}
 }
