@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:07:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 15:28:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -513,21 +513,21 @@ void Server::makeResponseForRedirect(int idx)
 
 void Server::makeResponse(const std::string &buffer, int idx)
 {
-	std::string header;
-	std::string message = getHttpStatusMessage(getHttpHandler(idx).getResponse()->status);
-	header = "HTTP/1.1 " + message + "\r\n";
-	if (getHttpHandler(idx).getRequest()->requestFile.find("jpg") != std::string::npos)
-		header += "Content-Type: image/jpg\r\n";
-	else if (getHttpHandler(idx).getRequest()->requestFile.find("png") != std::string::npos)
-		header += "Content-Type: image/png\r\n";
-	if (buffer != "")
-	{
-		header += "Content-Length: " + std::to_string(buffer.length()) + "\r\n";
-	}
-	else
-		header += "Content-Length: 0";
-	header += "\r\n\r\n";
-	getHttpHandler(idx).getResponse()->response = header + buffer + "\r\n";
+    std::string header;
+    std::string message = getHttpStatusMessage(getHttpHandler(idx).getResponse()->status);
+    header = "HTTP/1.1 " + message + "\r\n";
+    if (getHttpHandler(idx).getRequest()->requestFile.find("jpg") != std::string::npos)
+        header += "Content-Type: image/jpg\r\n";
+    else if (getHttpHandler(idx).getRequest()->requestFile.find("png") != std::string::npos)
+        header += "Content-Type: image/png\r\n";
+    if (!buffer.empty())
+    {
+        header += "Content-Length: " + std::to_string(buffer.size() + 2) + "\r\n"; // +2 for the added \r\n
+    }
+    else
+        header += "Content-Length: 0\r\n";
+    header += "\r\n";
+    getHttpHandler(idx).getResponse()->response = header + buffer + "\r\n";
 }
 
 long long Server::getFileSize(const std::string &filename, const int &idx)

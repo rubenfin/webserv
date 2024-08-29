@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:09:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 11:22:33 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,13 +313,13 @@ void HttpHandler::handleRequest(Server &serverAddress)
 	{
 		checkLocationMethod();
 		totalPathCheck();
-		checkClientBodySize();
+		// checkClientBodySize();
 		setBooleans();
 	}
 	combineRightUrl();
 }
 
-std::shared_ptr<Locations>  HttpHandler::getFoundDirective(void)
+std::shared_ptr<Locations> HttpHandler::getFoundDirective(void)
 {
 	return (_foundDirective);
 }

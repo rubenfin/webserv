@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 13:55:09 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/29 11:37:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,12 +257,16 @@ void Server::deleteFileInServer(int idx)
 
 void Server::sendResponse(const int &idx, int &socket)
 {
-	logger.log(INFO, "Sending response to client on socket: " + std::to_string(socket));
-	logger.log(RESPONSE, getHttpHandler(idx).getResponse()->response);
-	if (send(socket, getHttpHandler(idx).getResponse()->response.c_str(),
-			getHttpHandler(idx).getResponse()->response.size(), 0) == -1)
-	{
-		logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
-	}
-	getHttpHandler(idx).cleanHttpHandler();
+    ssize_t _bytesSent;
+    logger.log(INFO, "Sending response to client on socket: " + std::to_string(socket));
+    logger.log(RESPONSE, getHttpHandler(idx).getResponse()->response);
+    _bytesSent = send(socket, getHttpHandler(idx).getResponse()->response.c_str(),
+            getHttpHandler(idx).getResponse()->response.size(), 0);
+    if (_bytesSent == -1)
+    {
+        logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
+    }
+    std::cout << "bytes sent: " << _bytesSent << " on socket: " <<  std::to_string(socket) <<  std::endl;
+    std::cout << getHttpHandler(idx).getResponse()->response.size() << std::endl;
+    getHttpHandler(idx).cleanHttpHandler();
 }
