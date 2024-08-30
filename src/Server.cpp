@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:09:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:38:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,7 +260,7 @@ void Server::setError(const std::string &errorPageNumber,
 		{
 			buffer[size] = '\0'; // Null-terminate the buffer
 			HttpException::setCustomPage(exceptionName, buffer);
-			logger.log(INFO, "Created an error page for status"
+			logger.log(INFO, "Created an error page for status: "
 				+ errorPageNumber);
 		}
 		else
@@ -556,7 +556,7 @@ void Server::readFile(int idx)
 	long long	fileSize;
 
 	fileSize = getFileSize(getHttpHandler(idx).getRequest()->requestURL, idx);
-	buffer = (char *)malloc(fileSize * sizeof(char));
+	buffer = (char *)malloc((fileSize + 1) * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ getHttpHandler(idx).getRequest()->requestURL);
 	file = open(getHttpHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);

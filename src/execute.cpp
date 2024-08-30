@@ -153,7 +153,7 @@ void Server::readFromSocketSuccess(const int &idx, const char *buffer,
 	}
 	else
 	{
-
+		logger.log(DEBUG, "Reading chunked request");
 		getHttpHandler(idx).getRequest()->file.fileContent = std::string(buffer,
 				bytes_read);
 		removeBoundaryLine(getHttpHandler(idx).getRequest()->file.fileContent, trim(getHttpHandler(idx).getRequest()->file.fileBoundary));

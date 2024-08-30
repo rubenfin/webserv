@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/19 15:12:06 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 16:36:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:32:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 #define EXCEPTIONS_HPP
 
 #include "HttpHandler.hpp"
-#include <exception>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <cstring>
+#include <memory>
+#include <stdexcept>
 
 // Base HttpException class
 class HttpException : public std::runtime_error {
@@ -26,12 +26,10 @@ protected:
     int statusCode;
     char * pageContent;
 
-    // Declare the static map, but don't define it here
-    static std::unordered_map<std::string, char*> customPages;
+    static std::unordered_map<std::string, std::shared_ptr<char[]>> customPages;
 
 public:
     HttpException(int code, const std::string& message, char *defaultContent);
-    int getStatusCode() const;
     char * getPageContent() const;
 
     static void setCustomPage(const std::string& exceptionName, const char* content);

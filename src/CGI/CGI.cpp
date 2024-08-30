@@ -6,12 +6,11 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/20 11:52:36 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/26 14:02:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:24:39 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/CGI.hpp"
-
 
 void resetCGI(CGI_t &CGI)
 {
