@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:19:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 14:32:51 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void Server::execute_CGI_script(int *fds, const char *script, int idx)
 	// If execve returns, it failed
 	perror("execve failed");
 	getHttpHandler(idx).getResponse()->status = httpStatusCode::BadRequest;
-	exit(EXIT_FAILURE);
+	_exit(EXIT_FAILURE);
 }
 
 int	check_status(int status)

@@ -16,7 +16,7 @@ server {
 	
 	location /cgi-bin {
 		allow_methods GET POST
-		index test_cgi.py
+		index infinity.py
 	}
 	
 	location /upload_file {

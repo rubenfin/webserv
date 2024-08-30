@@ -440,6 +440,8 @@ int Webserv::execute(void)
 				}
 				else
 				{
+					if (interrupted)
+						break;
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
 				
 					Server* currentServer = findServerConnectedToSocket(eventList[idx].data.fd);
@@ -464,6 +466,7 @@ int Webserv::execute(void)
 					logger.log(ERR, "Caught an error inside loop: " + std::string(e.what()));
 				}	
 	}
+	
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		while(!_servers[i].getFdsRunningCGI().empty())
@@ -471,7 +474,11 @@ int Webserv::execute(void)
 			std::map<int, CGI_t*>::iterator it = _servers[i].getFdsRunningCGI().begin();
 
 			logger.log(INFO, "Killing CGI process with PID: " + std::to_string(it->second->PID));
-			kill(it->second->PID, SIGTERM);
+			if (kill(it->second->PID, SIGTERM) == 0)
+			{
+				sleep(1);
+				kill(it->second->PID, SIGKILL);
+			}
 			close(it->second->ReadFd);
 			_servers[i].removeCGIrunning(it->first);
 		}
