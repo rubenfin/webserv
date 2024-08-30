@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 15:28:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:09:59 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -522,7 +522,7 @@ void Server::makeResponse(const std::string &buffer, int idx)
         header += "Content-Type: image/png\r\n";
     if (!buffer.empty())
     {
-        header += "Content-Length: " + std::to_string(buffer.size() + 2) + "\r\n"; // +2 for the added \r\n
+        header += "Content-Length: " + std::to_string(buffer.size() + 2) + "\r\n";
     }
     else
         header += "Content-Length: 0\r\n";

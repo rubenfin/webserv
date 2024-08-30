@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:23:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 10:45:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ int	main(int argc, char **argv)
 			return (EXIT_FAILURE);
 		Webserv webserv(filename);
 		webserv.execute();
-	
 		return (EXIT_SUCCESS);
 	}
 	else

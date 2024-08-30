@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 16:23:05 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:21:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,7 @@ static void	setRequestBody(request_t *req)
 void	parse_request(request_t *req, std::string buffer, const int& idx)
 {
 	req->requestContent = buffer;
-    logger.log(DEBUG, 	"size of requestContent at start: " + std::to_string(req->requestContent.size()));
 	req->file.fileExists = false;
-	std::cerr << req->requestContent << std::endl;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
 	setRequestURL(req);

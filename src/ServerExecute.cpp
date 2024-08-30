@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:37:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:19:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void Server::cgi(int idx, int socket)
 	CGI_t				*CGIinfo = new CGI_t();
 	int					fds[2];
 
-	logger.log(DEBUG, "in CGI");
+	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));
 	if (access(getHttpHandler(idx).getRequest()->requestURL.c_str(), X_OK) != 0)
 		logThrowStatus(idx, ERR, "[403] Script doesn't have executable rights",
 			httpStatusCode::Forbidden, ForbiddenException());
@@ -257,16 +257,12 @@ void Server::deleteFileInServer(int idx)
 
 void Server::sendResponse(const int &idx, int &socket)
 {
-    ssize_t _bytesSent;
     logger.log(INFO, "Sending response to client on socket: " + std::to_string(socket));
     logger.log(RESPONSE, getHttpHandler(idx).getResponse()->response);
-    _bytesSent = send(socket, getHttpHandler(idx).getResponse()->response.c_str(),
-            getHttpHandler(idx).getResponse()->response.size(), 0);
-    if (_bytesSent == -1)
-    {
+    if (send(socket, getHttpHandler(idx).getResponse()->response.data(),
+            getHttpHandler(idx).getResponse()->response.size(), 0) == -1)
+	{
         logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
-    }
-    std::cout << "bytes sent: " << _bytesSent << " on socket: " <<  std::to_string(socket) <<  std::endl;
-    std::cout << getHttpHandler(idx).getResponse()->response.size() << std::endl;
-    getHttpHandler(idx).cleanHttpHandler();
+	}
+	getHttpHandler(idx).cleanHttpHandler();
 }

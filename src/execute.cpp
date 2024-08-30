@@ -30,7 +30,7 @@ void Server::serverActions(const int &idx, int &socket)
 	else
 		readFile(idx);
 	if (getHttpHandler(idx).getRequest()->currentBytesRead < BUFFERSIZE
-		- 1 && !getHttpHandler(idx).getChunked())
+		- 1 && !getHttpHandler(idx).getChunked() && !getHttpHandler(idx).getCgi())
 	{
 		sendResponse(idx, socket);
 	}
@@ -121,35 +121,19 @@ void	removeBoundaryLine(std::string &str, const std::string &boundary)
 	size_t	lineEnd;
 	size_t	found;
 
-	std::string boundaryLine = boundary + "--"; // Expected boundary with "--"
+	std::string boundaryLine = boundary + "--";
 	found = str.find(boundaryLine);
-	// Find the first occurrence of the boundary
 	if (found != std::string::npos)
 	{
-		// Find the start of the line
 		lineStart = str.rfind('\n', found);
-		if (lineStart == std::string::npos)
-		{
-			lineStart = 0; // If no newline is found, this is the first line
-		}
-		else
-		{
-			lineStart += 1; // Move to the character after the newline
-		}
-		// Find the end of the line
+		lineStart == std::string::npos ? lineStart = 0 : lineStart += 1;
 		lineEnd = str.find('\n', found);
 		if (lineEnd == std::string::npos)
 		{
-			lineEnd = str.length(); // If no newline is found,
+			lineEnd = str.length();
 		}
-		// Erase the entire line
 		str.erase(lineStart, lineEnd - lineStart + 1); //
-		logger.log(INFO, "Removed boundary line: |" + boundary + "|");
-	}
-	else
-	{
-		logger.log(INFO, "Did not find boundary line to remove: |" + boundary
-			+ "|");
+		// logger.log(INFO, "Removed boundary line: |" + boundary + "|");
 	}
 }
 
@@ -240,7 +224,6 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	idx = handler.getIdx();
 	try
 	{
-		// std::cout << "this is a client_tmp: " <<client_tmp << std::endl;
 		client_tmp = event.data.fd;
 		
 		if (event.events & EPOLLIN)
@@ -252,8 +235,6 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 				return ;
 			}
 			buffer[bytes_read] = '\0';
-			std::cout << bytes_read << std::endl;
-			std::cout << buffer << std::endl;
 			readFromSocketSuccess(idx, buffer, bytes_read);
 			setFdReadyForWrite(eventConfig, client_tmp);
 		}
@@ -388,7 +369,6 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
         }
         
         CGI_t *currCGI = it->second;
-        // std::cout << "tryeing to read CGI" << std::endl;
         
         while (true) 
         {
@@ -396,37 +376,19 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
             if (br > 0) 
             {
                 buffer[br] = '\0';
-                // Accumulate data, prepare response, or handle as needed
-                // std::cout << "Read " << br << " bytes from CGI" << std::endl;
-                // You might want to accumulate this data into a larger buffer if needed
-            } 
-            else if (br == -1) 
-            {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) 
-                {
-                    // No data available right now, try again later
-                    std::cout << "No data available for now, will try later." << std::endl;
-                    break;
-                } 
-                else 
-                {
-                    // An error occurred, handle it
-                    std::cerr << "Error reading from CGI: " << strerror(errno) << std::endl;
-                    break;
-                }
+				logger.log(INFO, "Read " + std::to_string(br) + " bytes from CGI");
+				handler.getResponse()->response += buffer;
             } 
             else if (br == 0) 
             {
-                // EOF: the CGI process has finished sending data
-                // std::cout << "EOF reached for CGI" << std::endl;
+				logger.log(INFO, "EOF reached for CGI");
                 waitpid(currCGI->PID, &status, 0);
 				removeCGIrunning(handler.getConnectedToSocket());
 				handler.setConnectedToCGI(-1);
-				// std::cout << "handler connected to CGI should be -1" << handler.getConnectedToCGI() << std::endl;
                 close(currCGI->ReadFd);
                 resetCGI(*currCGI);
                 delete currCGI;
-                makeResponse(buffer, idx);
+                makeResponse(handler.getResponse()->response, idx);
                 sendResponse(idx, socket);
                 return;
             }
@@ -504,6 +466,15 @@ int Webserv::execute(void)
 	}
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
+		while(!_servers[i].getFdsRunningCGI().empty())
+		{
+			std::map<int, CGI_t*>::iterator it = _servers[i].getFdsRunningCGI().begin();
+
+			logger.log(INFO, "Killing CGI process with PID: " + std::to_string(it->second->PID));
+			kill(it->second->PID, SIGTERM);
+			close(it->second->ReadFd);
+			_servers[i].removeCGIrunning(it->first);
+		}
 		close(_servers[i].getSocketFD());
 		logger.log(INFO, "Server shut down at port: " + _servers[i].getPortString());
 	}

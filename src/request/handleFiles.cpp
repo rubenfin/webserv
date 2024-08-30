@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:38:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/08/30 11:20:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,49 +75,32 @@ void	printFileStruct(file_t *file)
 
 void findFileContent(request_t *req, file_t *requestFile)
 {
-    // Find the start of the content after the delimiter
     std::size_t start = req->requestBody.find("\r\n\r\n");
     if (start != std::string::npos)
-    {
-        start += 4;  // Move past the delimiter to the start of the content
-    }
+        start += 4; 
     else
     {
         logger.log(ERR, "Content start delimiter not found");
         return;
     }
 
-    std::cout << "file boundary: " << requestFile->fileBoundary << std::endl;
-
-    // Find the start of the boundary string
     std::size_t end = req->requestBody.find(requestFile->fileBoundary, start);
     if (end == std::string::npos)
     {
         logger.log(WARNING, "Did not find any ending boundary");
-        // If boundary not found, take the rest of the string as the content
         requestFile->fileContent = req->requestBody.substr(start);
         requestFile->fileContentLength = requestFile->fileContent.size();
         return;
     }
 
-    // The boundary might be followed by "--", adjust the end accordingly
     if (req->requestBody.compare(end - 2, 2, "\r\n") == 0)
-    {
-        end -= 2;  // Remove the trailing "\r\n"
-    }
-    
-    // Now, check if there is a trailing "--" after the boundary
-    if (req->requestBody.compare(end - 2, 2, "--") == 0)
-    {
-        end -= 2;  // Remove the trailing "--"
-    }
+        end -= 2;
 
-    // Extract the file content between start and end
+    if (req->requestBody.compare(end - 2, 2, "--") == 0)
+        end -= 2;
+
     requestFile->fileContent = req->requestBody.substr(start, end - start);
     requestFile->fileContentLength = requestFile->fileContent.size();
-
-    // Uncomment this for debugging
-    // std::cout << requestFile->fileContent << std::endl;
 }
 
 
