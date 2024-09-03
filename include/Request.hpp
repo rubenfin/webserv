@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Request.hpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/24 17:36:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 10:49:28 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Request.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/24 17:36:08 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/02 14:30:40 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ typedef enum METHODS
 
 typedef struct request_t
 {
+	std::string port;
+	std::string host;
 	std::string http_v;
 	std::string firstLine;
 	std::string requestContent;
@@ -38,17 +40,18 @@ typedef struct request_t
 	std::string requestDirectory;
 	std::string requestFile;
 	std::string contentType;
-	int 		currentBytesRead;
-	int			totalBytesRead;
-	ssize_t		contentLength;
+	int		currentBytesRead;
+	int		totalBytesRead;
+	ssize_t	contentLength;
 	file_t	file;
 	METHODS	method;
 	std::map<std::string, std::string> header;
 }			request_t;
 
 void		setFile(request_t *req, file_t *requestFile);
-void		parse_request(request_t *req, std::string buffer, const int& idx);
+void		parse_request(request_t *req, std::string buffer, const int &idx);
 void		resetRequest(request_t &request);
+void		setHostAndPort(request_t *request);
 void		printRequestStruct(request_t *req, int index);
 std::string trim(const std::string &str);
-std::string extractValue(request_t *req, const std::string &toSearch);
+std::string extractValueReq(request_t *req, const std::string &toSearch);

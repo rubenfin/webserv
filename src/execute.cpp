@@ -214,12 +214,11 @@ int	fd_is_valid(int fd)
 	return (fcntl(fd, F_GETFD) != -1 || errno != EBADF);
 }
 
-void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler)
+void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler, char buffer[BUFFERSIZE])
 {
 	int		client_tmp = -1;
-	ssize_t	bytes_read;
-	char	buffer[BUFFERSIZE];
 	int		idx;
+	size_t bytes_read;
 
 	idx = handler.getIdx();
 	try
@@ -244,7 +243,7 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 			setFdReadyForRead(eventConfig, client_tmp);
 		}
 	}
-	catch (const FavIconException)
+	catch (const FavIconException &e)
 	{
 		sendFavIconResponse(idx, client_tmp);
 		setFdReadyForRead(eventConfig, client_tmp);
@@ -405,6 +404,7 @@ int Webserv::execute(void)
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
 	int					serverConnectIndex;
+	char buffer[BUFFERSIZE];
 	HttpHandler *currentHttpHandler = nullptr;
 	std::vector<request_t> request;
 	std::vector<response_t> response;
@@ -454,7 +454,7 @@ int Webserv::execute(void)
 					if (currentHttpHandler)
 					{
 						if (currentHttpHandler->getConnectedToCGI() == -1)
-							currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler);
+							currentServer->readWriteServer(eventList[idx], eventConfig, *currentHttpHandler, buffer);
 						else
 							currentServer->readCGI(eventList[idx].data.fd, *currentHttpHandler);
 					}

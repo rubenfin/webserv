@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.hpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/26 18:20:39 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 15:40:25 by jade-haa          #+#    #+#             */
+/*   Updated: 2024/09/03 14:06:36 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include <sys/epoll.h>
 
 #define MAX_EVENTS 64
+#define BUFFERSIZE 1024
+
 
 class					Locations;
 class					HttpHandler;
@@ -78,7 +80,7 @@ class Server
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
 	void setFdReadyForWrite(epoll_event &eventConfig, int &socket);
-	void readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler);
+	void readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler, char buffer[BUFFERSIZE]);
 	void cgi(int index, int socket);
 	void execute_CGI_script(int *fds, const char *script, int index);
 	void getLocationStack(std::string locationContent);

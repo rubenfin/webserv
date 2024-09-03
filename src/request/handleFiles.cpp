@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   handleFiles.cpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:20:43 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   handleFiles.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/09 15:04:20 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/02 14:27:00 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void	setFile(request_t *req, file_t *requestFile)
 	std::string cLength;
 	std::string totalFileContent;
 
-	cLength = trim(extractValue(req, "Content-Length: "));
+	cLength = trim(extractValueReq(req, "Content-Length: "));
 	if (req->method == POST && cLength != "0")
 	{
 		if (cLength == "")
@@ -124,19 +124,19 @@ void	setFile(request_t *req, file_t *requestFile)
 	}
 	logger.log(DEBUG, "File exists set to true in RequestFile");
 	requestFile->fileExists = true;
-	requestFile->fileContentType = trim(extractValue(req, "Content-Type: "));
+	requestFile->fileContentType = trim(extractValueReq(req, "Content-Type: "));
 	trimLastChar(requestFile->fileContentType);
 	if (requestFile->fileContentType == "multipart/form-data")
-		requestFile->fileBoundary = trim(extractValue(req,
+		requestFile->fileBoundary = trim(extractValueReq(req,
 					"Content-Type: multipart/form-data; boundary="));
 	if (!requestFile->fileBoundary.empty())
 	{
 		try
 		{
-			requestFile->fileContentDisposition = trim(extractValue(req,
+			requestFile->fileContentDisposition = trim(extractValueReq(req,
 						"Content-Disposition: "));
 			trimLastChar(requestFile->fileContentDisposition);
-			requestFile->fileName = trim(extractValue(req, "filename="));
+			requestFile->fileName = trim(extractValueReq(req, "filename="));
 			trimFirstChar(requestFile->fileName);
 			trimLastChar(requestFile->fileName);
 			findFileContent(req, &req->file);

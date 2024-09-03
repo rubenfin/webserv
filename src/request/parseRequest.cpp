@@ -1,20 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   parseRequest.cpp                                   :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:21:23 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   parseRequest.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/24 16:12:04 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/02 14:49:32 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
 
 
-std::string extractValue(request_t *req, const std::string &toSearch)
+std::string extractValueReq(request_t *req, const std::string &toSearch)
 {
+	std::cout << req->requestContent << std::endl;
 	std::size_t keywordPos = req->requestContent.find(toSearch);
 	if (keywordPos != std::string::npos)
 	{
@@ -151,12 +152,30 @@ static void	setRequestBody(request_t *req)
 	req->requestBody = req->requestContent.substr(foundBody);
 }
 
+void setHostAndPort(request_t *req)
+{
+	std::string HostAndPort = extractValueReq(req, "Host: ");
+	if (!HostAndPort.empty())
+	{
+		std::cout << "deze     " << std::endl;
+		std::cout << HostAndPort << std::endl;
+	}
+	std::size_t pos = HostAndPort.find(":");
+	if (pos != std::string::npos)
+	{
+		req->host = HostAndPort.substr(0, pos);
+		req->port = HostAndPort.substr(pos + 1);
+		std::cout << req->host << " | " << req->port << std::endl;
+	}
+}
+
 void	parse_request(request_t *req, std::string buffer, const int& idx)
 {
 	req->requestContent = buffer;
 	req->file.fileExists = false;
 	req->firstLine = req->requestContent.substr(0, req->requestContent.find("\n"));
 	setHttpVersion(req);
+	setHostAndPort(req);
 	setRequestURL(req);
 	setMethod(req);
 	setRequestDirFile(req);

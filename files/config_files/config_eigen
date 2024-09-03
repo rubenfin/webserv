@@ -1,6 +1,6 @@
 server {
 	server_name localhost
-	listen 8080
+	listen 8000
 	client_body_size 1M
 
 	root files/response_files/
