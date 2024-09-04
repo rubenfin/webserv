@@ -12,6 +12,31 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
+char *ft_read(size_t fd, char buffer[BUFFERSIZE], int *bytes_read)
+{
+    char primary[BUFFERSIZE];
+    int primBytes;
+
+    primBytes = read(fd, primary, BUFFERSIZE);
+    if (primBytes == -1)
+        return NULL;
+
+    if (primBytes > 0)
+    {
+        strncpy(buffer, primary, primBytes);
+        if (primBytes < BUFFERSIZE)
+            buffer[primBytes] = '\0';
+        else
+            buffer[BUFFERSIZE - 1] = '\0';
+
+        *bytes_read = primBytes;
+        return buffer;
+    }
+    *bytes_read = 0;
+    buffer[0] = '\0';
+    return buffer;
+}
+
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*newarray;

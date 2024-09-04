@@ -218,7 +218,7 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 {
 	int		client_tmp = -1;
 	int		idx;
-	size_t bytes_read;
+	int bytes_read;
 
 	idx = handler.getIdx();
 	try
@@ -227,7 +227,8 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 		
 		if (event.events & EPOLLIN)
 		{
-			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
+			buffer = ft_read(client_tmp, buffer, &bytes_read);
+			std::cout << buffer << std::endl;
 			if (bytes_read < 1)
 			{
 				readFromSocketError(bytes_read, idx, client_tmp);
@@ -404,7 +405,9 @@ int Webserv::execute(void)
 	struct epoll_event	eventConfig;
 	struct epoll_event	eventList[MAX_EVENTS];
 	int					serverConnectIndex;
-	char buffer[BUFFERSIZE];
+	int bytes_read;
+	char *buffer = (char *)malloc(sizeof(char) * 1025);
+	char tmp[BUFFERSIZE];
 	HttpHandler *currentHttpHandler = nullptr;
 	std::vector<request_t> request;
 	std::vector<response_t> response;
@@ -437,9 +440,13 @@ int Webserv::execute(void)
 					addFdToReadEpoll(eventConfig, client_socket);
 					if (_servers[serverConnectIndex].initSocketToHandler(client_socket))
 						addSocketToServer(client_socket, &(_servers[serverConnectIndex]));
+					buffer = ft_read(client_socket, buffer, &bytes_read);
+					std::cout << buffer << std::endl;
 				}
 				else
 				{
+					buffer = ft_read(client_socket, tmp, &bytes_read);
+					std::cout << buffer << std::endl;
 					if (interrupted)
 						break;
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
