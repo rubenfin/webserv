@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.hpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 16:23:41 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 14:51:39 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/04 15:40:51 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "CGI.hpp"
 #include "Exceptions.hpp"
 #include "HttpHandler.hpp"
 #include "Logger.hpp"
-#include "CGI.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
 #include <netinet/in.h>
 #include <regex>
 #include <signal.h>
@@ -38,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 // need to check this might be only for GET and not POST and DELETE
@@ -58,7 +58,7 @@ extern Logger &logger;
 /*
 	reinterpret cast to get the diffence between the stored pointes in the unordered map
 	this determines if it's a Server, Client or maybe even CGI.
-	each Client has a single HTTP (request/response) Handler. 
+	each Client has a single HTTP (request/response) Handler.
 */
 
 class Webserv
@@ -68,18 +68,21 @@ class Webserv
 	epoll_event _event;
 	HttpHandler *_handler;
 	std::vector<Server> _servers;
-	std::unordered_map<int, Server*> _socketsConnectedToServers;
+	std::unordered_map<int, Server *> _socketsConnectedToServers;
+
   public:
-	void addSocketToServer(const int& socket, Server* server);
-	std::unordered_map<int, Server*> &getSocketsConnectedToServers(void);
+	void addSocketToServer(const int& socket, Server* server, char buffer[BUFFERSIZE]);
+	std::unordered_map<int, Server *> &getSocketsConnectedToServers(void);
 	void setupServers(socklen_t &addrlen);
 	int execute(void);
 	void checkCGItimeouts(void);
 	void printParsing(void);
-	Server* findServerConnectedToSocket(const int& socket);
+	Server *findServerConnectedToSocket(const int &socket);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
+	void addFdToWriteEpollWB(epoll_event &eventConfig, int &socket);
 	int checkForNewConnection(int eventFd);
-	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i, int server);
+	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i,
+		int server);
 	void cleanHandlerRequestResponse();
 	void setConfig(std::string fileName);
 	Webserv(std::string fileName);

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:38:58 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/04 15:36:51 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,6 +203,13 @@ void Server::setIndex(void)
 	_index.erase(remove_if(_index.begin(), _index.end(), isspace),
 		_index.end());
 }
+
+void Server::setBuffer(char buffer[BUFFERSIZE])
+{
+	strncpy(_buffer, buffer, BUFFERSIZE);
+	std::cout << "buffer >>>>" << _buffer << std::endl;
+}
+
 
 void Server::setUpload(void)
 {
@@ -591,7 +598,7 @@ void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 	eventConfig.data.fd = socket;
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, socket, &eventConfig) == -1)
 	{
-		perror("");
+		perror("addFdToReadEpoll");
 		std::cout << "Connection with epoll_ctl fails!" << std::endl;
 		close(socket);
 	}

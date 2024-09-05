@@ -166,10 +166,12 @@ void Server::removeFdFromEpoll(int &socket)
 {
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_DEL, socket, NULL) == -1)
 	{
-		perror("");
+		perror("removeFdFromEpoll ");
 		std::cout << "failed to remove fd from epoll" << std::endl;
 		close(socket);
+		return;
 	}
+	std::cout << "epoll modify is working removeFdFromEpoll" << std::endl;
 }
 
 void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
@@ -178,10 +180,12 @@ void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 	eventConfig.data.fd = socket;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, socket, &eventConfig) == -1)
 	{
-		perror("");
+		perror("addFdToReadEpoll ");
 		std::cout << "Connection with epoll_ctl fails!" << std::endl;
 		close(socket);
+		return;
 	}
+	std::cout << "epoll modify is working addFdToReadEpoll" << std::endl;
 }
 
 void Server::setFdReadyForRead(epoll_event &eventConfig, int &socket)
@@ -190,10 +194,12 @@ void Server::setFdReadyForRead(epoll_event &eventConfig, int &socket)
 	eventConfig.data.fd = socket;
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_MOD, socket, &eventConfig) == -1)
 	{
-		perror("");
+		perror("setFdReadyForRead ");
 		std::cout << "Connection with epoll_ctl fails!" << std::endl;
 		close(socket);
+		return;
 	}
+	std::cout << "epoll modify is working setFdReadyForRead" << std::endl;
 }
 
 void Server::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
@@ -203,9 +209,26 @@ void Server::setFdReadyForWrite(epoll_event &eventConfig, int &socket)
 
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_MOD, socket, &eventConfig) == -1)
 	{
+		perror("setFdReadyForWrite ");
+		close(socket);
+		return;
+	}
+	std::cout << "epoll modify is working setFdReadyForWrite" << std::endl;
+}
+
+void Webserv::addFdToWriteEpollWB(epoll_event &eventConfig, int &socket)
+{
+	eventConfig.events = EPOLLOUT | EPOLLET;
+	eventConfig.data.fd = socket;
+
+	if (epoll_ctl((_epollFd), EPOLL_CTL_ADD, socket, &eventConfig) == -1)
+	{
+		perror("addFdToWriteEpollWB ");
 		std::cout << "Modify does not work" << std::endl;
 		close(socket);
+		return;
 	}
+	std::cout << "epoll modify is working addFdToWriteEpollWB" << std::endl;
 }
 
 int	fd_is_valid(int fd)
@@ -405,6 +428,8 @@ int Webserv::execute(void)
 	struct epoll_event	eventList[MAX_EVENTS];
 	int					serverConnectIndex;
 	char buffer[BUFFERSIZE];
+	request_t req[100];
+	int bytes_read;
 	HttpHandler *currentHttpHandler = nullptr;
 	std::vector<request_t> request;
 	std::vector<response_t> response;
@@ -434,9 +459,14 @@ int Webserv::execute(void)
 						close(client_socket);
 						continue ;
 					}
-					addFdToReadEpoll(eventConfig, client_socket);
+					bytes_read = read(client_socket, buffer, BUFFERSIZE);
+					if (bytes_read < 0)
+					{
+						perror("read inside execute");
+					}
+					addFdToWriteEpollWB(eventConfig, client_socket);
 					if (_servers[serverConnectIndex].initSocketToHandler(client_socket))
-						addSocketToServer(client_socket, &(_servers[serverConnectIndex]));
+						addSocketToServer(client_socket, &(_servers[serverConnectIndex]) , buffer);
 				}
 				else
 				{

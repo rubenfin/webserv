@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/09/02 16:01:56 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/09/04 15:44:40 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,19 +132,21 @@ std::unordered_map<int, Server*> &Webserv::getSocketsConnectedToServers(void)
 	return (_socketsConnectedToServers);
 }
 
-void Webserv::addSocketToServer(const int& socket, Server* server)
+void Webserv::addSocketToServer(const int& socket, Server* server, char buffer[BUFFERSIZE])
 {
 
     logger.log(INFO, "Trying to add socket " + std::to_string(socket) + " to server: " + std::to_string(server->getSocketFD()));
     
     if (_socketsConnectedToServers.find(socket) != _socketsConnectedToServers.end())
     {
+		close(socket);
         logger.log(WARNING, "Socket " + std::to_string(socket) + " is already connected to a server.");
         return;
     }
     
     auto result = _socketsConnectedToServers.insert({socket, server});
-    
+	
+	result.first->second->setBuffer(buffer);
     if (!result.second)
     {
         logger.log(ERR, "Couldn't add socket to servers connected");
