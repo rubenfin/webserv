@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:38:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/12 14:23:05 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,7 @@ std::string Server::extractValueUntilLocation(const std::string &searchString)
 	}
 	return ("");
 }
+
 void Server::setServerName(void)
 {
 	_serverName = extractValue("server_name");
@@ -197,6 +198,7 @@ void Server::setRoot(void)
 	_root = extractValue("root");
 	_root.erase(remove_if(_root.begin(), _root.end(), isspace), _root.end());
 }
+
 void Server::setIndex(void)
 {
 	_index = extractValueUntilLocation("index");
@@ -562,8 +564,8 @@ void Server::readFile(int idx)
 	file = open(getHttpHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
-		perror("opening file of responseURL");
-		return ;
+		getHttpHandler(idx).getResponse()->status = httpStatusCode::NotFound;
+		throw NotFoundException();
 	}
 	read_bytes = read(file, buffer, fileSize);
 	buffer[read_bytes] = '\0';

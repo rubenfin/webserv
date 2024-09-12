@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/26 18:20:39 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/12 14:15:02 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Server
 	std::string 			_methodsList;
 	int						_serverFd;
 	std::string 			_serverName;
+	std::string				_serverNameIP;
 	int						_port;
 	std::string 			_root;
 	std::string 			_index;
@@ -115,7 +116,7 @@ class Server
 	std::vector<Locations> getLocation(void);
 	HttpHandler& getHttpHandler(int index);
 	HttpHandler* matchSocketToHandler(const int& socket);
-	int initSocketToHandler(const int &socket);
+	int initSocketToHandler(const int &socket, char *buffer,  int bytes_rd);
 	long long getClientBodySize(void);
 	void setLocationsRegex(std::string serverContent);
 	long long getFileSize(const std::string &filename, const int &idx);

@@ -63,8 +63,8 @@ server {
 }
 
 server {
-			server_name localhost
-			listen 8001
+			server_name 127.0.0.2
+			listen 8000
 			client_body_size 1M
 		
 			index test.html

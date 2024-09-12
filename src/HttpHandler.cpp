@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:22:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/12 12:14:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,10 +250,16 @@ void HttpHandler::checkLocationMethod(void)
 	}
 }
 
+void HttpHandler::setFirstRequest(std::string buffer)
+{
+	_firstRequest = buffer;
+}
+
 void HttpHandler::cleanHttpHandler()
 {
 	resetRequestResponse(*_request, *_response);
 	// _connectedToCGI = -1;
+	_firstRequest = "";
 	_server = nullptr;
 	_foundDirective = nullptr;
 	_isCgi = false;

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/28 16:23:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/12 11:51:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,9 @@ class Webserv
 	HttpHandler *_handler;
 	std::vector<Server> _servers;
 	std::unordered_map<int, Server*> _socketsConnectedToServers;
+	
   public:
+  	int findRightServer(const std::string &buffer);
 	void addSocketToServer(const int& socket, Server* server);
 	std::unordered_map<int, Server*> &getSocketsConnectedToServers(void);
 	void setupServers(socklen_t &addrlen);

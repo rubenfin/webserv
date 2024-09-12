@@ -235,6 +235,7 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 				return ;
 			}
 			buffer[bytes_read] = '\0';
+			std::cout << buffer << std::endl;
 			readFromSocketSuccess(idx, buffer, bytes_read);
 			setFdReadyForWrite(eventConfig, client_tmp);
 		}
@@ -244,7 +245,7 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 			setFdReadyForRead(eventConfig, client_tmp);
 		}
 	}
-	catch (const FavIconException)
+	catch (const FavIconException &e)
 	{
 		sendFavIconResponse(idx, client_tmp);
 		setFdReadyForRead(eventConfig, client_tmp);
@@ -257,13 +258,15 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	}
 }
 
-int Server::initSocketToHandler(const int &socket)
+int Server::initSocketToHandler(const int &socket, char *buffer,  int bytes_rd)
 {
 	for (size_t i = 0; i < _http_handler.size(); i++)
 	{
 		if (_http_handler.at(i).getConnectedToSocket() == -1)
 		{
 			_http_handler.at(i).setConnectedToSocket(socket);
+			// _http_handler.at(i).setFirstRequest(std::string(buffer, bytes_rd));
+			this->readFromSocketSuccess(i, buffer, bytes_rd);
 			return (1);
 		}
 	}
@@ -282,7 +285,7 @@ HttpHandler *Server::matchSocketToHandler(const int &socket)
 		if (socket == _http_handler.at(i).getConnectedToCGI())
 				return (&(_http_handler.at(i)));
 	}
-	logger.log(ERR, "Couldn't match socket to handler");
+	logger.log(ERR, "Couldn't match socket or CGI FD to handler");
 	return (nullptr);
 }
 
@@ -308,7 +311,7 @@ Server* Webserv::findServerConnectedToSocket(const int& socket)
         }
     }
 
-    logger.log(ERR, "Couldn't match socket to any server");
+    logger.log(ERR, "Couldn't match socket or CGI FD to any server");
     return (nullptr);
 }
 
@@ -395,6 +398,71 @@ void Server::readCGI(int client_tmp, HttpHandler &handler)
         }
     }
 }
+int Webserv::findRightServer(const std::string &buffer)
+{
+    std::string serverName;
+    std::string port;
+    std::size_t pos;
+
+    if (buffer.empty())
+    {
+        std::cout << "Buffer is empty" << std::endl;
+        return (-1);
+    }
+
+    // Find the "Host: " header in the buffer
+    pos = buffer.find("Host: ");
+    if (pos == std::string::npos)
+    {
+        std::cout << "Couldn't find any host" << std::endl;
+        return (-1);
+    }
+
+    // Extract the host starting from the position after "Host: " (6 characters ahead)
+    pos += 6; // Skip past "Host: "
+    std::size_t endPos = buffer.find("\r\n", pos); // Find end of the line
+
+    if (endPos == std::string::npos)
+    {
+        endPos = buffer.length(); // If no \r\n, take the rest of the buffer
+    }
+
+    // Extract the server name and port (if available)
+    std::string hostLine = buffer.substr(pos, endPos - pos);
+
+    // Split by ':' to separate server name and port
+    std::size_t portPos = hostLine.find(':');
+    if (portPos != std::string::npos)
+    {
+        serverName = hostLine.substr(0, portPos); // Extract server name
+        port = hostLine.substr(portPos + 1);      // Extract port
+    }
+    else
+    {
+        serverName = hostLine; // No port specified, so entire line is the server name
+    }
+
+    std::cout << "Server Name: " << serverName << std::endl;
+    std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
+
+	serverName = trim(serverName);
+	port = trim(port);
+
+	std::cout << _servers.size() << std::endl;
+    for (size_t i = 0; i < _servers.size(); i++)
+    {
+		std::cout << i << std::endl;
+		std::cout << "|" << _servers[i].getServerName() << "|" << _servers[i].getPortString() << "|" << std::endl;
+        if (_servers[i].getServerName() == serverName && _servers[i].getPortString() == port)
+        {
+			std::cout << "RETURN: " << i << std::endl;
+            return i;
+        }
+    }
+	std::cout << "here" << std::endl;
+
+    return (-1); // Temporary return value (success or failure logic can be implemented)
+}
 
 
 int Webserv::execute(void)
@@ -408,6 +476,11 @@ int Webserv::execute(void)
 	HttpHandler *currentHttpHandler = nullptr;
 	std::vector<request_t> request;
 	std::vector<response_t> response;
+	std::string bufferString;
+	int foundServer;
+	char buffer[BUFFERSIZE];
+	int rd_bytes;
+
 	signal(SIGINT, handleSigInt);
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
@@ -435,11 +508,38 @@ int Webserv::execute(void)
 						continue ;
 					}
 					addFdToReadEpoll(eventConfig, client_socket);
-					if (_servers[serverConnectIndex].initSocketToHandler(client_socket))
-						addSocketToServer(client_socket, &(_servers[serverConnectIndex]));
+					rd_bytes = read(client_socket, buffer, BUFFERSIZE);
+					buffer[rd_bytes] = '\0';
+					std::cout << buffer << std::endl;
+					std::cout << rd_bytes << std::endl;
+					if (rd_bytes == -1)
+					{
+						std::cout << "closing client socket: " << client_socket << std::endl;
+						close(client_socket);
+						continue;
+					}
+					else if (rd_bytes == 0)
+					{
+						logger.log(INFO, "Removed client_socket " + std::to_string(client_socket)
+							+ " from epoll because 0 bytes read");
+						close(client_socket);
+						continue;
+					}
+
+					foundServer = findRightServer(std::string(buffer, rd_bytes));
+					if (foundServer == -1)
+					{
+						std::cout << "foundServer is equal to -1";
+						close(client_socket);
+						continue ;
+					}
+					if (_servers[foundServer].initSocketToHandler(client_socket, buffer, rd_bytes))
+						addSocketToServer(client_socket, &(_servers[foundServer]));
+					_servers[foundServer].setFdReadyForWrite(eventConfig, client_socket);
 				}
 				else
 				{
+					
 					if (interrupted)
 						break;
 					logger.log(INFO, "Caught an event on socket: " + std::to_string(eventList[idx].data.fd));
