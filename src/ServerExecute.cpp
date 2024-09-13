@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 14:32:51 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/13 15:25:26 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ void Server::execute_CGI_script(int *fds, const char *script, int idx)
 	logger.log(INFO, "Executing CGI script");
 	close(fds[0]);
 	env = makeEnv(idx);
-	// Redirect both STDOUT and STDERR
 	dup2(fds[1], STDOUT_FILENO);
 	dup2(fds[1], STDERR_FILENO);
 	close(fds[1]);
@@ -67,10 +66,9 @@ void Server::execute_CGI_script(int *fds, const char *script, int idx)
 		write(STDIN_FILENO,
 			getHttpHandler(idx).getRequest()->requestBody.data(),
 			getHttpHandler(idx).getRequest()->requestBody.size());
-		// close(STDIN_FILENO);  // Close STDIN after writing
+		// close(STDIN_FILENO);
 	}
 	execve(script, exec_args, env);
-	// If execve returns, it failed
 	perror("execve failed");
 	getHttpHandler(idx).getResponse()->status = httpStatusCode::BadRequest;
 	_exit(EXIT_FAILURE);
