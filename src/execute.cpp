@@ -1,13 +1,5 @@
 #include "../include/Webserv.hpp"
 
-void	handleSigInt(int signal)
-{
-	if (signal == SIGINT)
-	{
-		logger.log(ERR, "closed Webserv with SIGINT");
-		interrupted = 1;
-	}
-}
 
 int Server::serverActions(const int &idx, int &socket)
 {
@@ -283,7 +275,6 @@ int Server::initSocketToHandler(int &socket, char *buffer,  int bytes_rd)
 		this->sendFavIconResponse(i, socket);
 		return (0);
 	}
-		
 	logger.log(ERR, "Couldn't init socket to handler");
 	return (0);
 }
@@ -554,7 +545,6 @@ int Webserv::handleFirstRequest(int &client_socket)
 		return (1);
 }
 
-
 int Webserv::execute(void)
 {
 	int					client_socket;
@@ -567,10 +557,7 @@ int Webserv::execute(void)
 	std::vector<request_t> request;
 	std::vector<response_t> response;
 
-
-	signal(SIGINT, handleSigInt);
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGPIPE, SIG_IGN);
+	initializeSignals();
 	this->setupServers(addrlen);
 	for (size_t i = 0; i < _servers.size(); i++)
 		_servers.at(i).linkHandlerResponseRequest(request, response, &_socketReceivedFirstRequest);

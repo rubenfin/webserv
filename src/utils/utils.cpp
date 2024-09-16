@@ -42,3 +42,19 @@ int	configPathCheck(const std::string &filename)
 			0);
     return (1);
 }
+
+void	handleSigInt(int signal)
+{
+	if (signal == SIGINT)
+	{
+		logger.log(ERR, "closed Webserv with SIGINT");
+		interrupted = 1;
+	}
+}
+
+void initializeSignals(void)
+{
+	signal(SIGINT, handleSigInt);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);
+}

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:43:34 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/02 16:30:35 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:47:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,3 +23,5 @@ void	setNonBlocking(int *fd);
 bool	hasSpecialCharacters(const std::string& fileName);
 void 	replaceEncodedSlash(std::string &str);
 int	    configPathCheck(const std::string &filename);
+void	handleSigInt(int signal);
+void    initializeSignals(void);
