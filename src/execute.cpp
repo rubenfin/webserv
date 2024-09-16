@@ -261,18 +261,29 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 	}
 }
 
-int Server::initSocketToHandler(const int &socket, char *buffer,  int bytes_rd)
+int Server::initSocketToHandler(int &socket, char *buffer,  int bytes_rd)
 {
-	for (size_t i = 0; i < _http_handler.size(); i++)
+	size_t i = 0;
+	try
 	{
-		if (_http_handler.at(i).getConnectedToSocket() == -1)
+		while (i < _http_handler.size())
 		{
-			_http_handler.at(i).setConnectedToSocket(socket);
-			// _http_handler.at(i).setFirstRequest(std::string(buffer, bytes_rd));
-			this->readFromSocketSuccess(i, buffer, bytes_rd);
-			return (1);
+			if (_http_handler.at(i).getConnectedToSocket() == -1)
+			{
+				_http_handler.at(i).setConnectedToSocket(socket);
+				// _http_handler.at(i).setFirstRequest(std::string(buffer, bytes_rd));
+				this->readFromSocketSuccess(i, buffer, bytes_rd);
+				return (1);
+			}
+			i++;
 		}
 	}
+	catch (const FavIconException &e)
+	{
+		this->sendFavIconResponse(i, socket);
+		return (0);
+	}
+		
 	logger.log(ERR, "Couldn't init socket to handler");
 	return (0);
 }
@@ -286,11 +297,9 @@ HttpHandler *Server::matchSocketToHandler(const int &socket)
 		if (socket == _http_handler.at(i).getConnectedToSocket())
 				return (&(_http_handler.at(i)));
 		if (cgiPtr != nullptr) {
-			if (socket == cgiPtr->ReadFd || socket == cgiPtr->WriteFd) {
+			if (socket == cgiPtr->ReadFd || socket == cgiPtr->WriteFd)
         		return &(_http_handler.at(i));
-   		}
-}
-
+		}	
 	}
 	logger.log(ERR, "Couldn't match socket or CGI FD to handler");
 	return (nullptr);
@@ -497,7 +506,7 @@ int Webserv::findRightServer(const std::string &buffer)
     return (-1); // Temporary return value (success or failure logic can be implemented)
 }
 
-int Webserv::handleFirstRequest(const int &client_socket)
+int Webserv::handleFirstRequest(int &client_socket)
 {
 	struct epoll_event	eventConfig;
 	std::string bufferString;
@@ -539,6 +548,8 @@ int Webserv::handleFirstRequest(const int &client_socket)
 		std::cout << "The foundServer is: " << foundServer << std::endl;
 		if (_servers[foundServer].initSocketToHandler(client_socket, buffer, rd_bytes))
 			addSocketToServer(client_socket, &(_servers[foundServer]));
+		else
+			return (0);
 		_servers[foundServer].setFdReadyForWrite(eventConfig, client_socket);
 		return (1);
 }
@@ -594,7 +605,7 @@ int Webserv::execute(void)
 					if (!getServerReceivedFirstRequest(eventList[idx].data.fd))
 					{
 						handleFirstRequest(eventList[idx].data.fd);
-						logger.log(INFO, "Handled first request on: " + eventList[idx].data.fd);
+						logger.log(INFO, "Handled first request on: " + std::to_string(eventList[idx].data.fd));
 						continue ;
 					}
 
