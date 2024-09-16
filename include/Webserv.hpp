@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/12 11:51:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:23:35 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,11 @@ class Webserv
 	HttpHandler *_handler;
 	std::vector<Server> _servers;
 	std::unordered_map<int, Server*> _socketsConnectedToServers;
+	std::unordered_map<int, bool> _socketReceivedFirstRequest;
 	
   public:
+  	void insertSocketIntoReceivedFirstRequest(const int &socket);
+	int handleFirstRequest(const int &client_socket);
   	int findRightServer(const std::string &buffer);
 	void addSocketToServer(const int& socket, Server* server);
 	std::unordered_map<int, Server*> &getSocketsConnectedToServers(void);
@@ -79,6 +82,7 @@ class Webserv
 	void checkCGItimeouts(void);
 	void printParsing(void);
 	Server* findServerConnectedToSocket(const int& socket);
+	bool getServerReceivedFirstRequest(const int& socket);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
 	int checkForNewConnection(int eventFd);
 	int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i, int server);

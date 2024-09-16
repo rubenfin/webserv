@@ -4,10 +4,10 @@ import os
 import cgi
 
 
-body = '<html><body>\n<h1>Python CGI "Test form"</h1>'
+body = '<html><body>\n<h1>Python CGI "Test form"</h1>\n'
 method = os.environ.get("REQUEST_METHOD", "")
 if method == "GET":
-	body += '''<form method='POST' action='/cgi/form_cgi.py'>
+	body += '''<form method='POST' action='/cgi-bin/form.py'>
 <label for='name'>Name:</label>
 <input type='text' id='name' name='name'><br><br>
 <label for='city'>City:</label>
@@ -24,7 +24,7 @@ else:
 	body += f"<h2>Unknown method: {method}</h2>"
 body += "</body></html>"
 
-response = f"HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: {len(body)}\n\n{body}"
+response = f"{body}"
 print(response)
 
 

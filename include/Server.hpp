@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/12 14:15:02 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:46:13 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class Server
 	std::vector<HttpHandler> _http_handler;
 
   public:
-	void readCGI(int socket, HttpHandler& handler);
+	void readWriteCGI(int socket, HttpHandler& handler);
  	void removeCGIrunning(int socket);
 	std::map<int, CGI_t*> &getFdsRunningCGI(void);
   	void removeSocketAndServer(int socket);
@@ -78,10 +78,10 @@ class Server
 	const int &bytes_read);
 	void removeFdFromEpoll(int &socket);
 	void setFdReadyForRead(epoll_event &eventConfig, int &socket);
-	void setFdReadyForWrite(epoll_event &eventConfig, int &socket);
+	void setFdReadyForWrite(epoll_event &eventConfig, const int &socket);
 	void readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHandler& handler);
 	void cgi(int index, int socket);
-	void execute_CGI_script(int *fds, const char *script, int index);
+	void execute_CGI_script(int *writeSide, int *readSide, const char *script, int idx);
 	void getLocationStack(std::string locationContent);
 	void logThrowStatus(const int &idx, const level &lvl,
 		const std::string &msg, const httpStatusCode &status,
@@ -135,7 +135,8 @@ class Server
 	void clientConnectionFailed(int client_socket, int index);
 	void sendResponse(const int &idx, int &socket);
 	void sendFavIconResponse(const int &idx, int &socket);
-	void linkHandlerResponseRequest(std::vector<request_t>& requests, std::vector<response_t>& responses);
+	void linkHandlerResponseRequest(std::vector<request_t> &requests,
+	std::vector<response_t> &responses, std::unordered_map<int, bool> *_socketReceivedFirstRequest);
 	void checkFileDetails(const int &idx, std::ofstream &file);
 	~Server();
 };

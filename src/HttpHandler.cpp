@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/12 12:14:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:47:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 
-HttpHandler::HttpHandler() :  _connectedToSocket(-1), _connectedToCGI(-1), _request(nullptr), _response(nullptr),
+HttpHandler::HttpHandler() :  _connectedToSocket(-1), _cgiPtr(nullptr), _request(nullptr), _response(nullptr),
 	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
 	_hasRedirect(false)
 {
@@ -255,10 +255,18 @@ void HttpHandler::setFirstRequest(std::string buffer)
 	_firstRequest = buffer;
 }
 
+void HttpHandler::linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest)
+{
+	this->_socketReceivedFirstRequest = _socketReceivedFirstRequest;
+}
+
 void HttpHandler::cleanHttpHandler()
 {
 	resetRequestResponse(*_request, *_response);
 	// _connectedToCGI = -1;
+	_socketReceivedFirstRequest->erase(_connectedToSocket);
+	_connectedToSocket = -1;
+	_cgiPtr = nullptr;
 	_firstRequest = "";
 	_server = nullptr;
 	_foundDirective = nullptr;
@@ -375,12 +383,12 @@ void HttpHandler::setConnectedToSocket(const int& fd)
 	_connectedToSocket = fd;
 }
 
-void HttpHandler::setConnectedToCGI(const int& fd)
+void HttpHandler::setConnectedToCGI(CGI_t *cgiPtr)
 {
-	_connectedToCGI = fd;
+	_cgiPtr = cgiPtr;
 }
 
-int HttpHandler::getConnectedToCGI(void)
+CGI_t * HttpHandler::getConnectedToCGI(void)
 {
-	return (_connectedToCGI);
+	return (_cgiPtr);
 }

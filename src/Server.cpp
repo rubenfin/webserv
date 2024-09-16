@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/12 14:23:05 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:45:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -432,7 +432,7 @@ void Server::setLocationsRegex(std::string serverContent)
 }
 
 void Server::linkHandlerResponseRequest(std::vector<request_t> &requests,
-	std::vector<response_t> &responses)
+	std::vector<response_t> &responses, std::unordered_map<int, bool> *_socketReceivedFirstRequest)
 {
 	requests.resize(MAX_EVENTS);
 	responses.resize(MAX_EVENTS);
@@ -440,6 +440,7 @@ void Server::linkHandlerResponseRequest(std::vector<request_t> &requests,
 	{
 		_http_handler.at(i).connectToRequestResponse(&(requests.at(i)),
 			&(responses.at(i)), i);
+		_http_handler.at(i).linkToReceivedFirstRequest(_socketReceivedFirstRequest);
 	}
 }
 

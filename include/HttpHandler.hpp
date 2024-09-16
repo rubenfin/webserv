@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/12 12:11:45 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:47:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,26 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 class	Locations;
 class	Server;
 struct request_t;
 struct response_t;
+struct CGI_t;
 
 class HttpHandler
 {
   private:
 	int _connectedToSocket;
- 	int _connectedToCGI;
+	CGI_t *_cgiPtr;
 	int _idx;
 	std::string _firstRequest;
 	request_t *_request; 
 	response_t *_response;
 	std::shared_ptr<Locations>  _foundDirective;
 	Server *_server;
+	std::unordered_map<int, bool> *_socketReceivedFirstRequest;
 	int _currentSocket;
 	bool _isCgi;
 	bool _hasRedirect;
@@ -45,8 +48,8 @@ class HttpHandler
 	HttpHandler();
 	~HttpHandler();
 
-  	int getConnectedToCGI(void);
-  	void setConnectedToCGI(const int& fd);
+  	CGI_t * getConnectedToCGI(void);
+  	void setConnectedToCGI(CGI_t *cgiPtr);
 	void setFirstRequest(std::string buffer);
 	void handleRequestBody(void);
 	void checkRequestData(void);
@@ -64,6 +67,7 @@ class HttpHandler
 	int& getConnectedToSocket(void);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
+	void linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);
 	std::shared_ptr<Locations>  getFoundDirective(void);
 	request_t *getRequest(void);
 	response_t *getResponse(void);

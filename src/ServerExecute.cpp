@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/13 15:25:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:49:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,23 +50,21 @@ char **Server::makeEnv(int idx)
 	return (env);
 }
 
-void Server::execute_CGI_script(int *fds, const char *script, int idx)
+void Server::execute_CGI_script(int *writeSide, int *readSide, const char *script, int idx)
 {
 	char	*exec_args[] = {(char *)script, nullptr};
 	char	**env;
 
 	logger.log(INFO, "Executing CGI script");
-	close(fds[0]);
+	close(writeSide[0]);
+	close(readSide[1]);
 	env = makeEnv(idx);
-	dup2(fds[1], STDOUT_FILENO);
-	dup2(fds[1], STDERR_FILENO);
-	close(fds[1]);
+	dup2(writeSide[1], STDOUT_FILENO);
+	dup2(writeSide[1], STDERR_FILENO);
+	close(writeSide[1]);
 	if (getHttpHandler(idx).getRequest()->method == POST)
 	{
-		write(STDIN_FILENO,
-			getHttpHandler(idx).getRequest()->requestBody.data(),
-			getHttpHandler(idx).getRequest()->requestBody.size());
-		// close(STDIN_FILENO);
+		dup2(readSide[0], STDIN_FILENO);		
 	}
 	execve(script, exec_args, env);
 	perror("execve failed");
@@ -94,13 +92,18 @@ void Server::logThrowStatus(const int &idx, const level &lvl,
 void Server::cgi(int idx, int socket)
 {
 	CGI_t				*CGIinfo = new CGI_t();
-	int					fds[2];
+	int					childToParent[2];
+	int					parentToChild[2];
 
 	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));
 	if (access(getHttpHandler(idx).getRequest()->requestURL.c_str(), X_OK) != 0)
 		logThrowStatus(idx, ERR, "[403] Script doesn't have executable rights",
 			httpStatusCode::Forbidden, ForbiddenException());
-	if (pipe(fds) == -1)
+	if (pipe(childToParent) == -1)
+		logThrowStatus(idx, ERR, "[500] Pipe has failed",
+			httpStatusCode::InternalServerError,
+			InternalServerErrorException());
+	if (pipe(parentToChild) == -1)
 		logThrowStatus(idx, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
@@ -110,25 +113,35 @@ void Server::cgi(int idx, int socket)
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
 	else if (CGIinfo->PID == 0)
-		execute_CGI_script(fds,
+		execute_CGI_script(childToParent, parentToChild,
 			getHttpHandler(idx).getRequest()->requestURL.c_str(), idx);
 	else
 	{
-		close(fds[1]);
-		CGIinfo->ReadFd = fds[0];
+		close(parentToChild[0]);
+		close(childToParent[1]);
+		CGIinfo->ReadFd = childToParent[0];
+		CGIinfo->WriteFd = parentToChild[1];
 		CGIinfo->isRunning = true;
 		CGIinfo->StartTime = time(NULL);
-		fcntl(fds[0], F_SETFL, O_NONBLOCK);
+		fcntl(childToParent[0], F_SETFL, O_NONBLOCK);
+		fcntl(parentToChild[1], F_SETFL, O_NONBLOCK);
 		struct epoll_event ev;
         ev.events = EPOLLIN;
-        ev.data.fd = fds[0];
-        if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, fds[0], &ev) == -1) {
-            logThrowStatus(idx, ERR, "[500] Couldn't add FD to epoll in CGI",
+        ev.data.fd = childToParent[0];
+        if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, childToParent[0], &ev) == -1) {
+            logThrowStatus(idx, ERR, "[500] Couldn't add childToParent FD to epoll in CGI",
+			httpStatusCode::InternalServerError,
+			InternalServerErrorException());
+        }
+        ev.events = EPOLLOUT;
+        ev.data.fd = parentToChild[1];
+        if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, parentToChild[1], &ev) == -1) {
+            logThrowStatus(idx, ERR, "[500] Couldn't add parentToChild FD to epoll in CGI",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
         }
 		_fdsRunningCGI.insert({socket, CGIinfo});
-		getHttpHandler(idx).setConnectedToCGI(fds[0]);
+		getHttpHandler(idx).setConnectedToCGI(CGIinfo);
 	}
 	return ;
 }
@@ -263,4 +276,5 @@ void Server::sendResponse(const int &idx, int &socket)
         logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
 	}
 	getHttpHandler(idx).cleanHttpHandler();
+	close(socket);
 }

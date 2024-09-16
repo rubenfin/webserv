@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/26 14:02:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:37:02 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,24 @@ void Webserv::cleanHandlerRequestResponse()
 
 	}
 	
+}
+
+void Webserv::insertSocketIntoReceivedFirstRequest(const int &socket)
+{
+	_socketReceivedFirstRequest.insert({socket, false});
+}
+
+bool Webserv::getServerReceivedFirstRequest(const int& socket)
+{
+	std::unordered_map<int, bool>::iterator it = _socketReceivedFirstRequest.find(socket);
+	if (it != _socketReceivedFirstRequest.end())
+	{
+		bool saved = it->second;
+		it->second = true;
+		return (saved);
+	}
+	logger.log(WARNING, "Couldn't find anything in ServerReceivedFirstRequest, FD is most likely CGI");
+	return (true);	
 }
 
 std::unordered_map<int, Server*> &Webserv::getSocketsConnectedToServers(void)
