@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:45:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:55:43 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -586,6 +586,8 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	}
 	getHttpHandler(idx).cleanHttpHandler();
+	removeFdFromEpoll(socket);
+	close(socket);
 }
 
 void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
@@ -595,7 +597,7 @@ void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, socket, &eventConfig) == -1)
 	{
 		perror("");
-		std::cout << "Connection with epoll_ctl fails!" << std::endl;
+		std::cout << "addFdToReadEpoll fails!" << std::endl;
 		close(socket);
 	}
 }

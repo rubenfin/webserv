@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:46:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 13:57:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ class Server
   	void removeSocketAndServer(int socket);
 	void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
 	void readFromSocketError(const int &err, const int &idx, int &socket);
-	void serverActions(const int &idx, int &socket);
+	int serverActions(const int &idx, int &socket);
   	void readFromSocketSuccess(const int &idx, const char *buffer,
 	const int &bytes_read);
 	void removeFdFromEpoll(int &socket);

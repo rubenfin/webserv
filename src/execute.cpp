@@ -9,7 +9,7 @@ void	handleSigInt(int signal)
 	}
 }
 
-void Server::serverActions(const int &idx, int &socket)
+int Server::serverActions(const int &idx, int &socket)
 {
 	if (getHttpHandler(idx).getReturnAutoIndex())
 	{
@@ -33,7 +33,9 @@ void Server::serverActions(const int &idx, int &socket)
 		- 1 && !getHttpHandler(idx).getChunked() && !getHttpHandler(idx).getCgi())
 	{
 		sendResponse(idx, socket);
+		return (0);
 	}
+	return (1);
 }
 
 void Server::clientConnectionFailed(int client_socket, int idx)
@@ -179,7 +181,7 @@ void Webserv::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, socket, &eventConfig) == -1)
 	{
 		perror("");
-		std::cout << "Connection with epoll_ctl fails!" << std::endl;
+		std::cout << "addFdToReadEpoll fails!" << std::endl;
 		close(socket);
 	}
 }
@@ -191,7 +193,7 @@ void Server::setFdReadyForRead(epoll_event &eventConfig, int &socket)
 	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_MOD, socket, &eventConfig) == -1)
 	{
 		perror("");
-		std::cout << "Connection with epoll_ctl fails!" << std::endl;
+		std::cout << "setFdReadyForRead fails!" << std::endl;
 		close(socket);
 	}
 }
@@ -241,20 +243,21 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HttpHa
 		}
 		else if (event.events & EPOLLOUT)
 		{
-			serverActions(idx, client_tmp);
+			if (!serverActions(idx, client_tmp))
+				return ;
 			setFdReadyForRead(eventConfig, client_tmp);
 		}
 	}
 	catch (const FavIconException &e)
 	{
 		sendFavIconResponse(idx, client_tmp);
-		setFdReadyForRead(eventConfig, client_tmp);
+		// setFdReadyForRead(eventConfig, client_tmp);
 	}
 	catch (const HttpException &e)
 	{
 		makeResponse(e.getPageContent(), idx);
 		sendResponse(idx, client_tmp);
-		setFdReadyForRead(eventConfig, client_tmp);
+		// setFdReadyForRead(eventConfig, client_tmp);
 	}
 }
 
