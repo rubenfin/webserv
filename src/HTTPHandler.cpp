@@ -1,51 +1,50 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   HttpHandler.cpp                                    :+:    :+:            */
+/*   HTTPHandler.cpp                                    :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:47:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 17:03:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/HttpHandler.hpp"
+#include "../include/HTTPHandler.hpp"
 
-HttpHandler::HttpHandler() :  _connectedToSocket(-1), _cgiPtr(nullptr), _request(nullptr), _response(nullptr),
-	_foundDirective(nullptr), _server(nullptr), _isCgi(false),
-	_hasRedirect(false)
+HTTPHandler::HTTPHandler() : _connectedToSocket(-1), _cgiPtr(nullptr),
+	_request(nullptr), _response(nullptr), _foundDirective(nullptr),
+	_server(nullptr), _isCgi(false), _hasRedirect(false)
 {
 }
 
-HttpHandler::~HttpHandler()
+HTTPHandler::~HTTPHandler()
 {
 }
 
-void HttpHandler::handleRequestBody(void)
+void HTTPHandler::handleRequestBody(void)
 {
 	// TODO, store requestBody somewhere on the server, how do we retrieve it?
 }
-std::shared_ptr<Locations> HttpHandler::findMatchingDirective(void)
+std::shared_ptr<Locations> HTTPHandler::findMatchingDirective(void)
 {
-    std::shared_ptr<Locations> currLongestLocation = nullptr;
-
-    for (size_t i = 0; i < _server->getLocation().size(); i++)
-    {
-        const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
-        if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
-        {
-            if (!currLongestLocation
-                || locationDirective.size() > currLongestLocation->getLocationDirective().size())
-            {
-                currLongestLocation = std::make_shared<Locations>(_server->getLocation()[i]);
-            }
-        }
-    }
-    return currLongestLocation;
+	std::shared_ptr<Locations> currLongestLocation = nullptr;
+	for (size_t i = 0; i < _server->getLocation().size(); i++)
+	{
+		const std::string &locationDirective = _server->getLocation()[i].getLocationDirective();
+		if (getRequest()->requestDirectory.find(locationDirective) != std::string::npos)
+		{
+			if (!currLongestLocation
+				|| locationDirective.size() > currLongestLocation->getLocationDirective().size())
+			{
+				currLongestLocation = std::make_shared<Locations>(_server->getLocation()[i]);
+			}
+		}
+	}
+	return (currLongestLocation);
 }
 
-void HttpHandler::combineRightUrl(void)
+void HTTPHandler::combineRightUrl(void)
 {
 	if (_foundDirective)
 		std::cout << RED << _foundDirective->getAlias() << RESET << std::endl;
@@ -59,7 +58,8 @@ void HttpHandler::combineRightUrl(void)
 				+ getRequest()->requestURL;
 		}
 		else
-			getServer()->logThrowStatus(_idx, ERR, "[404] No directory found", httpStatusCode::NotFound, NotFoundException());
+			getServer()->logThrowStatus(_idx, ERR, "[404] No directory found",
+				httpStatusCode::NotFound, NotFoundException());
 	}
 	else if (_foundDirective->getAlias() != "")
 	{
@@ -70,14 +70,17 @@ void HttpHandler::combineRightUrl(void)
 				+ _foundDirective->getIndex();
 		else if (_foundDirective->getAutoIndex())
 		{
-			getRequest()->requestURL = _server->getRoot() +_foundDirective->getAlias();
+			getRequest()->requestURL = _server->getRoot()
+				+ _foundDirective->getAlias();
 			_returnAutoIndex = true;
-			logger.log(WARNING, "No index found in foundDirective,  now trying autoindex");
+			logger.log(WARNING, "No index found in foundDirective, now trying autoindex");
 		}
 		else if (_hasRedirect)
 			return ;
 		else
-			getServer()->logThrowStatus(_idx, ERR, "[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?", httpStatusCode::Forbidden, ForbiddenException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?", httpStatusCode::Forbidden,
+				ForbiddenException());
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
 	{
@@ -89,12 +92,14 @@ void HttpHandler::combineRightUrl(void)
 			_returnAutoIndex = true;
 			logger.log(WARNING,
 				"No index found in config file and now trying to use autoindex for /");
-				return ;
+			return ;
 		}
 		else if (_hasRedirect)
 			return ;
 		else
-			getServer()->logThrowStatus(_idx, ERR, "[403] No index found in config file and no autoindex in current directive", httpStatusCode::Forbidden, ForbiddenException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[403] No index found in config file and no autoindex in current directive",
+				httpStatusCode::Forbidden, ForbiddenException());
 	}
 	else if (_foundDirective->getRoot() != "")
 	{
@@ -124,33 +129,35 @@ void HttpHandler::combineRightUrl(void)
 			else if (_hasRedirect)
 				return ;
 			else
-				getServer()->logThrowStatus(_idx, ERR, "[403] No index foundDirective in config file and no autoindex in foundDirective", httpStatusCode::Forbidden, ForbiddenException());
+				getServer()->logThrowStatus(_idx, ERR,
+					"[403] No index foundDirective in config file and no autoindex in foundDirective",
+					httpStatusCode::Forbidden, ForbiddenException());
 		}
 	}
 	// logger.log(DEBUG, "requestURL result --> " + getRequest()->requestURL);
 }
 
-Server *HttpHandler::getServer(void)
+Server *HTTPHandler::getServer(void)
 {
 	return (_server);
 }
 
-request_t *HttpHandler::getRequest(void)
+request_t *HTTPHandler::getRequest(void)
 {
 	return (_request);
 }
 
-response_t *HttpHandler::getResponse(void)
+response_t *HTTPHandler::getResponse(void)
 {
 	return (_response);
 }
 
-bool HttpHandler::getReturnAutoIndex(void)
+bool HTTPHandler::getReturnAutoIndex(void)
 {
 	return (_returnAutoIndex);
 }
 
-void HttpHandler::httpVersionCheck(void)
+void HTTPHandler::httpVersionCheck(void)
 {
 	if (getRequest()->http_v != "1.1")
 	{
@@ -159,36 +166,42 @@ void HttpHandler::httpVersionCheck(void)
 	}
 }
 
-int HttpHandler::pathCheck(const std::string& dir, const std::string& file)
+int HTTPHandler::pathCheck(const std::string &dir, const std::string &file)
 {
 	if (!dir.empty())
 	{
 		if (!checkIfDir(dir))
-			getServer()->logThrowStatus(_idx, ERR, "[404] Directory doesn't exist", httpStatusCode::NotFound, NotFoundException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[404] Directory doesn't exist", httpStatusCode::NotFound,
+				NotFoundException());
 	}
 	if (!file.empty() && file != dir)
 	{
 		if (!checkIfFile(file))
-			getServer()->logThrowStatus(_idx, ERR, "[404] File doesn't exist", httpStatusCode::NotFound, NotFoundException());
-
+			getServer()->logThrowStatus(_idx, ERR, "[404] File doesn't exist",
+				httpStatusCode::NotFound, NotFoundException());
 	}
 	return (1);
 }
 
-void HttpHandler::methodCheck(void)
+void HTTPHandler::methodCheck(void)
 {
 	if (getRequest()->method == ERROR)
-		getServer()->logThrowStatus(_idx, ERR, "[400] Only available methods are GET, POST and DELETE", httpStatusCode::BadRequest, BadRequestException());
+		getServer()->logThrowStatus(_idx, ERR,
+			"[400] Only available methods are GET, POST and DELETE",
+			httpStatusCode::BadRequest, BadRequestException());
 }
 
-void HttpHandler::fileCheck()
+void HTTPHandler::fileCheck()
 {
 	if (getRequest()->file.fileName.size() > 256
 		|| hasSpecialCharacters(getRequest()->file.fileName))
-		getServer()->logThrowStatus(_idx, ERR, "[400] Filename has too many characters or has special characters", httpStatusCode::BadRequest, BadRequestException());
+		getServer()->logThrowStatus(_idx, ERR,
+			"[400] Filename has too many characters or has special characters",
+			httpStatusCode::BadRequest, BadRequestException());
 }
 
-void HttpHandler::setDelete()
+void HTTPHandler::setDelete()
 {
 	// size_t foundEqual = getRequest()->requestBody.find("=");
 	// if (foundEqual + 1 == std::string::npos)
@@ -208,7 +221,7 @@ void HttpHandler::setDelete()
 	}
 }
 
-void HttpHandler::checkRequestData(void)
+void HTTPHandler::checkRequestData(void)
 {
 	httpVersionCheck();
 	methodCheck();
@@ -222,7 +235,7 @@ void	deleteFoundDirective(Locations *_foundDirective)
 	delete	_foundDirective;
 }
 
-void HttpHandler::setBooleans(void)
+void HTTPHandler::setBooleans(void)
 {
 	if (_foundDirective && !_foundDirective->getReturn().empty())
 		_hasRedirect = true;
@@ -231,36 +244,43 @@ void HttpHandler::setBooleans(void)
 		_isCgi = true;
 }
 
-void HttpHandler::checkLocationMethod(void)
+void HTTPHandler::checkLocationMethod(void)
 {
 	if (getRequest()->method == GET)
 	{
 		if (!getFoundDirective()->getMethods().GET)
-			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[405] Method not allowed in location",
+				httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 	else if (getRequest()->method == POST)
 	{
 		if (!_foundDirective->getMethods().POST)
-			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[405] Method not allowed in location",
+				httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 	else if (getRequest()->method == DELETE)
 	{
 		if (!_foundDirective->getMethods().DELETE)
-			getServer()->logThrowStatus(_idx, ERR, "[405] Method not allowed in location", httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
+			getServer()->logThrowStatus(_idx, ERR,
+				"[405] Method not allowed in location",
+				httpStatusCode::MethodNotAllowed, MethodNotAllowedException());
 	}
 }
 
-void HttpHandler::setFirstRequest(std::string buffer)
+void HTTPHandler::setFirstRequest(std::string buffer)
 {
 	_firstRequest = buffer;
 }
 
-void HttpHandler::linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest)
+void HTTPHandler::linkToReceivedFirstRequest(std::unordered_map<int,
+	bool> *_socketReceivedFirstRequest)
 {
 	this->_socketReceivedFirstRequest = _socketReceivedFirstRequest;
 }
 
-void HttpHandler::cleanHttpHandler()
+void HTTPHandler::cleanHTTPHandler()
 {
 	resetRequestResponse(*_request, *_response);
 	// _connectedToCGI = -1;
@@ -277,7 +297,7 @@ void HttpHandler::cleanHttpHandler()
 	_isChunked = false;
 }
 
-void HttpHandler::connectToRequestResponse(request_t *request,
+void HTTPHandler::connectToRequestResponse(request_t *request,
 	response_t *response, int idx)
 {
 	this->_idx = idx;
@@ -285,37 +305,46 @@ void HttpHandler::connectToRequestResponse(request_t *request,
 	this->_response = response;
 }
 
-void HttpHandler::totalPathCheck(void)
+void HTTPHandler::totalPathCheck(void)
 {
 	if (_foundDirective->getAlias().empty())
 	{
-		pathCheck(getServer()->getRoot() + getRequest()->requestDirectory, getServer()->getRoot() + getRequest()->requestDirectory
+		pathCheck(getServer()->getRoot() + getRequest()->requestDirectory,
+			getServer()->getRoot() + getRequest()->requestDirectory
 			+ getRequest()->requestFile);
 	}
-	else 
+	else
 	{
-		std::cout << getRequest()->requestURL  << "|" << _foundDirective->getLocationDirective() << std::endl;
-		if (getRequest()->requestURL != _foundDirective->getLocationDirective() && getRequest()->requestURL != _foundDirective->getLocationDirective() + "/")
-			getServer()->logThrowStatus(_idx, ERR, "[404] Directory doesn't completely match in alias", httpStatusCode::NotFound, NotFoundException());
-		pathCheck(_server->getRoot()
-			+ _foundDirective->getAlias(), _server->getRoot()
-			+ _foundDirective->getAlias() + "/"
+		std::cout << getRequest()->requestURL << "|" << _foundDirective->getLocationDirective() << std::endl;
+		if (getRequest()->requestURL != _foundDirective->getLocationDirective()
+			&& getRequest()->requestURL != _foundDirective->getLocationDirective()
+			+ "/")
+			getServer()->logThrowStatus(_idx, ERR,
+				"[404] Directory doesn't completely match in alias",
+				httpStatusCode::NotFound, NotFoundException());
+		pathCheck(_server->getRoot() + _foundDirective->getAlias(),
+			_server->getRoot() + _foundDirective->getAlias() + "/"
 			+ _foundDirective->getIndex());
 	}
 }
 
-void HttpHandler::setCurrentSocket(int fd)
+void HTTPHandler::setCurrentSocket(int fd)
 {
 	_currentSocket = fd;
 }
 
-void HttpHandler::checkClientBodySize(void)
+void HTTPHandler::checkClientBodySize(void)
 {
-	if (getRequest()->contentLength != 0 && static_cast<long long>(getRequest()->contentLength) > _foundDirective->getClientBodySize())
-		getServer()->logThrowStatus(_idx, ERR, "[413] Content-Length exceeded client body size limit", httpStatusCode::PayloadTooLarge, PayloadTooLargeException());
+	std::cout << getRequest()->contentLength << "|" << _foundDirective->getClientBodySize() << std::endl;
+	
+	if (getRequest()->contentLength != 0
+		&& static_cast<long long>(getRequest()->contentLength) > _foundDirective->getClientBodySize())
+		getServer()->logThrowStatus(_idx, ERR,
+			"[413] Content-Length exceeded client body size limit",
+			httpStatusCode::PayloadTooLarge, PayloadTooLargeException());
 }
 
-void HttpHandler::handleRequest(Server &serverAddress)
+void HTTPHandler::handleRequest(Server &serverAddress)
 {
 	_server = &serverAddress;
 	_isCgi = false;
@@ -327,68 +356,68 @@ void HttpHandler::handleRequest(Server &serverAddress)
 	{
 		checkLocationMethod();
 		totalPathCheck();
-		// checkClientBodySize();
+		checkClientBodySize();
 		setBooleans();
 	}
 	combineRightUrl();
 }
 
-std::shared_ptr<Locations> HttpHandler::getFoundDirective(void)
+std::shared_ptr<Locations> HTTPHandler::getFoundDirective(void)
 {
 	return (_foundDirective);
 }
 
-bool HttpHandler::getCgi(void)
+bool HTTPHandler::getCgi(void)
 {
 	return (_isCgi);
 }
 
-bool HttpHandler::getRedirect(void)
+bool HTTPHandler::getRedirect(void)
 {
 	return (_hasRedirect);
 }
 
-bool HttpHandler::getHeaderChecked(void)
+bool HTTPHandler::getHeaderChecked(void)
 {
 	return (_headerChecked);
 }
 
-bool HttpHandler::getChunked(void)
+bool HTTPHandler::getChunked(void)
 {
 	return (_isChunked);
 }
 
-int HttpHandler::getIdx(void)
+int HTTPHandler::getIdx(void)
 {
-	return(_idx);
+	return (_idx);
 }
 
-int &HttpHandler::getConnectedToSocket(void)
+int &HTTPHandler::getConnectedToSocket(void)
 {
 	return (_connectedToSocket);
 }
 
-void HttpHandler::setHeaderChecked(bool boolean)
+void HTTPHandler::setHeaderChecked(bool boolean)
 {
 	_headerChecked = boolean;
 }
 
-void HttpHandler::setChunked(bool boolean)
+void HTTPHandler::setChunked(bool boolean)
 {
 	_isChunked = boolean;
 }
 
-void HttpHandler::setConnectedToSocket(const int& fd)
+void HTTPHandler::setConnectedToSocket(const int &fd)
 {
 	_connectedToSocket = fd;
 }
 
-void HttpHandler::setConnectedToCGI(CGI_t *cgiPtr)
+void HTTPHandler::setConnectedToCGI(CGI_t *cgiPtr)
 {
 	_cgiPtr = cgiPtr;
 }
 
-CGI_t * HttpHandler::getConnectedToCGI(void)
+CGI_t *HTTPHandler::getConnectedToCGI(void)
 {
 	return (_cgiPtr);
 }

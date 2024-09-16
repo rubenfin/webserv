@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/29 11:22:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 17:04:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void Locations::getLocationRegex(void)
 	setReturn();
 	setAlias();
 	setAutoIndex();
-	// setClientBodySize();
+	setClientBodySize();
 }
 
 std::string Locations::getLocationDirective(void)

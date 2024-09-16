@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:37:02 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:53:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,13 +87,12 @@ void Webserv::setConfig(std::string fileName)
 
 int Webserv::checkForNewConnection(int eventFd)
 {
-	
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		if (eventFd == _servers[i].getServerFd())
-			return i;
+			return (i);
 	}
-	return -1;
+	return (-1);
 }
 
 Webserv::Webserv(std::string fileName)
@@ -103,7 +102,6 @@ Webserv::Webserv(std::string fileName)
 	interrupted = 0;
 	// _socketsConnectedToServers.reserve(MAX_EVENTS);
 }
-
 
 void Webserv::setupServers(socklen_t &addrlen)
 {
@@ -122,10 +120,8 @@ void Webserv::cleanHandlerRequestResponse()
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		for (size_t j = 0; j < MAX_EVENTS; j++)
-			_servers[i].getHttpHandler(j).cleanHttpHandler();
-
+			_servers[i].getHTTPHandler(j).cleanHTTPHandler();
 	}
-	
 }
 
 void Webserv::insertSocketIntoReceivedFirstRequest(const int &socket)
@@ -133,43 +129,45 @@ void Webserv::insertSocketIntoReceivedFirstRequest(const int &socket)
 	_socketReceivedFirstRequest.insert({socket, false});
 }
 
-bool Webserv::getServerReceivedFirstRequest(const int& socket)
+bool Webserv::getServerReceivedFirstRequest(const int &socket)
 {
-	std::unordered_map<int, bool>::iterator it = _socketReceivedFirstRequest.find(socket);
+	bool	saved;
+
+	std::unordered_map<int,
+		bool>::iterator it = _socketReceivedFirstRequest.find(socket);
 	if (it != _socketReceivedFirstRequest.end())
 	{
-		bool saved = it->second;
+		saved = it->second;
 		it->second = true;
 		return (saved);
 	}
 	logger.log(WARNING, "Couldn't find anything in ServerReceivedFirstRequest, FD is most likely CGI");
-	return (true);	
+	return (true);
 }
 
-std::unordered_map<int, Server*> &Webserv::getSocketsConnectedToServers(void)
+std::unordered_map<int, Server *> &Webserv::getSocketsConnectedToServers(void)
 {
 	return (_socketsConnectedToServers);
 }
 
-void Webserv::addSocketToServer(const int& socket, Server* server)
+void Webserv::addSocketToServer(const int &socket, Server *server)
 {
-
-    logger.log(INFO, "Trying to add socket " + std::to_string(socket) + " to server: " + std::to_string(server->getSocketFD()));
-    
-    if (_socketsConnectedToServers.find(socket) != _socketsConnectedToServers.end())
-    {
-        logger.log(WARNING, "Socket " + std::to_string(socket) + " is already connected to a server.");
-        return;
-    }
-    
-    auto result = _socketsConnectedToServers.insert({socket, server});
-    
-    if (!result.second)
-    {
-        logger.log(ERR, "Couldn't add socket to servers connected");
-        return;
-    }
-    logger.log(INFO, "Paired socket: " + std::to_string(socket) + " to Server with FD " + std::to_string(server->getServerFd()));
+	logger.log(INFO, "Trying to add socket " + std::to_string(socket)
+		+ " to server: " + std::to_string(server->getSocketFD()));
+	if (_socketsConnectedToServers.find(socket) != _socketsConnectedToServers.end())
+	{
+		logger.log(WARNING, "Socket " + std::to_string(socket)
+			+ " is already connected to a server.");
+		return ;
+	}
+	auto result = _socketsConnectedToServers.insert({socket, server});
+	if (!result.second)
+	{
+		logger.log(ERR, "Couldn't add socket to servers connected");
+		return ;
+	}
+	logger.log(INFO, "Paired socket: " + std::to_string(socket)
+		+ " to Server with FD " + std::to_string(server->getServerFd()));
 }
 
 Webserv::~Webserv()

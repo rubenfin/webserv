@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:55:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,7 +380,7 @@ std::vector<Locations> Server::getLocation(void)
 	return (_locations);
 }
 
-HttpHandler &Server::getHttpHandler(int index)
+HTTPHandler &Server::getHTTPHandler(int index)
 {
 	return (_http_handler.at(index));
 }
@@ -496,11 +496,11 @@ void Server::makeResponseForRedirect(int idx)
 	logger.log(DEBUG, "in makeResponseForRedirect");
 	// Use 302 Found for temporary redirects,
 	// or 301 Moved Permanently for permanent redirects
-	getHttpHandler(idx).getResponse()->status = httpStatusCode::MovedPermanently;
+	getHTTPHandler(idx).getResponse()->status = httpStatusCode::MovedPermanently;
 	// or 301 for permanent
-	std::string message = getHttpStatusMessage(getHttpHandler(idx).getResponse()->status);
+	std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse()->status);
 	header = "HTTP/1.1 " + message + "\r\n";
-	std::string redirectUrl = getHttpHandler(idx).getFoundDirective()->getReturn();
+	std::string redirectUrl = getHTTPHandler(idx).getFoundDirective()->getReturn();
 	if (redirectUrl.substr(0, 4) != "http")
 	{
 		redirectUrl = "http://" + redirectUrl;
@@ -511,17 +511,17 @@ void Server::makeResponseForRedirect(int idx)
 	header += "Content-Length: 0"
 				"\r\n";
 	header += "\r\n";
-	getHttpHandler(idx).getResponse()->response = header + body;
+	getHTTPHandler(idx).getResponse()->response = header + body;
 }
 
 void Server::makeResponse(const std::string &buffer, int idx)
 {
     std::string header;
-    std::string message = getHttpStatusMessage(getHttpHandler(idx).getResponse()->status);
+    std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse()->status);
     header = "HTTP/1.1 " + message + "\r\n";
-    if (getHttpHandler(idx).getRequest()->requestFile.find("jpg") != std::string::npos)
+    if (getHTTPHandler(idx).getRequest()->requestFile.find("jpg") != std::string::npos)
         header += "Content-Type: image/jpg\r\n";
-    else if (getHttpHandler(idx).getRequest()->requestFile.find("png") != std::string::npos)
+    else if (getHTTPHandler(idx).getRequest()->requestFile.find("png") != std::string::npos)
         header += "Content-Type: image/png\r\n";
     if (!buffer.empty())
     {
@@ -530,7 +530,7 @@ void Server::makeResponse(const std::string &buffer, int idx)
     else
         header += "Content-Length: 0\r\n";
     header += "\r\n";
-    getHttpHandler(idx).getResponse()->response = header + buffer + "\r\n";
+    getHTTPHandler(idx).getResponse()->response = header + buffer + "\r\n";
 }
 
 long long Server::getFileSize(const std::string &filename, const int &idx)
@@ -542,7 +542,7 @@ long long Server::getFileSize(const std::string &filename, const int &idx)
 	{
 		perror("stat");
 		logger.log(ERR, "[500] stat said |" + filename + "| is not a file");
-		getHttpHandler(idx).getResponse()->status = httpStatusCode::InternalServerError;
+		getHTTPHandler(idx).getResponse()->status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}
 	else
@@ -558,14 +558,14 @@ void Server::readFile(int idx)
 	char		*buffer;
 	long long	fileSize;
 
-	fileSize = getFileSize(getHttpHandler(idx).getRequest()->requestURL, idx);
+	fileSize = getFileSize(getHTTPHandler(idx).getRequest()->requestURL, idx);
 	buffer = (char *)malloc((fileSize + 1) * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
-		+ getHttpHandler(idx).getRequest()->requestURL);
-	file = open(getHttpHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);
+		+ getHTTPHandler(idx).getRequest()->requestURL);
+	file = open(getHTTPHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
-		getHttpHandler(idx).getResponse()->status = httpStatusCode::NotFound;
+		getHTTPHandler(idx).getResponse()->status = httpStatusCode::NotFound;
 		throw NotFoundException();
 	}
 	read_bytes = read(file, buffer, fileSize);
@@ -585,7 +585,7 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 		std::cerr << "send failed with error code " << errno << " (" << strerror(errno) << ")" << std::endl;
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	}
-	getHttpHandler(idx).cleanHttpHandler();
+	getHTTPHandler(idx).cleanHTTPHandler();
 	removeFdFromEpoll(socket);
 	close(socket);
 }

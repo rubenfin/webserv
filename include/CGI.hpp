@@ -6,13 +6,15 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/24 12:43:27 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 09:56:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:51:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Webserv.hpp"
+#include <time.h>
+#include <unistd.h>
 
 typedef struct CGI_t
 {

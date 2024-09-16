@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:49:33 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ struct request_t;
 struct response_t;
 struct CGI_t;
 
-class HttpHandler
+class HTTPHandler
 {
   private:
 	int _connectedToSocket;
@@ -45,8 +45,8 @@ class HttpHandler
 	bool _isChunked;
 
   public:
-	HttpHandler();
-	~HttpHandler();
+	HTTPHandler();
+	~HTTPHandler();
 
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);
@@ -82,5 +82,5 @@ class HttpHandler
 	bool getHeaderChecked(void);
 	bool getChunked(void);
 	void connectToRequestResponse(request_t *request, response_t *response, int idx);
-	void cleanHttpHandler();
+	void cleanHTTPHandler();
 };

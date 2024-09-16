@@ -6,14 +6,14 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/19 15:12:06 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:32:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXCEPTIONS_HPP
 #define EXCEPTIONS_HPP
 
-#include "HttpHandler.hpp"
+#include "HTTPHandler.hpp"
 #include <string>
 #include <unordered_map>
 #include <cstring>

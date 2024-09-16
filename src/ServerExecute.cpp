@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:51:08 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,29 +20,29 @@ char **Server::makeEnv(int idx)
 
 	std::vector<std::string> addingEnv;
 	std::string currMethod;
-	if (getHttpHandler(idx).getRequest()->method == GET)
+	if (getHTTPHandler(idx).getRequest()->method == GET)
 		currMethod = "GET";
-	else if (getHttpHandler(idx).getRequest()->method == POST)
+	else if (getHTTPHandler(idx).getRequest()->method == POST)
 		currMethod = "POST";
-	else if (getHttpHandler(idx).getRequest()->method == DELETE)
+	else if (getHTTPHandler(idx).getRequest()->method == DELETE)
 		currMethod = "DELETE";
 	addingEnv.push_back("REQUEST_METHOD=" + currMethod);
 	addingEnv.push_back("QUERY_STRING="
-		+ getHttpHandler(idx).getRequest()->requestBody);
+		+ getHTTPHandler(idx).getRequest()->requestBody);
 	std::map<std::string,
-		std::string>::iterator contentTypeIt = getHttpHandler(idx).getRequest()->header.find("Content-Type");
-	if (contentTypeIt != getHttpHandler(idx).getRequest()->header.end())
+		std::string>::iterator contentTypeIt = getHTTPHandler(idx).getRequest()->header.find("Content-Type");
+	if (contentTypeIt != getHTTPHandler(idx).getRequest()->header.end())
 		addingEnv.push_back("CONTENT_TYPE=" + contentTypeIt->second);
 	std::map<std::string,
-		std::string>::iterator contentLengthIt = getHttpHandler(idx).getRequest()->header.find("Content-Length");
-	if (contentLengthIt != getHttpHandler(idx).getRequest()->header.end())
+		std::string>::iterator contentLengthIt = getHTTPHandler(idx).getRequest()->header.find("Content-Length");
+	if (contentLengthIt != getHTTPHandler(idx).getRequest()->header.end())
 		addingEnv.push_back("CONTENT_LENGTH=" + contentLengthIt->second);
 	addingEnv.push_back("SERVER_NAME=" + getServerName());
 	addingEnv.push_back("SERVER_PORT=" + std::to_string(getPort()));
 	addingEnv.push_back("SCRIPT_NAME="
-		+ getHttpHandler(idx).getRequest()->requestFile);
+		+ getHTTPHandler(idx).getRequest()->requestFile);
 	addingEnv.push_back("PATH_INFO="
-		+ getHttpHandler(idx).getRequest()->requestURL);
+		+ getHTTPHandler(idx).getRequest()->requestURL);
 	env = new char *[addingEnv.size() + 1];
 	for (size_t i = 0; i < addingEnv.size(); ++i)
 		env[i] = strdup(addingEnv[i].c_str());
@@ -62,13 +62,13 @@ void Server::execute_CGI_script(int *writeSide, int *readSide, const char *scrip
 	dup2(writeSide[1], STDOUT_FILENO);
 	dup2(writeSide[1], STDERR_FILENO);
 	close(writeSide[1]);
-	if (getHttpHandler(idx).getRequest()->method == POST)
+	if (getHTTPHandler(idx).getRequest()->method == POST)
 	{
 		dup2(readSide[0], STDIN_FILENO);		
 	}
 	execve(script, exec_args, env);
 	perror("execve failed");
-	getHttpHandler(idx).getResponse()->status = httpStatusCode::BadRequest;
+	getHTTPHandler(idx).getResponse()->status = httpStatusCode::BadRequest;
 	_exit(EXIT_FAILURE);
 }
 
@@ -85,7 +85,7 @@ void Server::logThrowStatus(const int &idx, const level &lvl,
 {
 
 	logger.log(lvl, msg);
-	getHttpHandler(idx).getResponse()->status = status;
+	getHTTPHandler(idx).getResponse()->status = status;
 	throw	exception;
 }
 
@@ -96,7 +96,7 @@ void Server::cgi(int idx, int socket)
 	int					parentToChild[2];
 
 	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));
-	if (access(getHttpHandler(idx).getRequest()->requestURL.c_str(), X_OK) != 0)
+	if (access(getHTTPHandler(idx).getRequest()->requestURL.c_str(), X_OK) != 0)
 		logThrowStatus(idx, ERR, "[403] Script doesn't have executable rights",
 			httpStatusCode::Forbidden, ForbiddenException());
 	if (pipe(childToParent) == -1)
@@ -114,7 +114,7 @@ void Server::cgi(int idx, int socket)
 			InternalServerErrorException());
 	else if (CGIinfo->PID == 0)
 		execute_CGI_script(childToParent, parentToChild,
-			getHttpHandler(idx).getRequest()->requestURL.c_str(), idx);
+			getHTTPHandler(idx).getRequest()->requestURL.c_str(), idx);
 	else
 	{
 		close(parentToChild[0]);
@@ -141,7 +141,7 @@ void Server::cgi(int idx, int socket)
 			InternalServerErrorException());
         }
 		_fdsRunningCGI.insert({socket, CGIinfo});
-		getHttpHandler(idx).setConnectedToCGI(CGIinfo);
+		getHTTPHandler(idx).setConnectedToCGI(CGIinfo);
 	}
 	return ;
 }
@@ -164,7 +164,7 @@ void Server::checkFileDetails(const int &idx, std::ofstream &file)
 					InternalServerErrorException());
 			logger.log(WARNING, "Made upload dir");
 		}
-		std::string fileName = getHttpHandler(idx).getRequest()->file.fileName;
+		std::string fileName = getHTTPHandler(idx).getRequest()->file.fileName;
 		std::string fullPath = uploadPath + "/" + fileName;
 		if (fileName.empty())
 			logThrowStatus(idx, ERR, "[403] No file has been uploaded",
@@ -177,16 +177,16 @@ void Server::checkFileDetails(const int &idx, std::ofstream &file)
 			file.close();
 		}
 	}
-	getHttpHandler(idx).getRequest()->file.fileChecked = true;
+	getHTTPHandler(idx).getRequest()->file.fileChecked = true;
 }
 
 void Server::setFileInServer(int idx)
 {
 	std::ofstream file;
-	std::string &fileContent = getHttpHandler(idx).getRequest()->file.fileContent;
+	std::string &fileContent = getHTTPHandler(idx).getRequest()->file.fileContent;
 	std::string fullPath = getUpload() + "/"
-		+ getHttpHandler(idx).getRequest()->file.fileName;
-	if (!getHttpHandler(idx).getRequest()->file.fileChecked)
+		+ getHTTPHandler(idx).getRequest()->file.fileName;
+	if (!getHTTPHandler(idx).getRequest()->file.fileChecked)
 		checkFileDetails(idx, file);
 	logger.log(DEBUG, "in setFileInServer");
 	file.open(fullPath,
@@ -194,7 +194,7 @@ void Server::setFileInServer(int idx)
 	if (file.is_open())
 	{
 		file << fileContent;
-		if (getHttpHandler(idx).getRequest()->totalBytesRead >= getHttpHandler(idx).getRequest()->contentLength)
+		if (getHTTPHandler(idx).getRequest()->totalBytesRead >= getHTTPHandler(idx).getRequest()->contentLength)
 		{
 			file.close();
 			logThrowStatus(idx,
@@ -216,8 +216,8 @@ void Server::deleteFileInServer(int idx)
 
 	logger.log(DEBUG, "in deleteFileInServer");
 	std::string filePath = getUpload() + "/"
-		+ getHttpHandler(idx).getRequest()->file.fileName;
-	fileNameSize = getHttpHandler(idx).getRequest()->file.fileName.size();
+		+ getHTTPHandler(idx).getRequest()->file.fileName;
+	fileNameSize = getHTTPHandler(idx).getRequest()->file.fileName.size();
 	if (getUpload().empty())
 		logThrowStatus(idx,
 						ERR,
@@ -232,9 +232,9 @@ void Server::deleteFileInServer(int idx)
 			"[403] Tried deleting a file or directory that doesn't exist",
 			httpStatusCode::Forbidden, ForbiddenException());
 	else if (checkIfDir(getUpload() + "/"
-			+ getHttpHandler(idx).getRequest()->file.fileName))
+			+ getHTTPHandler(idx).getRequest()->file.fileName))
 	{
-		if (getHttpHandler(idx).getRequest()->file.fileName[fileNameSize
+		if (getHTTPHandler(idx).getRequest()->file.fileName[fileNameSize
 			- 1] != '/')
 			logThrowStatus(idx, ERR,
 				"[409] Tried deleting a directory with unvalid syntax "
@@ -269,13 +269,13 @@ void Server::deleteFileInServer(int idx)
 void Server::sendResponse(const int &idx, int &socket)
 {
     logger.log(INFO, "Sending response to client on socket: " + std::to_string(socket));
-    logger.log(RESPONSE, getHttpHandler(idx).getResponse()->response);
-    if (send(socket, getHttpHandler(idx).getResponse()->response.data(),
-            getHttpHandler(idx).getResponse()->response.size(), 0) == -1)
+    logger.log(RESPONSE, getHTTPHandler(idx).getResponse()->response);
+    if (send(socket, getHTTPHandler(idx).getResponse()->response.data(),
+            getHTTPHandler(idx).getResponse()->response.size(), 0) == -1)
 	{
         logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
 	}
-	getHttpHandler(idx).cleanHttpHandler();
+	getHTTPHandler(idx).cleanHTTPHandler();
 	removeFdFromEpoll(socket);
 	close(socket);
 }
