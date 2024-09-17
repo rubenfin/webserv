@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:52:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 16:33:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void Server::cgi(int idx, int socket)
 	CGI_t	*CGIinfo;
 	int		childToParent[2];
 	int		parentToChild[2];
-		struct epoll_event ev;
+	struct epoll_event ev;
 
 	CGIinfo = new CGI_t();
 	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:34:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 14:58:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,7 +323,6 @@ void HTTPHandler::setCurrentSocket(int fd)
 
 void HTTPHandler::checkClientBodySize(void)
 {
-	std::cout << getRequest().contentLength << "|" << _foundDirective->getClientBodySize() << std::endl;
 	if (getRequest().contentLength != 0
 		&& static_cast<long long>(getRequest().contentLength) > _foundDirective->getClientBodySize())
 		getServer()->logThrowStatus(_idx, ERR,

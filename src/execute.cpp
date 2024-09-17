@@ -479,7 +479,7 @@ int Webserv::findRightServer(const std::string &buffer)
 	// std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
 	serverName = trim(serverName);
 	port = trim(port);
-	std::cout << _servers.size() << std::endl;
+	// std::cout << _servers.size() << std::endl;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		// std::cout << i << std::endl;
@@ -487,7 +487,7 @@ int Webserv::findRightServer(const std::string &buffer)
 		if (_servers[i].getServerName() == serverName
 			&& _servers[i].getPortString() == port)
 		{
-			std::cout << "RETURN: " << i << std::endl;
+			// std::cout << "RETURN: " << i << std::endl;
 			return (i);
 		}
 	}
@@ -541,6 +541,7 @@ int Webserv::handleFirstRequest(int &client_socket)
 	if (foundServer == -1)
 	{
 		std::cout << "foundServer is equal to -1";
+		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
 	}
