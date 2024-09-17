@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:53:29 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 14:18:52 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void Server::initializeAddress()
 	this->_address->sin_addr.s_addr = INADDR_ANY;
 	// autofills ip address with current host
 	this->_address->sin_port = htons(getPort());
-	if (getPort() <= 0)
+	if (getPort() <= 0 || getPort() > 65535)
 	{
 		logger.log(ERR, "Not an available port");
 		exit(EXIT_FAILURE);
