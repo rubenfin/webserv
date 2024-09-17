@@ -140,8 +140,7 @@ void Server::readFromSocketSuccess(const int &idx, const char *buffer,
 		parse_request(getHTTPHandler(idx).getRequest(),
 			std::string(buffer, bytes_read), idx);
 		getHTTPHandler(idx).handleRequest(*this);
-
-		if (bytes_read == BUFFERSIZE - 1)
+		if (bytes_read == BUFFERSIZE)
 			getHTTPHandler(idx).setChunked(true);
 		getHTTPHandler(idx).getRequest()->totalBytesRead += bytes_read - ( getHTTPHandler(idx).getRequest()->requestContent.size() - getHTTPHandler(idx).getRequest()->requestBody.size() );
 	}
@@ -256,6 +255,7 @@ void Server::readWriteServer(epoll_event& event,epoll_event& eventConfig, HTTPHa
 int Server::initSocketToHandler(int &socket, char *buffer,  int bytes_rd)
 {
 	size_t i = 0;
+	// epoll_event ev;
 	try
 	{
 		while (i < _http_handler.size())
@@ -265,7 +265,7 @@ int Server::initSocketToHandler(int &socket, char *buffer,  int bytes_rd)
 				_http_handler.at(i).setConnectedToSocket(socket);
 				// _http_handler.at(i).setFirstRequest(std::string(buffer, bytes_rd));
 				this->readFromSocketSuccess(i, buffer, bytes_rd);
-				
+				// this->setFdReadyForWrite(ev, socket);
 				return (1);
 			}
 			i++;
@@ -547,7 +547,9 @@ int Webserv::handleFirstRequest(int &client_socket)
 		if (_servers[foundServer].initSocketToHandler(client_socket, buffer, rd_bytes))
 			addSocketToServer(client_socket, &(_servers[foundServer]));
 		else
+		{
 			return (0);
+		}
 		_servers[foundServer].setFdReadyForWrite(eventConfig, client_socket);
 		return (1);
 }
