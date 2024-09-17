@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:10:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:53:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -581,6 +581,7 @@ void Server::sendFavIconResponse(const int &idx, int &socket)
 		logger.log(ERR, "[500] Failed to send response to client, send()");
 	}
 	getHTTPHandler(idx).cleanHTTPHandler();
+	removeSocketAndServer(socket);
 	removeFdFromEpoll(socket);
 	close(socket);
 }

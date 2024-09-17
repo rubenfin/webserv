@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:58:23 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ protected:
   std::unordered_map<int, bool> _socketReceivedFirstRequest;
 
 public:
+  void removeFdFromEpoll(int &socket);
   void insertSocketIntoReceivedFirstRequest(const int &socket);
   int handleFirstRequest(int &client_socket);
   int findRightServer(const std::string &buffer);

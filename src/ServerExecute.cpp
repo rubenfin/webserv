@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:22:35 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:52:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,6 +281,7 @@ void Server::sendResponse(const int &idx, int &socket)
 		logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
 	}
 	getHTTPHandler(idx).cleanHTTPHandler();
+	removeSocketAndServer(socket);
 	removeFdFromEpoll(socket);
 	close(socket);
 }

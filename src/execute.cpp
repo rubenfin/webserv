@@ -502,6 +502,17 @@ int Webserv::findRightServer(const std::string &buffer)
 		// Temporary return value (success or failure logic can be implemented)
 }
 
+void Webserv::removeFdFromEpoll(int &socket)
+{
+	logger.log(INFO, "Removing socket from epoll: " + std::to_string(socket));
+	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, socket, NULL) == -1)
+	{
+		perror("");
+		std::cout << "failed to remove fd from epoll: " << socket << std::endl;
+		close(socket);
+	}
+}
+
 int Webserv::handleFirstRequest(int &client_socket)
 {
 	struct epoll_event	eventConfig;
@@ -523,12 +534,14 @@ int Webserv::handleFirstRequest(int &client_socket)
 	{
 		std::cout << "Client closed connection on socket: " << client_socket << std::endl;
 		buffer[rd_bytes] = '\0';
+		removeFdFromEpoll(client_socket);
 		close(client_socket);
 	}
 	else // rd_bytes == -1
 	{
 		std::cout << "Read failed, closing client socket: " << client_socket << std::endl;
 		buffer[0] = '\0';
+		removeFdFromEpoll(client_socket);
 		close(client_socket);
 	}
 	if (!buffer[0])
