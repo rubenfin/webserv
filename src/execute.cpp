@@ -41,16 +41,10 @@ int	makeSocketNonBlocking(int &sfd)
 {
 	int	flags;
 
-	flags = fcntl(sfd, F_GETFL, 0);
+	flags = fcntl(sfd, F_SETFL, O_NONBLOCK, 0);
 	if (flags == -1)
 	{
 		perror("fcntl first if");
-		return (0);
-	}
-	flags |= O_NONBLOCK;
-	if (fcntl(sfd, F_SETFL, flags) == -1)
-	{
-		perror("fcntl second if");
 		return (0);
 	}
 	return (1);
@@ -481,15 +475,15 @@ int Webserv::findRightServer(const std::string &buffer)
 	{
 		serverName = hostLine; // No port specified,so entire line is the server name
 	}
-	std::cout << "Server Name: " << serverName << std::endl;
-	std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
+	// std::cout << "Server Name: " << serverName << std::endl;
+	// std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
 	serverName = trim(serverName);
 	port = trim(port);
 	std::cout << _servers.size() << std::endl;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
-		std::cout << i << std::endl;
-		std::cout << "|" << _servers[i].getServerName() << "|" << _servers[i].getPortString() << "|" << std::endl;
+		// std::cout << i << std::endl;
+		// std::cout << "|" << _servers[i].getServerName() << "|" << _servers[i].getPortString() << "|" << std::endl;
 		if (_servers[i].getServerName() == serverName
 			&& _servers[i].getPortString() == port)
 		{
@@ -497,7 +491,6 @@ int Webserv::findRightServer(const std::string &buffer)
 			return (i);
 		}
 	}
-	std::cout << "here" << std::endl;
 	return (-1);
 		// Temporary return value (success or failure logic can be implemented)
 }
@@ -523,12 +516,9 @@ int Webserv::handleFirstRequest(int &client_socket)
 	std::string bufferString;
 	rd_bytes = read(client_socket, buffer, BUFFERSIZE);
 	buffer[rd_bytes] = '\0';
-	std::cout << buffer << std::endl;
-	std::cout << rd_bytes << std::endl;
 	if (rd_bytes > 0)
 	{
 		buffer[rd_bytes] = '\0';
-		std::cout << "Received: " << buffer << std::endl;
 	}
 	else if (rd_bytes == 0)
 	{
@@ -554,7 +544,6 @@ int Webserv::handleFirstRequest(int &client_socket)
 		close(client_socket);
 		return (0);
 	}
-	std::cout << "The foundServer is: " << foundServer << std::endl;
 	if (_servers[foundServer].initSocketToHandler(client_socket, buffer,
 			rd_bytes))
 		addSocketToServer(client_socket, &(_servers[foundServer]));
@@ -588,7 +577,7 @@ int Webserv::execute(void)
 		try
 		{
 			checkCGItimeouts();
-			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, -1);
 			for (int idx = 0; idx < eventCount; ++idx)
 			{
 				serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);

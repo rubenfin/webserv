@@ -1,5 +1,5 @@
 server {
-	server_name dump-linux
+	server_name localhost
 	listen 8080
 	client_body_size 20M
 
