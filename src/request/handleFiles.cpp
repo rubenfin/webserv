@@ -6,12 +6,11 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/30 11:20:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:26:41 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
-#include <bits/stdc++.h>
 
 void	clearUntilDoubleNewline(std::string &str)
 {
@@ -73,9 +72,9 @@ void	printFileStruct(file_t *file)
 	logger.log(REQUEST, "fileBoundary: " + file->fileBoundary);
 }
 
-void findFileContent(request_t *req, file_t *requestFile)
+void findFileContent(request_t &req, file_t *requestFile)
 {
-    std::size_t start = req->requestBody.find("\r\n\r\n");
+    std::size_t start = req.requestBody.find("\r\n\r\n");
     if (start != std::string::npos)
         start += 4; 
     else
@@ -84,41 +83,41 @@ void findFileContent(request_t *req, file_t *requestFile)
         return;
     }
 
-    std::size_t end = req->requestBody.find(requestFile->fileBoundary, start);
+    std::size_t end = req.requestBody.find(requestFile->fileBoundary, start);
     if (end == std::string::npos)
     {
         logger.log(WARNING, "Did not find any ending boundary");
-        requestFile->fileContent = req->requestBody.substr(start);
+        requestFile->fileContent = req.requestBody.substr(start);
         requestFile->fileContentLength = requestFile->fileContent.size();
         return;
     }
 
-    if (req->requestBody.compare(end - 2, 2, "\r\n") == 0)
+    if (req.requestBody.compare(end - 2, 2, "\r\n") == 0)
         end -= 2;
 
-    if (req->requestBody.compare(end - 2, 2, "--") == 0)
+    if (req.requestBody.compare(end - 2, 2, "--") == 0)
         end -= 2;
 
-    requestFile->fileContent = req->requestBody.substr(start, end - start);
+    requestFile->fileContent = req.requestBody.substr(start, end - start);
     requestFile->fileContentLength = requestFile->fileContent.size();
 }
 
 
-void	setFile(request_t *req, file_t *requestFile)
+void	setFile(request_t &req, file_t *requestFile)
 {
 	std::string cLength;
 	std::string totalFileContent;
 
 	cLength = trim(extractValue(req, "Content-Length: "));
-	if (req->method == POST && cLength != "0")
+	if (req.method == POST && cLength != "0")
 	{
 		if (cLength == "")
 			throw BadRequestException();
-		req->contentLength = std::stoi(cLength);
+		req.contentLength = std::stoi(cLength);
 	}
 	else
 	{
-		req->contentLength = 0;
+		req.contentLength = 0;
 		logger.log(DEBUG, "Did not proceed with setFile(), contentLength = 0");
 		return ;
 	}
@@ -139,7 +138,7 @@ void	setFile(request_t *req, file_t *requestFile)
 			requestFile->fileName = trim(extractValue(req, "filename="));
 			trimFirstChar(requestFile->fileName);
 			trimLastChar(requestFile->fileName);
-			findFileContent(req, &req->file);
+			findFileContent(req, &req.file);
 		}
 		catch (const std::exception &e)
 		{

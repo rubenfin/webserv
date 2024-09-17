@@ -6,49 +6,27 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 17:36:08 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/14 10:49:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:36:45 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "File.hpp"
 #include "Webserv.hpp"
 #include <map>
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
+#include <sys/types.h>
+#include "HTTPHandler.hpp"
+#include "File.hpp"
 
-typedef enum METHODS
-{
-	GET,
-	POST,
-	DELETE,
-	ERROR
-}			METHODS;
+struct request_t;
 
-typedef struct request_t
-{
-	std::string http_v;
-	std::string firstLine;
-	std::string requestContent;
-	std::string requestBody;
-	std::string requestURL;
-	std::string requestDirectory;
-	std::string requestFile;
-	std::string contentType;
-	int 		currentBytesRead;
-	int			totalBytesRead;
-	ssize_t		contentLength;
-	file_t	file;
-	METHODS	method;
-	std::map<std::string, std::string> header;
-}			request_t;
-
-void		setFile(request_t *req, file_t *requestFile);
-void		parse_request(request_t *req, std::string buffer, const int& idx);
+void		setFile(request_t &req, file_t *requestFile);
+void		parse_request(request_t &req, std::string buffer, const int &idx);
 void		resetRequest(request_t &request);
-void		printRequestStruct(request_t *req, int index);
+void		printRequestStruct(request_t &req, int index);
 std::string trim(const std::string &str);
-std::string extractValue(request_t *req, const std::string &toSearch);
+std::string extractValue(request_t &req, const std::string &toSearch);

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:10:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,15 +431,10 @@ void Server::setLocationsRegex(std::string serverContent)
 	}
 }
 
-void Server::linkHandlerResponseRequest(std::vector<request_t> &requests,
-	std::vector<response_t> &responses, std::unordered_map<int, bool> *_socketReceivedFirstRequest)
+void Server::linkHandlerResponseRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest)
 {
-	requests.resize(MAX_EVENTS);
-	responses.resize(MAX_EVENTS);
 	for (size_t i = 0; i < _http_handler.size(); i++)
 	{
-		_http_handler.at(i).connectToRequestResponse(&(requests.at(i)),
-			&(responses.at(i)), i);
 		_http_handler.at(i).linkToReceivedFirstRequest(_socketReceivedFirstRequest);
 	}
 }
@@ -496,9 +491,9 @@ void Server::makeResponseForRedirect(int idx)
 	logger.log(DEBUG, "in makeResponseForRedirect");
 	// Use 302 Found for temporary redirects,
 	// or 301 Moved Permanently for permanent redirects
-	getHTTPHandler(idx).getResponse()->status = httpStatusCode::MovedPermanently;
+	getHTTPHandler(idx).getResponse().status = httpStatusCode::MovedPermanently;
 	// or 301 for permanent
-	std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse()->status);
+	std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse().status);
 	header = "HTTP/1.1 " + message + "\r\n";
 	std::string redirectUrl = getHTTPHandler(idx).getFoundDirective()->getReturn();
 	if (redirectUrl.substr(0, 4) != "http")
@@ -511,17 +506,17 @@ void Server::makeResponseForRedirect(int idx)
 	header += "Content-Length: 0"
 				"\r\n";
 	header += "\r\n";
-	getHTTPHandler(idx).getResponse()->response = header + body;
+	getHTTPHandler(idx).getResponse().response = header + body;
 }
 
 void Server::makeResponse(const std::string &buffer, int idx)
 {
     std::string header;
-    std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse()->status);
+    std::string message = getHttpStatusMessage(getHTTPHandler(idx).getResponse().status);
     header = "HTTP/1.1 " + message + "\r\n";
-    if (getHTTPHandler(idx).getRequest()->requestFile.find("jpg") != std::string::npos)
+    if (getHTTPHandler(idx).getRequest().requestFile.find("jpg") != std::string::npos)
         header += "Content-Type: image/jpg\r\n";
-    else if (getHTTPHandler(idx).getRequest()->requestFile.find("png") != std::string::npos)
+    else if (getHTTPHandler(idx).getRequest().requestFile.find("png") != std::string::npos)
         header += "Content-Type: image/png\r\n";
     if (!buffer.empty())
     {
@@ -530,7 +525,7 @@ void Server::makeResponse(const std::string &buffer, int idx)
     else
         header += "Content-Length: 0\r\n";
     header += "\r\n";
-    getHTTPHandler(idx).getResponse()->response = header + buffer + "\r\n";
+    getHTTPHandler(idx).getResponse().response = header + buffer + "\r\n";
 }
 
 long long Server::getFileSize(const std::string &filename, const int &idx)
@@ -542,7 +537,7 @@ long long Server::getFileSize(const std::string &filename, const int &idx)
 	{
 		perror("stat");
 		logger.log(ERR, "[500] stat said |" + filename + "| is not a file");
-		getHTTPHandler(idx).getResponse()->status = httpStatusCode::InternalServerError;
+		getHTTPHandler(idx).getResponse().status = httpStatusCode::InternalServerError;
 		throw InternalServerErrorException();
 	}
 	else
@@ -558,14 +553,14 @@ void Server::readFile(int idx)
 	char		*buffer;
 	long long	fileSize;
 
-	fileSize = getFileSize(getHTTPHandler(idx).getRequest()->requestURL, idx);
+	fileSize = getFileSize(getHTTPHandler(idx).getRequest().requestURL, idx);
 	buffer = (char *)malloc((fileSize + 1) * sizeof(char));
 	logger.log(DEBUG, "Request URL in readFile(): "
-		+ getHTTPHandler(idx).getRequest()->requestURL);
-	file = open(getHTTPHandler(idx).getRequest()->requestURL.c_str(), O_RDONLY);
+		+ getHTTPHandler(idx).getRequest().requestURL);
+	file = open(getHTTPHandler(idx).getRequest().requestURL.c_str(), O_RDONLY);
 	if (file == -1)
 	{
-		getHTTPHandler(idx).getResponse()->status = httpStatusCode::NotFound;
+		getHTTPHandler(idx).getResponse().status = httpStatusCode::NotFound;
 		throw NotFoundException();
 	}
 	read_bytes = read(file, buffer, fileSize);

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/09 14:00:43 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:37:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ std::string trim(const std::string &str)
 	return (right <= left ? std::string() : std::string(left, right));
 }
 
-void 	resetRequestFile(file_t &file)
+void	resetRequestFile(file_t &file)
 {
 	file.fileBoundary = "";
 	file.fileContent = "";
@@ -49,20 +49,21 @@ void	resetRequest(request_t &request)
 	resetRequestFile(request.file);
 }
 
-void	printRequestStruct(request_t *req, int index)
+void	printRequestStruct(request_t &req, int index)
 {
 	logger.log(REQUEST, "PARSED REQUEST: INDEX: " + std::to_string(index));
 	logger.log(REQUEST, "----------------------------------");
-	logger.log(REQUEST, "http_v: " + req->http_v);
-	logger.log(REQUEST, "firstLine: " + req->firstLine);
-	logger.log(REQUEST, "requestBody: " + req->requestBody);
-    // logger.log(DEBUG, 	"FILESIZE OF REQUESTBODY: " + std::to_string(req->requestBody.size()));
-	logger.log(REQUEST, "requestURL: " + req->requestURL);
-	logger.log(REQUEST, "requestDirectory: " + req->requestDirectory);
-	logger.log(REQUEST, "requestFile: " + req->requestFile);
-	logger.log(REQUEST, "contentLength: " + std::to_string(req->contentLength));
-	logger.log(REQUEST, "contentType: " + req->contentType);
-	// for (const auto &header : req->header) {
+	logger.log(REQUEST, "http_v: " + req.http_v);
+	logger.log(REQUEST, "firstLine: " + req.firstLine);
+	logger.log(REQUEST, "requestBody: " + req.requestBody);
+	// logger.log(DEBUG, 	"FILESIZE OF REQUESTBODY: "
+			// + std::to_string(req.requestBody.size()));
+	logger.log(REQUEST, "requestURL: " + req.requestURL);
+	logger.log(REQUEST, "requestDirectory: " + req.requestDirectory);
+	logger.log(REQUEST, "requestFile: " + req.requestFile);
+	logger.log(REQUEST, "contentLength: " + std::to_string(req.contentLength));
+	logger.log(REQUEST, "contentType: " + req.contentType);
+	// for (const auto &header : req.header) {
 	//     logger.log(REQUEST, header.first + ": " + header.second);
 	// }
 	logger.log(REQUEST, "END PR ---------------------------------- END PR");

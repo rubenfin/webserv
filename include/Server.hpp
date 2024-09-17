@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:08:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,7 @@ public:
   void clientConnectionFailed(int client_socket, int index);
   void sendResponse(const int &idx, int &socket);
   void sendFavIconResponse(const int &idx, int &socket);
-  void linkHandlerResponseRequest(
-      std::vector<request_t> &requests, std::vector<response_t> &responses,
-      std::unordered_map<int, bool> *_socketReceivedFirstRequest);
+  void linkHandlerResponseRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);
   void checkFileDetails(const int &idx, std::ofstream &file);
   ~Server();
 };

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   HttpHandler.hpp                                    :+:    :+:            */
+/*   HTTPHandler.hpp                                    :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:50:18 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/17 11:39:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,57 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include "Request.hpp"
+#include "Response.hpp"
+#include "File.hpp"
 
 class	Locations;
 class	Server;
 struct request_t;
 struct response_t;
 struct CGI_t;
+
+struct file_t;
+
+typedef enum METHODS
+{
+	GET,
+	POST,
+	DELETE,
+	ERROR
+}			METHODS;
+
+typedef struct response_t
+{
+	httpStatusCode	status;
+	std::string response;
+	int contentLength; 
+	response_t() : status(httpStatusCode::OK), response(""), contentLength(0) {}
+}					response_t;
+
+
+typedef struct request_t
+{
+	std::string http_v;
+	std::string firstLine;
+	std::string requestContent;
+	std::string requestBody;
+	std::string requestURL;
+	std::string requestDirectory;
+	std::string requestFile;
+	std::string contentType;
+	int		currentBytesRead;
+	int		totalBytesRead;
+	ssize_t	contentLength;
+	file_t	file;
+	METHODS	method;
+	std::map<std::string, std::string> header;
+	
+	request_t() : http_v(""), firstLine(""), requestContent(""),
+		requestBody(""), requestURL(""), requestDirectory(""),
+		requestFile(""), contentType(""), currentBytesRead(0),
+		totalBytesRead(0), contentLength(0), method(ERROR) {}
+}			request_t;
 
 class HTTPHandler
 {
@@ -32,8 +77,8 @@ class HTTPHandler
 	CGI_t *_cgiPtr;
 	int _idx;
 	std::string _firstRequest;
-	request_t *_request; 
-	response_t *_response;
+	response_t _response;
+	request_t _request; 
 	std::shared_ptr<Locations>  _foundDirective;
 	Server *_server;
 	std::unordered_map<int, bool> *_socketReceivedFirstRequest;
@@ -51,7 +96,6 @@ class HTTPHandler
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);
 	void setFirstRequest(std::string buffer);
-	void handleRequestBody(void);
 	void checkRequestData(void);
 	void combineRightUrl(void);
 	void handleRequest(Server &serverAddresss);
@@ -69,8 +113,8 @@ class HTTPHandler
 	void checkClientBodySize();
 	void linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);
 	std::shared_ptr<Locations>  getFoundDirective(void);
-	request_t *getRequest(void);
-	response_t *getResponse(void);
+	request_t &getRequest(void);
+	response_t &getResponse(void);
 	Server *getServer(void);
 	std::shared_ptr<Locations> findMatchingDirective(void);
 	void setCurrentSocket(int fd);
@@ -81,6 +125,5 @@ class HTTPHandler
 	bool getReturnAutoIndex(void);
 	bool getHeaderChecked(void);
 	bool getChunked(void);
-	void connectToRequestResponse(request_t *request, response_t *response, int idx);
 	void cleanHTTPHandler();
 };
