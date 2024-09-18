@@ -1,7 +1,6 @@
-
 server {
-	server_name localhost
-	listen 8000
+	server_name 127.0.0.1
+	listen dump-linux:8002
 	client_body_size 1M
 
 	root files/response_files/
@@ -63,8 +62,8 @@ server {
 }
 
 server {
-			server_name 127.0.0.2
-			listen 8000
+			server_name test
+			listen localhost:8002
 			client_body_size 1M
 		
 			index test.html
@@ -77,11 +76,11 @@ server {
 				allow_methods GET POST
 			}
 		
-		}
-		
+}
+
 server {
 			server_name localhost
-			listen 8002
+			listen localhost:8003
 			client_body_size 1M
 		
 			index index_2.html
@@ -93,5 +92,4 @@ server {
 			location / {
 				allow_methods GET POST
 			}
-		
-		}
+}

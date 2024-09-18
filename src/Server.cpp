@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 12:09:44 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 14:13:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,16 +38,38 @@ void Server::setSocketOptions(const int &opt)
 
 void Server::initializeAddress()
 {
-	this->_address->sin_family = AF_INET;
-	this->_address->sin_addr.s_addr = INADDR_ANY;
-	// autofills ip address with current host
-	this->_address->sin_port = htons(getPort());
-	if (getPort() <= 0 || getPort() > 65535)
-	{
-		logger.log(ERR, "Not an available port");
-		exit(EXIT_FAILURE);
-	}
+    this->_address->sin_family = AF_INET;
+
+    std::string host = getHost();
+
+    struct addrinfo hints, *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(host.c_str(), NULL, &hints, &res) != 0) {
+        logger.log(ERR, "Failed to resolve hostname: " + host);
+        exit(EXIT_FAILURE);
+    }
+
+    if (res != nullptr && res->ai_family == AF_INET) {
+        this->_address->sin_addr = ((struct sockaddr_in*)res->ai_addr)->sin_addr;
+    } else {
+        logger.log(ERR, "Resolved address is not IPv4");
+        exit(EXIT_FAILURE);
+    }
+
+    freeaddrinfo(res);
+
+    this->_address->sin_port = htons(getPort());
+     if (getPort() <= 0 || getPort() > 65535)
+    {
+        logger.log(ERR, "Not an available port");
+        exit(EXIT_FAILURE);
+    }
 }
+
+
 
 void Server::bindAdressSocket()
 {
@@ -186,7 +208,12 @@ std::string Server::extractValueUntilLocation(const std::string &searchString)
 void Server::setServerName(void)
 {
 	_serverName = extractValue("server_name");
-	logger.log(INFO, "Server name: " + _serverName);
+	if (!_serverName.empty())
+	{
+		logger.log(INFO, "Server name: " + _serverName);
+		return ;
+	}
+	logger.log(WARNING, "Server name not found in configuration file");
 }
 void Server::setPortHost(void)
 {
@@ -206,7 +233,7 @@ void Server::setPortHost(void)
     try {
         _port = std::stoi(_portString);
     } catch (const std::exception& e) {
-        std::cerr << "Invalid port: " << _portString << std::endl;
+        std::cerr << "Invalid port" << std::endl;
         throw; 
     }
 }
@@ -371,6 +398,11 @@ long long Server::getClientBodySize(void)
 std::string Server::getRoot(void)
 {
 	return (_root);
+}
+
+std::string Server::getHost(void)
+{
+	return (_host);
 }
 
 std::string Server::getUpload(void)

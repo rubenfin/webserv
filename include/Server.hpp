@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/18 11:59:22 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 14:13:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <cstring>
 
 #define MAX_EVENTS 64
 
@@ -106,6 +111,7 @@ public:
   int getServerFd(void);
   std::string getServerName(void);
   std::string getPortString(void);
+  std::string getHost(void);
   int getPort(void);
   std::string getRoot(void);
   std::string getIndex(void);

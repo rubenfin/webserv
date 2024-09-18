@@ -202,6 +202,8 @@ void Server::readWriteServer(epoll_event &event, epoll_event &eventConfig,
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
 
+
+	std::cout << "Current Handler: " << handler.getIdx() << std::endl;
 	try
 	{
 		client_tmp = event.data.fd;
@@ -440,49 +442,57 @@ int Webserv::findRightServer(const std::string &buffer)
 	std::string serverName;
 	std::string port;
 	std::size_t pos;
+	
+	std::cout << buffer << std::endl;
 	if (buffer.empty())
 	{
 		std::cout << "Buffer is empty" << std::endl;
 		return (-1);
 	}
-	// Find the "Host: " header in the buffer
 	pos = buffer.find("Host: ");
 	if (pos == std::string::npos)
 	{
 		std::cout << "Couldn't find any host" << std::endl;
 		return (-1);
 	}
-	// Extract the host starting from the position after "Host: " (6 characters ahead)
-	pos += 6;                                      // Skip past "Host: "
-	std::size_t endPos = buffer.find("\r\n", pos); // Find end of the line
+	pos += 6;
+	std::size_t endPos = buffer.find("\r\n", pos);
 	if (endPos == std::string::npos)
 	{
-		endPos = buffer.length(); // If no \r\n, take the rest of the buffer
+		endPos = buffer.length();
 	}
-	// Extract the server name and port (if available)
 	std::string hostLine = buffer.substr(pos, endPos - pos);
-	// Split by ':' to separate server name and port
 	std::size_t portPos = hostLine.find(':');
 	if (portPos != std::string::npos)
 	{
-		serverName = hostLine.substr(0, portPos); // Extract server name
-		port = hostLine.substr(portPos + 1);      // Extract port
+		serverName = hostLine.substr(0, portPos);
+		port = hostLine.substr(portPos + 1);
 	}
 	else
 	{
-		serverName = hostLine; // No port specified,so entire line is the server name
+		serverName = hostLine;
 	}
-	// std::cout << "Server Name: " << serverName << std::endl;
-	// std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
+	std::cout << "Server Name: " << serverName << std::endl;
+	std::cout << "Port: " << (port.empty() ? "default" : port) << std::endl;
 	serverName = trim(serverName);
 	port = trim(port);
-	// std::cout << _servers.size() << std::endl;
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		// std::cout << i << std::endl;
 		// std::cout << "|" << _servers[i].getServerName() << "|" << _servers[i].getPortString() << "|" << std::endl;
 		if (_servers[i].getServerName() == serverName
 			&& _servers[i].getPortString() == port)
+		{
+			// std::cout << "RETURN: " << i << std::endl;
+			return (i);
+		}
+	}
+
+	for (size_t i = 0; i < _servers.size(); i++)
+	{
+		// std::cout << i << std::endl;
+		// std::cout << "|" << _servers[i].getServerName() << "|" << _servers[i].getPortString() << "|" << std::endl;
+		if (_servers[i].getPortString() == port)
 		{
 			// std::cout << "RETURN: " << i << std::endl;
 			return (i);
@@ -537,7 +547,7 @@ int Webserv::handleFirstRequest(int &client_socket)
 	foundServer = findRightServer(firstRequest);
 	if (foundServer == -1)
 	{
-		std::cout << "foundServer is equal to -1";
+		logger.log(ERR, "Couldn't find server for first request");
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
