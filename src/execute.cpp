@@ -316,7 +316,6 @@ Server *Webserv::findServerConnectedToSocket(const int &socket)
 		for (auto it = fdsRunningCGI.begin(); it != fdsRunningCGI.end(); ++it)
 		{
 			currCGI = it->second;
-			// std::cout << currCGI->ReadFd << "|" << socket << std::endl;
 			if (currCGI->ReadFd == socket || currCGI->WriteFd == socket)
 				return (&(_servers[i]));
 		}
@@ -345,6 +344,7 @@ void Webserv::checkCGItimeouts(void)
 		{
 			currSocket = it->first;
 			currCGI = it->second;
+			std::cout << "Current CGI: " << currCGI->PID << "|" << currCGI->StartTime << std::endl;
 			if (currCGI->StartTime != 0 && time(NULL) - currCGI->StartTime > 10)
 			{
 				// std::cout << currSocket << "|" << _servers[i].getServerFd() << std::endl;
@@ -367,6 +367,8 @@ void Webserv::checkCGItimeouts(void)
 					_servers[i].removeFdFromEpoll(currCGI->ReadFd);
 					close(currCGI->ReadFd);
 				}
+				removeFdFromEpoll(currSocket);
+				close (currSocket);
 				delete currCGI;
 				resetCGI(*currCGI);
 				break ;
@@ -661,6 +663,7 @@ int Webserv::execute(void)
 			close(it->second->WriteFd);
 			_servers[i].removeCGIrunning(it->first);
 		}
+
 		close(_servers[i].getSocketFD());
 		logger.log(INFO, "Server shut down at port: "
 			+ _servers[i].getPortString());

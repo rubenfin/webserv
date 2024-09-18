@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Webserv.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/09/18 14:29:01 by jade-haa         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Webserv.cpp                                        :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
+/*   Updated: 2024/09/18 16:29:47 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,4 +173,5 @@ void Webserv::addSocketToServer(const int &socket, Server *server)
 
 Webserv::~Webserv()
 {
+	close(_epollFd);
 }
