@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Webserv.cpp                                        :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 11:24:12 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 16:45:43 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/18 14:29:01 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void Webserv::setConfig(std::string fileName)
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Unable to open file " << fileName << std::endl;
-		return ;
+		throw std::runtime_error("Unable to open file: " + fileName);
 	}
 	std::string line;
 	std::regex startPattern(R"(server\s*\{)");

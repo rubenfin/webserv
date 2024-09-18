@@ -23,11 +23,15 @@ void replaceEncodedSlash(std::string &str)
 int	configPathCheck(const std::string &filename)
 {
 	if (checkIfDir(filename))
-		return (logger.log(ERR, "The configuration filepath is a directory"),
-			0);
+	{
+		std::cout << "The configuration is a directory" << std::endl;
+		return(0);
+	}
 	if (!checkIfFile(filename))
-		return (logger.log(ERR, "The configuration filepath is not correct"),
-			0);
+	{
+		std::cout << "The configuration file is not valid" << std::endl;
+		return (0);
+	}
     return (1);
 }
 

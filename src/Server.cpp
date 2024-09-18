@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   Server.cpp                                         :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 14:13:24 by rfinneru      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
+/*   Updated: 2024/09/18 14:28:42 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,11 +215,16 @@ void Server::setServerName(void)
 	}
 	logger.log(WARNING, "Server name not found in configuration file");
 }
+
 void Server::setPortHost(void)
 {
 	std::string save;
     save = extractValue("listen");
-    
+    if (save.empty())
+	{
+		std::cerr << "No argument for listen" << std::endl;
+		throw std::invalid_argument("No listen argument");
+	}
     size_t colonPos = save.find(":");
     
     if (colonPos != std::string::npos)
@@ -228,12 +233,16 @@ void Server::setPortHost(void)
 		_host = save.substr(0, colonPos);
     }
     
-    std::cout << "PORT STRING: " << _portString << "|" << std::endl;
-    std::cout << "HOST STRING: " << _host << "|" << std::endl;
+    std::cout << "PORT STRING: " << _portString << " |" << std::endl;
+    std::cout << "HOST STRING: " << _host << " |" << std::endl;
     try {
         _port = std::stoi(_portString);
+		if (!(_port >= 0 && _port <= 65535))
+		{
+			throw std::invalid_argument("Invalid port range: needs to be between 0 and 65535");
+		}
     } catch (const std::exception& e) {
-        std::cerr << "Invalid port" << std::endl;
+        std::cerr << "Invalid port: " << _portString << std::endl;
         throw; 
     }
 }
@@ -299,12 +308,10 @@ void Server::setError(const std::string &errorPageNumber,
 	{
 		std::streamsize size = file.tellg();
 		file.seekg(0, std::ios::beg);
-		// Allocate buffer with the file size
-		char *buffer = new char[size + 1]; // +1 for null terminator
-		// Read file contents into buffer
+		char *buffer = new char[size + 1];
 		if (file.read(buffer, size))
 		{
-			buffer[size] = '\0'; // Null-terminate the buffer
+			buffer[size] = '\0';
 			HttpException::setCustomPage(exceptionName, buffer);
 			logger.log(INFO, "Created an error page for status: "
 				+ errorPageNumber);
