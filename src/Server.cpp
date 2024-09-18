@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 17:00:53 by rfinneru          #+#    #+#             */
-/*   Updated: 2024/09/18 14:28:42 by jade-haa         ###   ########.fr       */
+/*   Updated: 2024/09/18 14:36:39 by jade-haa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,8 @@ void Server::setPortHost(void)
         _portString = save.substr(colonPos + 1);
 		_host = save.substr(0, colonPos);
     }
+	else 
+		throw std::invalid_argument("No : in the listen argument");
     
     std::cout << "PORT STRING: " << _portString << " |" << std::endl;
     std::cout << "HOST STRING: " << _host << " |" << std::endl;
