@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 11:50:15 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 16:07:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,14 +80,19 @@ int	check_status(int status)
 	return (127);
 }
 
+void throwException(HttpException &exception)
+{
+	throw	exception;
+}
+
 void Server::logThrowStatus(HTTPHandler &handler, const level &lvl,
 	const std::string &msg, const httpStatusCode &status,
 	HttpException exception)
 {
-	throw	exception;
 
 	logger.log(lvl, msg);
 	handler.getResponse().status = status;
+	throwException(exception);
 }
 
 void Server::cgi(HTTPHandler &handler, int socket)
