@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:58:23 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 12:08:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,9 @@ protected:
   std::unordered_map<int, bool> _socketReceivedFirstRequest;
 
 public:
+  Webserv(std::string fileName);
+  ~Webserv();
+
   void removeFdFromEpoll(int &socket);
   void insertSocketIntoReceivedFirstRequest(const int &socket);
   int handleFirstRequest(int &client_socket);
@@ -85,10 +88,7 @@ public:
   bool getServerReceivedFirstRequest(const int &socket);
   void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
   int checkForNewConnection(int eventFd);
-  int acceptClientSocket(int &client_socket, socklen_t addrlen, const int &i,
-                         int server);
+  int acceptClientSocket(int &client_socket, socklen_t addrlen, const int& server);
   void cleanHandlerRequestResponse();
   void setConfig(std::string fileName);
-  Webserv(std::string fileName);
-  ~Webserv();
 };

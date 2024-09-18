@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/17 14:25:32 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 11:37:35 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ class HTTPHandler
 	HTTPHandler();
 	~HTTPHandler();
 
+	void setIndex(const int& idx);
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);
 	void setFirstRequest(std::string buffer);

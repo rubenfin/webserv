@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:37:24 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 12:01:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,8 @@ void	resetRequest(request_t &request)
 	resetRequestFile(request.file);
 }
 
-void	printRequestStruct(request_t &req, int index)
+void	printRequestStruct(request_t &req)
 {
-	logger.log(REQUEST, "PARSED REQUEST: INDEX: " + std::to_string(index));
 	logger.log(REQUEST, "----------------------------------");
 	logger.log(REQUEST, "http_v: " + req.http_v);
 	logger.log(REQUEST, "firstLine: " + req.firstLine);

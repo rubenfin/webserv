@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 14:43:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 11:39:14 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,17 @@ int	main(int argc, char **argv)
 		std::string filename(argv[1]);
 		if (!configPathCheck(filename))
 			return (EXIT_FAILURE);
-		Webserv webserv(filename);
-		webserv.execute();
+		
+		try
+		{
+			Webserv webserv(filename);
+			webserv.execute();
+		}
+		catch(const std::exception& e)
+		{
+			logger.log(ERR, "Fatal error in your configuration file: " + std::string(e.what()));
+			return (EXIT_FAILURE);
+		}
 		return (EXIT_SUCCESS);
 	}
 	else

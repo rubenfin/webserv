@@ -6,17 +6,17 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/21 11:57:13 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/20 18:07:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 12:02:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Server.hpp"
-std::string Server::returnAutoIndex(const int& idx, std::string &uri) {
+std::string Server::returnAutoIndex(HTTPHandler &handler, std::string &uri) {
     std::string autoIndexFile;
 
     std::string root = getRoot();
     if (uri.size() < root.size())
-        logThrowStatus(idx, ERR , "[404] URI is shorter than root path in autoindex" + uri + "|" + root, httpStatusCode::NotFound ,NotFoundException());
+        logThrowStatus(handler, ERR , "[404] URI is shorter than root path in autoindex" + uri + "|" + root, httpStatusCode::NotFound ,NotFoundException());
     
     std::string uriNoRoot = uri.substr(root.size());
     if (uriNoRoot.empty() || uriNoRoot.back() != '/') {
@@ -29,7 +29,7 @@ std::string Server::returnAutoIndex(const int& idx, std::string &uri) {
 
     DIR *dr = opendir(uri.c_str());
     if (dr == NULL) 
-        logThrowStatus(idx, ERR , "[404] Could not open directory in autoindex", httpStatusCode::NotFound ,NotFoundException());
+        logThrowStatus(handler, ERR , "[404] Could not open directory in autoindex", httpStatusCode::NotFound ,NotFoundException());
 
     autoIndexFile += "<html>\n<head><title>Index of " + uriNoRoot + "</title></head>\n<body>";
     autoIndexFile += "<h1>Index of " + uriNoRoot + "</h1>\n<hr>\n<pre>";

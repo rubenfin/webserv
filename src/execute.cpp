@@ -1,39 +1,39 @@
 #include "../include/Webserv.hpp"
 
-int Server::serverActions(const int &idx, int &socket)
+int Server::serverActions(HTTPHandler& handler, int &socket)
 {
-	if (getHTTPHandler(idx).getReturnAutoIndex())
+	if (handler.getReturnAutoIndex())
 	{
-		makeResponse((char *)returnAutoIndex(idx,
-				getHTTPHandler(idx).getRequest().requestURL).c_str(), idx);
+		makeResponse((char *)returnAutoIndex(handler,
+				handler.getRequest().requestURL).c_str(), handler);
 	}
-	else if (getHTTPHandler(idx).getRequest().method == DELETE)
-		deleteFileInServer(idx);
-	else if (getHTTPHandler(idx).getCgi())
+	else if (handler.getRequest().method == DELETE)
+		deleteFileInServer(handler);
+	else if (handler.getCgi())
 	{
-		cgi(idx, socket);
+		cgi(handler, socket);
 	}
-	else if (getHTTPHandler(idx).getRedirect())
-		makeResponseForRedirect(idx);
-	else if (getHTTPHandler(idx).getRequest().file.fileExists)
-		setFileInServer(idx);
+	else if (handler.getRedirect())
+		makeResponseForRedirect(handler);
+	else if (handler.getRequest().file.fileExists)
+		setFileInServer(handler);
 	else
-		readFile(idx);
-	if (getHTTPHandler(idx).getRequest().currentBytesRead < BUFFERSIZE - 1
-		&& !getHTTPHandler(idx).getChunked() && !getHTTPHandler(idx).getCgi())
+		readFile(handler);
+	if (handler.getRequest().currentBytesRead < BUFFERSIZE - 1
+		&& !handler.getChunked() && !handler.getCgi())
 	{
-		sendResponse(idx, socket);
+		sendResponse(handler, socket);
 		return (0);
 	}
 	return (1);
 }
 
-void Server::clientConnectionFailed(int client_socket, int idx)
+void Server::clientConnectionFailed(int client_socket, HTTPHandler &handler)
 {
 	logger.log(ERR, "[500] Error in accept()");
-	makeResponse((char *)PAGE_500, idx);
-	if (send(client_socket, getHTTPHandler(idx).getResponse().response.c_str(),
-			getHTTPHandler(idx).getResponse().response.size(), 0) == -1)
+	makeResponse((char *)PAGE_500, handler);
+	if (send(client_socket, handler.getResponse().response.c_str(),
+			handler.getResponse().response.size(), 0) == -1)
 		logger.log(ERR, "[500] Failed to send response to client");
 }
 
@@ -50,14 +50,12 @@ int	makeSocketNonBlocking(int &sfd)
 	return (1);
 }
 
-int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
-	const int &i, int server)
+int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen, const int& server)
 {
 	client_socket = accept(_servers[server].getSocketFD(),
 			(struct sockaddr *)_servers[server].getAddress(), &addrlen);
 	if (client_socket == -1)
 	{
-		_servers[server].clientConnectionFailed(client_socket, i);
 		logger.log(ERR, "Accept client socket failed, break in main loop");
 		return (0);
 	}
@@ -78,14 +76,13 @@ void Server::removeSocketAndServer(int socket)
 	logger.log(INFO, "Couldn't find socket in connectedSocketsToServers");
 }
 
-void Server::readFromSocketError(const int &err, const int &idx, int &socket)
+void Server::readFromSocketError(const int &err, HTTPHandler &handler, int &socket)
 {
 	if (err == -1)
 	{
 		logger.log(ERR, "Read of client socket failed");
-		getHTTPHandler(idx).getResponse().status = httpStatusCode::InternalServerError;
-		makeResponse(getHttpStatusHTML(getHTTPHandler(idx).getResponse().status),
-			idx);
+		handler.getResponse().status = httpStatusCode::InternalServerError;
+		makeResponse(getHttpStatusHTML(handler.getResponse().status), handler);
 		removeFdFromEpoll(socket);
 		close(socket);
 	}
@@ -97,7 +94,7 @@ void Server::readFromSocketError(const int &err, const int &idx, int &socket)
 		close(socket);
 	}
 	removeSocketAndServer(socket);
-	getHTTPHandler(idx).setConnectedToSocket(-1);
+	handler.setConnectedToSocket(-1);
 }
 
 void	removeBoundaryLine(std::string &str, const std::string &boundary)
@@ -121,29 +118,28 @@ void	removeBoundaryLine(std::string &str, const std::string &boundary)
 	}
 }
 
-void Server::readFromSocketSuccess(const int &idx, const char *buffer,
+void Server::readFromSocketSuccess(HTTPHandler& handler, const char *buffer,
 	const int &bytes_read)
 {
-	getHTTPHandler(idx).getRequest().currentBytesRead = bytes_read;
-	if (!getHTTPHandler(idx).getChunked())
+	handler.getRequest().currentBytesRead = bytes_read;
+	if (!handler.getChunked())
 	{
-		parse_request(getHTTPHandler(idx).getRequest(), std::string(buffer,
-				bytes_read), idx);
-		getHTTPHandler(idx).handleRequest(*this);
+		parse_request(handler.getRequest(), std::string(buffer, bytes_read));
+		handler.handleRequest(*this);
 		if (bytes_read == BUFFERSIZE)
-			getHTTPHandler(idx).setChunked(true);
-		getHTTPHandler(idx).getRequest().totalBytesRead += bytes_read
-			- (getHTTPHandler(idx).getRequest().requestContent.size()
-				- getHTTPHandler(idx).getRequest().requestBody.size());
+			handler.setChunked(true);
+		handler.getRequest().totalBytesRead += bytes_read
+			- (handler.getRequest().requestContent.size()
+				- handler.getRequest().requestBody.size());
 	}
 	else
 	{
 		logger.log(DEBUG, "Reading chunked request");
-		getHTTPHandler(idx).getRequest().file.fileContent = std::string(buffer,
+		handler.getRequest().file.fileContent = std::string(buffer,
 				bytes_read);
-		removeBoundaryLine(getHTTPHandler(idx).getRequest().file.fileContent,
-			trim(getHTTPHandler(idx).getRequest().file.fileBoundary));
-		getHTTPHandler(idx).getRequest().totalBytesRead += bytes_read;
+		removeBoundaryLine(handler.getRequest().file.fileContent,
+			trim(handler.getRequest().file.fileBoundary));
+		handler.getRequest().totalBytesRead += bytes_read;
 	}
 }
 
@@ -205,10 +201,7 @@ void Server::readWriteServer(epoll_event &event, epoll_event &eventConfig,
 	int		client_tmp;
 	ssize_t	bytes_read;
 	char	buffer[BUFFERSIZE];
-	int		idx;
 
-	client_tmp = -1;
-	idx = handler.getIdx();
 	try
 	{
 		client_tmp = event.data.fd;
@@ -217,31 +210,36 @@ void Server::readWriteServer(epoll_event &event, epoll_event &eventConfig,
 			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
 			if (bytes_read < 1)
 			{
-				readFromSocketError(bytes_read, idx, client_tmp);
+				readFromSocketError(bytes_read, handler, client_tmp);
 				return ;
 			}
 			buffer[bytes_read] = '\0';
-			std::cout << buffer << std::endl;
-			readFromSocketSuccess(idx, buffer, bytes_read);
+			readFromSocketSuccess(handler, buffer, bytes_read);
 			setFdReadyForWrite(eventConfig, client_tmp);
 		}
 		else if (event.events & EPOLLOUT)
 		{
-			if (!serverActions(idx, client_tmp))
+			if (!serverActions(handler, client_tmp))
 				return ;
 			setFdReadyForRead(eventConfig, client_tmp);
 		}
 	}
 	catch (const FavIconException &e)
 	{
-		sendFavIconResponse(idx, client_tmp);
+		sendFavIconResponse(handler, client_tmp);
 		// setFdReadyForRead(eventConfig, client_tmp);
 	}
 	catch (const HttpException &e)
 	{
-		makeResponse(e.getPageContent(), idx);
-		sendResponse(idx, client_tmp);
+		makeResponse(e.getPageContent(), handler);
+		sendResponse(handler, client_tmp);
 		// setFdReadyForRead(eventConfig, client_tmp);
+	}
+	catch (const std::exception &e)
+	{
+		logger.log(ERR, "[500] Error in readWriteServer");
+		makeResponse(PAGE_500, handler);
+		sendResponse(handler, client_tmp);
 	}
 }
 
@@ -255,10 +253,12 @@ int Server::initSocketToHandler(int &socket, char *buffer, int bytes_rd)
 	{
 		while (i < _http_handler.size())
 		{
-			if (_http_handler.at(i).getConnectedToSocket() == -1)
+			HTTPHandler	&handler = _http_handler.at(i);
+
+			if (handler.getConnectedToSocket() == -1)
 			{
-				_http_handler.at(i).setConnectedToSocket(socket);
-				this->readFromSocketSuccess(i, buffer, bytes_rd);
+				handler.setConnectedToSocket(socket);
+				this->readFromSocketSuccess(handler, buffer, bytes_rd);
 				return (1);
 			}
 			i++;
@@ -266,13 +266,13 @@ int Server::initSocketToHandler(int &socket, char *buffer, int bytes_rd)
 	}
 	catch (const FavIconException &e)
 	{
-		this->sendFavIconResponse(i, socket);
+		this->sendFavIconResponse(_http_handler.at(i), socket);
 		return (0);
 	}
 	catch (const HttpException &e)
 	{
-		this->makeResponse(e.getPageContent(), i);
-		this->sendResponse(i, socket);
+		this->makeResponse(e.getPageContent(), _http_handler.at(i));
+		this->sendResponse(_http_handler.at(i), socket);
 		return (0);
 	}
 	logger.log(ERR, "Couldn't init socket to handler");
@@ -349,10 +349,8 @@ void Webserv::checkCGItimeouts(void)
 				logger.log(ERR, "[502] CGI script has been timed out, since it lasted longer than 10 seconds");
 				currentHTTPHandler = _servers[i].matchSocketToHandler(currSocket);
 				currentHTTPHandler->getResponse().status = httpStatusCode::BadGateway;
-				_servers[i].makeResponse(PAGE_502,
-					currentHTTPHandler->getIdx());
-				_servers[i].sendResponse(currentHTTPHandler->getIdx(),
-					currSocket);
+				_servers[i].makeResponse(PAGE_502, *currentHTTPHandler);
+				_servers[i].sendResponse(*currentHTTPHandler, currSocket);
 				currentHTTPHandler->setConnectedToCGI(nullptr);
 				_servers[i].removeCGIrunning(currSocket);
 				_servers[i].setFdReadyForRead(_event,
@@ -386,7 +384,6 @@ void Server::readWriteCGI(int client_tmp, HTTPHandler &handler)
 	status = 0;
 	idx = handler.getIdx();
 	socket = handler.getConnectedToSocket();
-	// std::cout << "client_tmp vs connected CGI to handler " << client_tmp << "|" << handler.getConnectedToCGI() << std::endl;
 	if (handler.getConnectedToCGI()->ReadFd == client_tmp)
 	{
 		std::map<int, CGI_t *>::iterator it = _fdsRunningCGI.find(handler.getConnectedToSocket());
@@ -419,8 +416,8 @@ void Server::readWriteCGI(int client_tmp, HTTPHandler &handler)
 				close(currCGI->WriteFd);
 				resetCGI(*currCGI);
 				delete currCGI;
-				makeResponse(handler.getResponse().response, idx);
-				sendResponse(idx, socket);
+				makeResponse(handler.getResponse().response, handler);
+				sendResponse(handler, socket);
 				return ;
 			}
 		}
@@ -584,8 +581,7 @@ int Webserv::execute(void)
 				serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
 				if (serverConnectIndex >= 0)
 				{
-					if (!acceptClientSocket(client_socket, addrlen,
-							serverConnectIndex, serverConnectIndex))
+					if (!acceptClientSocket(client_socket, addrlen, serverConnectIndex))
 						continue ;
 					if (!makeSocketNonBlocking(client_socket))
 					{

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 16:53:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 11:24:12 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ void Webserv::printParsing(void)
 		}
 	}
 }
+
 void Webserv::setConfig(std::string fileName)
 {
 	int		index;

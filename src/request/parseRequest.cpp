@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:15:08 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/18 12:01:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ static void	setRequestBody(request_t &req)
 	req.requestBody = req.requestContent.substr(foundBody);
 }
 
-void	parse_request(request_t &req, std::string buffer, const int& idx)
+void	parse_request(request_t &req, std::string buffer)
 {
 	req.requestContent = buffer;
 	req.file.fileExists = false;
@@ -163,7 +163,7 @@ void	parse_request(request_t &req, std::string buffer, const int& idx)
 	setRequestHeader(req);
 	setRequestBody(req);
 	setFile(req, &req.file);
-	printRequestStruct(req, idx);
+	printRequestStruct(req);
 	if (req.contentLength)
 		printFileStruct(&req.file);
 }
