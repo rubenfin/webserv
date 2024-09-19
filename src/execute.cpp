@@ -344,7 +344,6 @@ void Webserv::checkCGItimeouts(void)
 		{
 			currSocket = it->first;
 			currCGI = it->second;
-			std::cout << "Current CGI: " << currCGI->PID << "|" << currCGI->StartTime << std::endl;
 			if (currCGI->StartTime != 0 && time(NULL) - currCGI->StartTime > 10)
 			{
 				// std::cout << currSocket << "|" << _servers[i].getServerFd() << std::endl;
@@ -355,8 +354,6 @@ void Webserv::checkCGItimeouts(void)
 				_servers[i].sendResponse(*currentHTTPHandler, currSocket);
 				currentHTTPHandler->setConnectedToCGI(nullptr);
 				_servers[i].removeCGIrunning(currSocket);
-				_servers[i].setFdReadyForRead(_event,
-					currentHTTPHandler->getConnectedToSocket());
 				if (currCGI->WriteFd >= 0)
 				{
 					_servers[i].removeFdFromEpoll(currCGI->WriteFd);
@@ -367,10 +364,14 @@ void Webserv::checkCGItimeouts(void)
 					_servers[i].removeFdFromEpoll(currCGI->ReadFd);
 					close(currCGI->ReadFd);
 				}
-				removeFdFromEpoll(currSocket);
+				if (kill(it->second->PID, SIGTERM) == 0)
+				{
+					usleep(200000);
+					kill(it->second->PID, SIGKILL);
+				}
 				close (currSocket);
-				delete currCGI;
 				resetCGI(*currCGI);
+				delete currCGI;
 				break ;
 			}
 		}
@@ -586,7 +587,8 @@ int Webserv::execute(void)
 		try
 		{
 			checkCGItimeouts();
-			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, -1);
+			logger.log(INFO, "Waiting for events...");
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
 			for (int idx = 0; idx < eventCount; ++idx)
 			{
 				serverConnectIndex = checkForNewConnection(eventList[idx].data.fd);
@@ -656,7 +658,7 @@ int Webserv::execute(void)
 				+ std::to_string(it->second->PID));
 			if (kill(it->second->PID, SIGTERM) == 0)
 			{
-				sleep(1);
+				usleep(200000);
 				kill(it->second->PID, SIGKILL);
 			}
 			close(it->second->ReadFd);
