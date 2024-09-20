@@ -6,11 +6,11 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/18 12:09:25 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 13:31:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/HTTPHandler.hpp"
+#include "../../include/HTTPHandler.hpp"
 
 HTTPHandler::HTTPHandler() : _connectedToSocket(-1), _cgiPtr(nullptr),
 	_idx(-1), _response(), _request(), _foundDirective(nullptr),
@@ -47,9 +47,6 @@ std::shared_ptr<Locations> HTTPHandler::findMatchingDirective(void)
 
 void HTTPHandler::combineRightUrl(void)
 {
-	if (_foundDirective)
-		std::cout << RED << _foundDirective->getAlias() << RESET << std::endl;
-	// No location directive found
 	if (!_foundDirective)
 	{
 		// File in root of server, not inside any directory
@@ -308,7 +305,6 @@ void HTTPHandler::totalPathCheck(void)
 	}
 	else
 	{
-		std::cout << getRequest().requestURL << "|" << _foundDirective->getLocationDirective() << std::endl;
 		if (getRequest().requestURL != _foundDirective->getLocationDirective()
 			&& getRequest().requestURL != _foundDirective->getLocationDirective()
 			+ "/")

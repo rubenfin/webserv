@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 16:34:01 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 11:39:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,9 +74,14 @@ public:
   Webserv(std::string fileName);
   ~Webserv();
 
-  void removeFdFromEpoll(int &socket);
+  void initalizeServers(socklen_t &addrlen);
+  void cleanUpServers();
+  int handleEvent(epoll_event *eventList, const int &event_fd, int idx);
+  int initializeConnection(const socklen_t &addrlen, int &client_socket,
+	const int &serverConnectIndex);
+  void removeFdFromEpoll(const int &socket);
   void insertSocketIntoReceivedFirstRequest(const int &socket);
-  int handleFirstRequest(int &client_socket);
+  int handleFirstRequest(const int &client_socket);
   int findRightServer(const std::string &buffer);
   void addSocketToServer(const int &socket, Server *server);
   std::unordered_map<int, Server *> &getSocketsConnectedToServers(void);
@@ -86,7 +91,7 @@ public:
   void printParsing(void);
   Server *findServerConnectedToSocket(const int &socket);
   bool getServerReceivedFirstRequest(const int &socket);
-  void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
+  void addFdToReadEpoll(int &socket);
   int checkForNewConnection(int eventFd);
   int acceptClientSocket(int &client_socket, socklen_t addrlen, const int& server);
   void cleanHandlerRequestResponse();

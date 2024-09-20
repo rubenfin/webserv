@@ -6,11 +6,11 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:08:48 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 17:04:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 13:31:22 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Locations.hpp"
+#include "../../include/Locations.hpp"
 
 void Locations::printMethods(void)
 {

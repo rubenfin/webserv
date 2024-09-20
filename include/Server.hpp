@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/18 16:33:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 11:54:52 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,21 +72,20 @@ protected:
   
 
 public:
-  void readWriteCGI(int socket, HTTPHandler &handler);
-  void removeCGIrunning(int socket);
+  void readWriteCGI(const int& socket, HTTPHandler &handler);
+  void removeCGIrunning(const int& socket);
   std::map<int, CGI_t *> &getFdsRunningCGI(void);
-  void removeSocketAndServer(int socket);
+  void removeSocketAndServer(const int& socket);
   void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
   void readFromSocketError(const int &err, HTTPHandler &handler, int &socket);
   int serverActions(HTTPHandler &handler, int &socket);
   void readFromSocketSuccess(HTTPHandler &handler, const char *buffer,
                              const int &bytes_read);
-  void removeFdFromEpoll(int &socket);
-  void setFdReadyForRead(epoll_event &eventConfig, int &socket);
-  void setFdReadyForWrite(epoll_event &eventConfig, const int &socket);
-  void readWriteServer(epoll_event &event, epoll_event &eventConfig,
-                       HTTPHandler &handler);
-  void cgi(HTTPHandler &handler, int socket);
+  void removeFdFromEpoll(const int &socket);
+  void setFdReadyForRead(const int &socket);
+  void setFdReadyForWrite(const int &socket);
+  void readWriteServer(epoll_event &event, HTTPHandler &handler);
+  void cgi(HTTPHandler &handler, const int& socket);
   void execute_CGI_script(int *writeSide, int *readSide, const char *script,
                           HTTPHandler &handler);
   void getLocationStack(std::string locationContent);
@@ -124,7 +123,7 @@ public:
   std::vector<Locations> getLocation(void);
   HTTPHandler &getHTTPHandler(const int& idx);
   HTTPHandler *matchSocketToHandler(const int &socket);
-  int initSocketToHandler(int &socket, char *buffer, int bytes_rd);
+  int initSocketToHandler(const int &socket, char *buffer, int bytes_rd);
   long long getClientBodySize(void);
   void setLocationsRegex(std::string serverContent);
   long long getFileSize(const std::string &filename, HTTPHandler &handler);
@@ -141,8 +140,8 @@ public:
   void deleteFileInServer(HTTPHandler &handler);
   std::string returnAutoIndex(HTTPHandler &handler, std::string &uri);
   void clientConnectionFailed(int client_socket, HTTPHandler &handler);
-  void sendResponse(HTTPHandler &handler, int &socket);
-  void sendFavIconResponse(HTTPHandler &handler, int &socket);
+  void sendResponse(HTTPHandler &handler, const int &socket);
+  void sendFavIconResponse(HTTPHandler &handler, const int &socket);
   void linkHandlerResponseRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);
   void checkFileDetails(HTTPHandler &handler, std::ofstream &file);
   ~Server();

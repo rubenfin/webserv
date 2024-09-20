@@ -1,18 +1,25 @@
 CC = c++ -std=c++11
 CFLAGS = -Wall -Wextra -Werror -g
-# LDFLAGS = -fsanitize=address
+LDFLAGS = -fsanitize=address
 SRC_DIR = src
 SERVER_DIR = server
 UTILS_DIR = utils
 REQUEST_DIR = request
 RESPONSE_DIR = response
+SETUP_DIR = setup
+HANDLER_DIR = handler
+
+
 LOG_DIR = extra/log
 
 SRC :=  $(wildcard $(SRC_DIR)/*.cpp) \
         $(wildcard $(SRC_DIR)/$(SERVER_DIR)/*.cpp) \
         $(wildcard $(SRC_DIR)/$(UTILS_DIR)/*.cpp) \
         $(wildcard $(SRC_DIR)/$(REQUEST_DIR)/*.cpp) \
-        $(wildcard $(SRC_DIR)/$(RESPONSE_DIR)/*.cpp) 
+        $(wildcard $(SRC_DIR)/$(RESPONSE_DIR)/*.cpp) \
+		$(wildcard $(SRC_DIR)/$(HANDLER_DIR)/*.cpp) \
+		$(wildcard $(SRC_DIR)/$(SETUP_DIR)/*.cpp)
+
 OBJS_DIR = objs
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJS_DIR)/%.o)
 NAME = webserv
@@ -38,13 +45,8 @@ $(LIBS_TARGET):
 library: $(LIBS_TARGET)
 
 re:
-	@read -p "Weet je het zeker Ruben? " answer; \
-	if [ "$$answer" = "ja" ]; then \
-	$(MAKE) fclean; \
-	$(MAKE) all; \
-	else \
-	    echo "Aborted."; \
-	fi
+	$(MAKE) fclean;
+	$(MAKE) all;
 
 $(NAME): $(OBJS_DIR) $(OBJ) $(LIBS_TARGET)
 	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS) $(LINKERFLAGS) $(LIBS_TARGET)

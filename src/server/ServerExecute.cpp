@@ -6,11 +6,11 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 16:52:11 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 13:25:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Server.hpp"
+#include "../../include/Server.hpp"
 
 volatile sig_atomic_t	interrupted;
 
@@ -73,29 +73,7 @@ void Server::execute_CGI_script(int *writeSide, int *readSide,
 	_exit(EXIT_FAILURE);
 }
 
-int	check_status(int status)
-{
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
-	return (127);
-}
-
-void throwException(HttpException &exception)
-{
-	throw	exception;
-}
-
-void Server::logThrowStatus(HTTPHandler &handler, const level &lvl,
-	const std::string &msg, const httpStatusCode &status,
-	HttpException exception)
-{
-
-	logger.log(lvl, msg);
-	handler.getResponse().status = status;
-	throwException(exception);
-}
-
-void Server::cgi(HTTPHandler &handler, int socket)
+void Server::cgi(HTTPHandler &handler, const int& socket)
 {
 	CGI_t	*CGIinfo;
 	int		childToParent[2];
@@ -275,18 +253,29 @@ void Server::deleteFileInServer(HTTPHandler &handler)
 			InternalServerErrorException());
 }
 
-void Server::sendResponse(HTTPHandler &handler, int &socket)
+
+int Server::serverActions(HTTPHandler& handler, int &socket)
 {
-	logger.log(INFO, "Sending response to client on socket: "
-		+ std::to_string(socket));
-	logger.log(RESPONSE, handler.getResponse().response);
-	if (send(socket, handler.getResponse().response.data(),
-			handler.getResponse().response.size(), 0) == -1)
+	if (handler.getReturnAutoIndex())
 	{
-		logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
+		makeResponse((char *)returnAutoIndex(handler,
+				handler.getRequest().requestURL).c_str(), handler);
 	}
-	handler.cleanHTTPHandler();
-	removeSocketAndServer(socket);
-	removeFdFromEpoll(socket);
-	close(socket);
+	else if (handler.getRequest().method == DELETE)
+		deleteFileInServer(handler);
+	else if (handler.getCgi())
+		cgi(handler, socket);
+	else if (handler.getRedirect())
+		makeResponseForRedirect(handler);
+	else if (handler.getRequest().file.fileExists)
+		setFileInServer(handler);
+	else
+		readFile(handler);
+	if (handler.getRequest().currentBytesRead < BUFFERSIZE - 1
+		&& !handler.getChunked() && !handler.getCgi())
+	{
+		sendResponse(handler, socket);
+		return (0);
+	}
+	return (1);
 }

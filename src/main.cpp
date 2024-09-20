@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:50:29 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 13:24:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 11:52:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Logger &logger = Logger::getInstance();
 int	main(int argc, char **argv)
 {
 	logger.setWorking(true);
+	disable_ctrl_chars();
 	if (argc == 2)
 	{
 		std::string filename(argv[1]);

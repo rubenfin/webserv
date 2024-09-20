@@ -6,11 +6,11 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/10 14:31:56 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/16 13:39:46 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/09/20 13:21:00 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Logger.hpp"
+#include "../../include/Logger.hpp"
 
 std::unique_ptr<Logger> Logger::instance = nullptr;
 std::once_flag Logger::initInstanceFlag;
