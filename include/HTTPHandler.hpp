@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/18 11:37:35 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 12:09:10 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ typedef struct response_t
 
 typedef struct request_t
 {
+	bool		bin;
 	std::string http_v;
 	std::string firstLine;
 	std::string requestContent;
@@ -57,14 +58,14 @@ typedef struct request_t
 	std::string requestDirectory;
 	std::string requestFile;
 	std::string contentType;
-	int		currentBytesRead;
-	int		totalBytesRead;
-	ssize_t	contentLength;
+	size_t		currentBytesRead;
+	size_t		totalBytesRead;
+	size_t		contentLength;
 	file_t	file;
 	METHODS	method;
 	std::map<std::string, std::string> header;
 	
-	request_t() : http_v(""), firstLine(""), requestContent(""),
+	request_t() : bin(false), http_v(""), firstLine(""), requestContent(""),
 		requestBody(""), requestURL(""), requestDirectory(""),
 		requestFile(""), contentType(""), currentBytesRead(0),
 		totalBytesRead(0), contentLength(0), method(ERROR) {}

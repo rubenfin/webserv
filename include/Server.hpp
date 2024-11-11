@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/20 11:54:52 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 12:06:55 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ public:
                       const httpStatusCode &status, HttpException exception);
   std::string extractValue(const std::string &searchString);
   std::string extractValueUntilLocation(const std::string &searchString);
+  void checkIfBin(HTTPHandler &handler);
   void setServerName(void);
   void setPortHost(void);
   void setRoot(void);

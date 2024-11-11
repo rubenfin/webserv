@@ -60,7 +60,8 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 
 	if (!getServerReceivedFirstRequest(event_fd))
 	{
-		handleFirstRequest(event_fd);
+		if (!handleFirstRequest(event_fd))
+			return (0);
 		logger.log(INFO, "Handled first request on: "
 			+ std::to_string(event_fd));
 		return (0) ;

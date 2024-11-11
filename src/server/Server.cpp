@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:25:13 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 14:44:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,7 @@ void Server::readWriteCGI(const int& CGI_FD, HTTPHandler &handler)
 
 	status = 0;
 	socket = handler.getConnectedToSocket();
+	handler.getConnectedToCGI()->LastAction = time(NULL);
 	if (handler.getConnectedToCGI()->ReadFd == CGI_FD)
 	{
 		std::map<int, CGI_t *>::iterator it = _fdsRunningCGI.find(handler.getConnectedToSocket());
@@ -192,33 +193,31 @@ void Server::readWriteCGI(const int& CGI_FD, HTTPHandler &handler)
 			return ;
 		}
 		currCGI = it->second;
-		while (true)
+
+		int br = read(currCGI->ReadFd, buffer, BUFFERSIZE);
+		if (br > 0)
 		{
-			int br = read(currCGI->ReadFd, buffer, BUFFERSIZE);
-			if (br > 0)
-			{
-				buffer[br] = '\0';
-				logger.log(INFO, "Read " + std::to_string(br)
-					+ " bytes from CGI");
-				handler.getResponse().response += buffer;
-			}
-			else if (br == 0)
-			{
-				logger.log(INFO, "EOF reached for CGI");
-				waitpid(currCGI->PID, &status, 0);
-				removeCGIrunning(handler.getConnectedToSocket());
-				handler.setConnectedToCGI(nullptr);
-				removeFdFromEpoll(currCGI->ReadFd);
-				if (currCGI->WriteFd != -1)
-					removeFdFromEpoll(currCGI->WriteFd);
-				close(currCGI->ReadFd);
-				close(currCGI->WriteFd);
-				resetCGI(*currCGI);
-				delete currCGI;
-				makeResponse(handler.getResponse().response, handler);
-				sendResponse(handler, socket);
-				return ;
-			}
+			buffer[br] = '\0';
+			logger.log(INFO, "Read " + std::to_string(br)
+				+ " bytes from CGI");
+			handler.getResponse().response += buffer;
+		}
+		else if (br == 0)
+		{
+			logger.log(INFO, "EOF reached for CGI");
+			waitpid(currCGI->PID, &status, 0);
+			removeCGIrunning(handler.getConnectedToSocket());
+			handler.setConnectedToCGI(nullptr);
+			removeFdFromEpoll(currCGI->ReadFd);
+			if (currCGI->WriteFd != -1)
+				removeFdFromEpoll(currCGI->WriteFd);
+			close(currCGI->ReadFd);
+			close(currCGI->WriteFd);
+			resetCGI(*currCGI);
+			delete currCGI;
+			makeResponse(handler.getResponse().response, handler);
+			sendResponse(handler, socket);
+			return ;
 		}
 	}
 	else if (handler.getConnectedToCGI()->WriteFd == CGI_FD)
@@ -235,6 +234,14 @@ void Server::readWriteCGI(const int& CGI_FD, HTTPHandler &handler)
 	}
 }
 
+void Server::checkIfBin(HTTPHandler &handler)
+{
+	if(handler.getRequest().contentLength == handler.getRequest().totalBytesRead && handler.getRequest().bin)
+	{
+		handler.getServer()->logThrowStatus(handler, ERR, "[413] Content-Length exceeded client body size limit",
+			httpStatusCode::PayloadTooLarge, PayloadTooLargeException());
+	}
+}
 
 void Server::readFromSocketSuccess(HTTPHandler& handler, const char *buffer,
 	const int &bytes_read)
@@ -258,6 +265,7 @@ void Server::readFromSocketSuccess(HTTPHandler& handler, const char *buffer,
 		removeBoundaryLine(handler.getRequest().file.fileContent,
 			trim(handler.getRequest().file.fileBoundary));
 		handler.getRequest().totalBytesRead += bytes_read;
+		checkIfBin(handler);
 	}
 }
 

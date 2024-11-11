@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:31:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 11:43:50 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -326,9 +326,9 @@ void HTTPHandler::checkClientBodySize(void)
 {
 	if (getRequest().contentLength != 0
 		&& static_cast<long long>(getRequest().contentLength) > _foundDirective->getClientBodySize())
-		getServer()->logThrowStatus(*this, ERR,
-			"[413] Content-Length exceeded client body size limit",
-			httpStatusCode::PayloadTooLarge, PayloadTooLargeException());
+		{
+			getRequest().bin = true;
+		}
 }
 
 void HTTPHandler::handleRequest(Server &serverAddress)

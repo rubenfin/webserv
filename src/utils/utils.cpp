@@ -3,7 +3,7 @@
 bool hasSpecialCharacters(const std::string& fileName)
 {
     for (char ch : fileName)
-        if (!std::isalnum(ch) && ch != '.' && ch != '_' && ch != '-') 
+        if (!std::isalnum(ch) && ch != '.' && ch != '_' && ch != '-' && ch != ' ') 
             return true;
     return false;
 }
@@ -16,7 +16,7 @@ void replaceEncodedSlash(std::string &str)
     size_t pos = 0;
     while ((pos = str.find(encodedSlash, pos)) != std::string::npos) {
         str.replace(pos, encodedSlash.length(), slash);
-        pos += slash.length(); // Move past the replaced part
+        pos += slash.length();
     }
 }
 
@@ -115,6 +115,7 @@ void resetCGI(CGI_t &CGI)
     CGI.WriteFd = -1;
     CGI.isRunning = false;
     CGI.StartTime = 0;
+	CGI.LastAction = 0;
 }
 
 int	check_status(int status)

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:31:16 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 14:46:08 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,11 +104,20 @@ Webserv::Webserv(std::string fileName)
 	// _socketsConnectedToServers.reserve(MAX_EVENTS);
 }
 
+void Webserv::removeSocketFromReceivedFirstRequest(const int &socket)
+{
+	auto it = this->_socketReceivedFirstRequest.find(socket);
+	if (it != this->_socketReceivedFirstRequest.end())
+	{
+		this->_socketReceivedFirstRequest.erase(it);
+	}
+}
+
 int Webserv::handleFirstRequest(const int &client_socket)
 {
-	int					foundServer;
-	char				buffer[BUFFERSIZE];
-	int					rd_bytes;
+	int		foundServer;
+	char	buffer[BUFFERSIZE];
+	int		rd_bytes;
 
 	std::string bufferString;
 	rd_bytes = read(client_socket, buffer, BUFFERSIZE);
@@ -119,26 +128,30 @@ int Webserv::handleFirstRequest(const int &client_socket)
 	}
 	else if (rd_bytes == 0)
 	{
-		logger.log(INFO, "Closed socket since 0 bytes read: " + std::to_string(client_socket));
+		logger.log(INFO, "Closed socket since 0 bytes read: "
+			+ std::to_string(client_socket));
 		buffer[rd_bytes] = '\0';
+		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
 	}
 	else
 	{
-		logger.log(INFO, "Read failed, closing client socket: " + std::to_string(client_socket));
+		logger.log(INFO, "Read failed, closing client socket: "
+			+ std::to_string(client_socket));
 		buffer[0] = '\0';
+		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
 	}
-
 	std::string firstRequest(buffer, rd_bytes);
 	foundServer = findRightServer(firstRequest);
 	if (foundServer == -1)
 	{
 		logger.log(ERR, "Couldn't find server for first request");
+		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
@@ -147,17 +160,17 @@ int Webserv::handleFirstRequest(const int &client_socket)
 			rd_bytes))
 		addSocketToServer(client_socket, &(_servers[foundServer]));
 	else
-		return (0);
+		return (removeSocketFromReceivedFirstRequest(client_socket), 0);
 	_servers[foundServer].setFdReadyForWrite(client_socket);
 	return (1);
 }
-
 
 Server *Webserv::findServerConnectedToSocket(const int &socket)
 {
 	CGI_t	*currCGI;
 
-	std::unordered_map<int, Server *>::iterator found = _socketsConnectedToServers.find(socket);
+	std::unordered_map<int,
+		Server *>::iterator found = _socketsConnectedToServers.find(socket);
 	if (found != _socketsConnectedToServers.end())
 	{
 		return (found->second);
@@ -178,18 +191,21 @@ Server *Webserv::findServerConnectedToSocket(const int &socket)
 
 void Webserv::addFdToReadEpoll(int &socket)
 {
-	struct epoll_event eventConfig;
+	struct epoll_event	eventConfig;
+
 	eventConfig.events = EPOLLIN | EPOLLET;
 	eventConfig.data.fd = socket;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, socket, &eventConfig) == -1)
 	{
 		perror("");
-		logger.log(WARNING, "Couldn't add socket to epoll: " + std::to_string(socket));
+		logger.log(WARNING, "Couldn't add socket to epoll: "
+			+ std::to_string(socket));
 		close(socket);
 	}
 }
 
-int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen, const int& server)
+int Webserv::acceptClientSocket(int &client_socket, socklen_t addrlen,
+	const int &server)
 {
 	client_socket = accept(_servers[server].getSocketFD(),
 			(struct sockaddr *)_servers[server].getAddress(), &addrlen);
@@ -205,12 +221,12 @@ int Webserv::initializeConnection(const socklen_t &addrlen, int &client_socket,
 	const int &serverConnectIndex)
 {
 	if (!acceptClientSocket(client_socket, addrlen, serverConnectIndex))
-		return(0) ;
+		return (0);
 	if (!makeSocketNonBlocking(client_socket))
 	{
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
-		return (0) ;
+		return (0);
 	}
 	addFdToReadEpoll(client_socket);
 	insertSocketIntoReceivedFirstRequest(client_socket);
@@ -234,7 +250,6 @@ int Webserv::findRightServer(const std::string &buffer)
 	std::string serverName;
 	std::string port;
 	std::size_t pos;
-	
 	if (buffer.empty())
 	{
 		logger.log(WARNING, "Buffer is empty");
@@ -269,11 +284,10 @@ int Webserv::findRightServer(const std::string &buffer)
 		if (_servers[i].getServerName() == serverName
 			&& _servers[i].getPortString() == port)
 			return (i);
-
 	for (size_t i = 0; i < _servers.size(); i++)
-		if (_servers[i].getHost() == serverName && _servers[i].getPortString() == port)
+		if (_servers[i].getHost() == serverName
+			&& _servers[i].getPortString() == port)
 			return (i);
-
 	for (size_t i = 0; i < _servers.size(); i++)
 		if (_servers[i].getPortString() == port)
 			return (i);
@@ -286,7 +300,8 @@ void Webserv::removeFdFromEpoll(const int &socket)
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, socket, NULL) == -1)
 	{
 		perror("");
-		logger.log(WARNING, "Failed to remove socket from epoll: " + std::to_string(socket));
+		logger.log(WARNING, "Failed to remove socket from epoll: "
+			+ std::to_string(socket));
 		close(socket);
 	}
 }
@@ -346,7 +361,6 @@ void Webserv::addSocketToServer(const int &socket, Server *server)
 		+ " to Server with FD " + std::to_string(server->getServerFd()));
 }
 
-
 void Webserv::checkCGItimeouts(void)
 {
 	CGI_t		*currCGI;
@@ -360,9 +374,11 @@ void Webserv::checkCGItimeouts(void)
 		{
 			currSocket = it->first;
 			currCGI = it->second;
-			if (currCGI->StartTime != 0 && time(NULL) - currCGI->StartTime > 10)
+			if (currCGI->StartTime != 0 && currCGI->LastAction != 0
+				&& (time(NULL) - currCGI->StartTime > 30 || time(NULL)
+					- currCGI->LastAction > 10))
 			{
-				logger.log(ERR, "[502] CGI script has been timed out, since it lasted longer than 10 seconds");
+				logger.log(ERR, "[502] CGI script has been timed out");
 				currentHTTPHandler = _servers[i].matchSocketToHandler(currSocket);
 				currentHTTPHandler->getResponse().status = httpStatusCode::BadGateway;
 				_servers[i].makeResponse(PAGE_502, *currentHTTPHandler);
@@ -381,12 +397,12 @@ void Webserv::checkCGItimeouts(void)
 				}
 				if (kill(it->second->PID, SIGTERM) == 0)
 				{
-					usleep(200000);
+					usleep(100000);
 					kill(it->second->PID, SIGKILL);
 				}
-				close (currSocket);
-				resetCGI(*currCGI);
+				close(currSocket);
 				delete currCGI;
+				resetCGI(*currCGI);
 				break ;
 			}
 		}
@@ -404,7 +420,7 @@ void Webserv::initalizeServers(socklen_t &addrlen)
 
 void Webserv::cleanUpServers()
 {
-		for (size_t i = 0; i < _servers.size(); i++)
+	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		while (!_servers[i].getFdsRunningCGI().empty())
 		{
@@ -421,7 +437,6 @@ void Webserv::cleanUpServers()
 			close(it->second->WriteFd);
 			_servers[i].removeCGIrunning(it->first);
 		}
-
 		close(_servers[i].getSocketFD());
 		logger.log(INFO, "Server shut down at port: "
 			+ _servers[i].getPortString());

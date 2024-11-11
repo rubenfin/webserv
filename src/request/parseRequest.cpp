@@ -6,11 +6,37 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/18 12:01:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 13:48:34 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
+
+std::string extractValueDoubleQuote(request_t &req, const std::string &toSearch) {
+    std::size_t keywordPos = req.requestContent.find(toSearch);
+    if (keywordPos != std::string::npos) {
+        std::size_t beginLocation = keywordPos + toSearch.size();
+
+        if (beginLocation >= req.requestContent.size()) {
+            return "";
+        }
+
+        while (beginLocation < req.requestContent.size() && std::isspace(req.requestContent[beginLocation])) {
+            ++beginLocation;
+        }
+
+        std::size_t endLocation = beginLocation;
+        while (endLocation < req.requestContent.size() && req.requestContent[endLocation] != '"') {
+            ++endLocation;
+        }
+
+        if (endLocation > beginLocation) {
+            return req.requestContent.substr(beginLocation, endLocation - beginLocation);
+        }
+    }
+    return "";
+}
+
 
 
 std::string extractValue(request_t &req, const std::string &toSearch)

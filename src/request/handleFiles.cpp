@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/09 15:04:20 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/17 11:26:41 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 14:22:16 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,14 +135,15 @@ void	setFile(request_t &req, file_t *requestFile)
 			requestFile->fileContentDisposition = trim(extractValue(req,
 						"Content-Disposition: "));
 			trimLastChar(requestFile->fileContentDisposition);
-			requestFile->fileName = trim(extractValue(req, "filename="));
-			trimFirstChar(requestFile->fileName);
-			trimLastChar(requestFile->fileName);
+			requestFile->fileName = extractValueDoubleQuote(req, "filename=\"");
+			// trimFirstChar(requestFile->fileName);
+			// trimLastChar(requestFile->fileName);
 			findFileContent(req, &req.file);
 		}
 		catch (const std::exception &e)
 		{
-			std::cout << "hier" << std::endl;
+			std::cout << RED << e.what() << RESET << std::endl;
+			throw InternalServerErrorException();
 		}
 	}
 }

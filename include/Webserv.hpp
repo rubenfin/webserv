@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 11:39:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 12:20:56 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,8 @@
 #include <unordered_map>
 #include <vector>
 
-// need to check this might be only for GET and not POST and DELETE
-#define BUFFERSIZE 1024
-#define MAX_FDS 1024
+#define BUFFERSIZE 8192
+// #define MAX_FDS 1024
 #define MAX_EVENTS 64
 #define MIN_SIZE 5
 
@@ -55,45 +54,42 @@ class							HTTPHandler;
 
 extern Logger &logger;
 
-/*
-        reinterpret cast to get the diffence between the stored pointes in the
-   unordered map this determines if it's a Server, Client or maybe even CGI.
-        each Client has a single HTTP (request/response) Handler.
-*/
+class Webserv
+{
+  protected:
+	int _epollFd;
+	epoll_event _event;
+	HTTPHandler *_handler;
+	std::vector<Server> _servers;
+	std::unordered_map<int, Server *> _socketsConnectedToServers;
+	std::unordered_map<int, bool> _socketReceivedFirstRequest;
 
-class Webserv {
-protected:
-  int _epollFd;
-  epoll_event _event;
-  HTTPHandler *_handler;
-  std::vector<Server> _servers;
-  std::unordered_map<int, Server *> _socketsConnectedToServers;
-  std::unordered_map<int, bool> _socketReceivedFirstRequest;
+  public:
+	Webserv(std::string fileName);
+	~Webserv();
 
-public:
-  Webserv(std::string fileName);
-  ~Webserv();
-
-  void initalizeServers(socklen_t &addrlen);
-  void cleanUpServers();
-  int handleEvent(epoll_event *eventList, const int &event_fd, int idx);
-  int initializeConnection(const socklen_t &addrlen, int &client_socket,
-	const int &serverConnectIndex);
-  void removeFdFromEpoll(const int &socket);
-  void insertSocketIntoReceivedFirstRequest(const int &socket);
-  int handleFirstRequest(const int &client_socket);
-  int findRightServer(const std::string &buffer);
-  void addSocketToServer(const int &socket, Server *server);
-  std::unordered_map<int, Server *> &getSocketsConnectedToServers(void);
-  void setupServers(socklen_t &addrlen);
-  int execute(void);
-  void checkCGItimeouts(void);
-  void printParsing(void);
-  Server *findServerConnectedToSocket(const int &socket);
-  bool getServerReceivedFirstRequest(const int &socket);
-  void addFdToReadEpoll(int &socket);
-  int checkForNewConnection(int eventFd);
-  int acceptClientSocket(int &client_socket, socklen_t addrlen, const int& server);
-  void cleanHandlerRequestResponse();
-  void setConfig(std::string fileName);
+	void initalizeServers(socklen_t &addrlen);
+	void cleanUpServers();
+	int handleEvent(epoll_event *eventList, const int &event_fd, int idx);
+	int initializeConnection(const socklen_t &addrlen, int &client_socket,
+		const int &serverConnectIndex);
+	void removeFdFromEpoll(const int &socket);
+	void insertSocketIntoReceivedFirstRequest(const int &socket);
+	int handleFirstRequest(const int &client_socket);
+	int findRightServer(const std::string &buffer);
+	void removeSocketFromReceivedFirstRequest(const int &socket);
+	void addSocketToServer(const int &socket, Server *server);
+	std::unordered_map<int, Server *> &getSocketsConnectedToServers(void);
+	void setupServers(socklen_t &addrlen);
+	int execute(void);
+	void checkCGItimeouts(void);
+	void printParsing(void);
+	Server *findServerConnectedToSocket(const int &socket);
+	bool getServerReceivedFirstRequest(const int &socket);
+	void addFdToReadEpoll(int &socket);
+	int checkForNewConnection(int eventFd);
+	int acceptClientSocket(int &client_socket, socklen_t addrlen,
+		const int &server);
+	void cleanHandlerRequestResponse();
+	void setConfig(std::string fileName);
 };

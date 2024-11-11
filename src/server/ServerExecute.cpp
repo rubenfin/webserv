@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:24:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:25:46 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 14:28:39 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 		CGIinfo->WriteFd = parentToChild[1];
 		CGIinfo->isRunning = true;
 		CGIinfo->StartTime = time(NULL);
+		CGIinfo->LastAction = time(NULL);
 		fcntl(childToParent[0], F_SETFL, O_NONBLOCK);
 		fcntl(parentToChild[1], F_SETFL, O_NONBLOCK);
 		ev.events = EPOLLIN;
