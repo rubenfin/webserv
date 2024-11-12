@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/11 14:46:08 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/12 14:52:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -436,6 +436,7 @@ void Webserv::cleanUpServers()
 			close(it->second->ReadFd);
 			close(it->second->WriteFd);
 			_servers[i].removeCGIrunning(it->first);
+			delete it->second;
 		}
 		close(_servers[i].getSocketFD());
 		logger.log(INFO, "Server shut down at port: "

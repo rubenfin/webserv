@@ -1,2 +1,7 @@
-dns moet nog
-volgorde als fout is
+
+Webserv TODO
+- Wat als je header van je eerste request in meerdere chunks verzonden moet worden?
+- Wat is het verschil tussen een 301 en 302 redirect?
+- Wat is het verschil tussen root en alias?
+- Redirection van verschillende servers nakijken
+- Request doen met curl
