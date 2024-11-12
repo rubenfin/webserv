@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/11 14:44:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 17:45:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,28 +135,24 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler& handler)
     handler.getResponse().response = header + buffer + "\r\n";
 }
 
-void Server::readFile(HTTPHandler &handler)
-{
-	int			file;
-	int			read_bytes;
-	char		*buffer;
-	long long	fileSize;
+void Server::readFile(HTTPHandler& handler) {
+    std::ifstream file;
+    std::string fileContents;
+    long long fileSize;
 
-	fileSize = getFileSize(handler.getRequest().requestURL, handler);
-	buffer = (char *)malloc((fileSize + 1) * sizeof(char));
-	logger.log(DEBUG, "Request URL in readFile(): "
-		+ handler.getRequest().requestURL);
-	file = open(handler.getRequest().requestURL.c_str(), O_RDONLY);
-	if (file == -1)
-	{
-		handler.getResponse().status = httpStatusCode::NotFound;
-		throw NotFoundException();
-	}
-	read_bytes = read(file, buffer, fileSize);
-	buffer[read_bytes] = '\0';
-	close(file);
-	makeResponse(std::string(buffer, read_bytes), handler);
-	free(buffer);
+    logger.log(DEBUG, "Request URL in readFile(): " + handler.getRequest().requestURL);
+    fileSize = getFileSize(handler.getRequest().requestURL, handler);
+    file.open(handler.getRequest().requestURL, std::ios::in | std::ios::binary);
+
+    if (!file.is_open()) {
+        handler.getResponse().status = httpStatusCode::NotFound;
+        throw NotFoundException();
+    }
+    fileContents.resize(static_cast<std::size_t>(fileSize));
+    file.read((char *)fileContents.data(), fileSize);
+    file.close();
+	
+    makeResponse(fileContents, handler);
 }
 
 void Server::removeSocketAndServer(const int& socket)

@@ -74,6 +74,7 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 			+ std::to_string(event_fd));
 		return (0) ;
 	}
+	
 	currentHTTPHandler = currentServer->matchSocketToHandler(event_fd);
 	if (currentHTTPHandler)
 	{

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/11 12:20:56 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/11 18:07:21 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include <filesystem>
+#include <sstream>
 
 #define BUFFERSIZE 8192
 // #define MAX_FDS 1024

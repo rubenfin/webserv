@@ -20,16 +20,36 @@ void replaceEncodedSlash(std::string &str)
     }
 }
 
+bool configNameCheck(const std::string &filename)
+{
+	std::string extension = "fnoc.";
+	std::string::const_iterator it = filename.end() - 1;
+
+	for (int i = 0; i < 5; i++)
+	{
+		if (*it != extension[i])
+			return false;
+		it--;
+	}
+
+	return true;
+}
+
 int	configPathCheck(const std::string &filename)
 {
+	if (!configNameCheck(filename))
+	{
+		std::cerr << "The configuration file is not a .conf file" << std::endl;
+		return (0);
+	}
 	if (checkIfDir(filename))
 	{
-		std::cout << "The configuration is a directory" << std::endl;
-		return(0);
+		std::cerr << "The configuration is a directory" << std::endl;
+		return (0);
 	}
 	if (!checkIfFile(filename))
 	{
-		std::cout << "The configuration file is not valid" << std::endl;
+		std::cerr << "The configuration file is not valid" << std::endl;
 		return (0);
 	}
     return (1);
