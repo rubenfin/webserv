@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/11 11:43:50 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 18:50:59 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,8 +331,17 @@ void HTTPHandler::checkClientBodySize(void)
 		}
 }
 
+void HTTPHandler::parsingErrorCheck(void)
+{
+	if (getRequest().internalError)
+		getServer()->logThrowStatus(*this, ERR, "[500] Error while parsing request",
+			httpStatusCode::InternalServerError, InternalServerErrorException());
+}
+
+
 void HTTPHandler::handleRequest(Server &serverAddress)
 {
+	parsingErrorCheck();
 	_server = &serverAddress;
 	_isCgi = false;
 	_hasRedirect = false;

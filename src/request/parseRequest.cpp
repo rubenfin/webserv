@@ -6,11 +6,27 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/11 13:48:34 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 18:47:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
+
+void replaceEncodedSpaces(std::string& text) {
+    size_t newlinePos = text.find('\n');
+    std::string firstLine = (newlinePos != std::string::npos) ? text.substr(0, newlinePos) : text;
+
+    size_t pos = firstLine.find("%20");
+	if (pos == std::string::npos)
+		return;
+
+    while (pos != std::string::npos) {
+        firstLine.replace(pos, 3, " ");
+        pos = firstLine.find("%20", pos + 1);
+    }
+
+    text = firstLine + text.substr(newlinePos);
+}
 
 std::string extractValueDoubleQuote(request_t &req, const std::string &toSearch) {
     std::size_t keywordPos = req.requestContent.find(toSearch);
@@ -123,6 +139,8 @@ static void setRequestURL(request_t &req)
 		req.requestURL = req.firstLine.substr(startPos);
 	else
 		req.requestURL = req.firstLine.substr(startPos, endPos - startPos);
+	if(!req.requestURL.empty())
+		replaceEncodedSpaces(req.requestURL);
 }
 
 static void setRequestDirFile(request_t &req)
@@ -138,6 +156,8 @@ static void setRequestDirFile(request_t &req)
 			req.requestDirectory = req.requestURL.substr(0, lastSlash);
 		}
 	}
+	if (!req.requestDirectory.empty())
+		replaceEncodedSpaces(req.requestDirectory);
 }
 
 static void	setRequestHeader(request_t &req)
@@ -177,19 +197,28 @@ static void	setRequestBody(request_t &req)
 	req.requestBody = req.requestContent.substr(foundBody);
 }
 
+
 void	parse_request(request_t &req, std::string buffer)
 {
-	req.requestContent = buffer;
-	req.file.fileExists = false;
-	req.firstLine = req.requestContent.substr(0, req.requestContent.find("\n"));
-	setHttpVersion(req);
-	setRequestURL(req);
-	setMethod(req);
-	setRequestDirFile(req);
-	setRequestHeader(req);
-	setRequestBody(req);
-	setFile(req, &req.file);
-	printRequestStruct(req);
-	if (req.contentLength)
-		printFileStruct(&req.file);
+	try
+	{
+		req.requestContent = buffer;
+		req.file.fileExists = false;
+		req.firstLine = req.requestContent.substr(0, req.requestContent.find("\n"));
+		setHttpVersion(req);
+		setRequestURL(req);
+		setMethod(req);
+		setRequestDirFile(req);
+		setRequestHeader(req);
+		setRequestBody(req);
+		setFile(req, &req.file);
+		printRequestStruct(req);
+		if (req.contentLength)
+			printFileStruct(&req.file);
+	}
+	catch(const std::exception& e)
+	{
+		logger.log(ERR, "Error while parsing request: " + std::string(e.what()));
+		req.internalError = true;
+	}
 }

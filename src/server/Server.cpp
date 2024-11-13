@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/12 15:00:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 18:15:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ void Server::initializeAddress()
 	else
 	{
 		logger.log(ERR, "Resolved address is not IPv4");
+		freeaddrinfo(res);
 		exit(EXIT_FAILURE);
 	}
 	freeaddrinfo(res);

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/11 12:09:10 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 18:50:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ typedef struct response_t
 
 typedef struct request_t
 {
+	bool	    internalError;
 	bool		bin;
 	std::string http_v;
 	std::string firstLine;
@@ -65,7 +66,7 @@ typedef struct request_t
 	METHODS	method;
 	std::map<std::string, std::string> header;
 	
-	request_t() : bin(false), http_v(""), firstLine(""), requestContent(""),
+	request_t() : internalError(false), bin(false), http_v(""), firstLine(""), requestContent(""),
 		requestBody(""), requestURL(""), requestDirectory(""),
 		requestFile(""), contentType(""), currentBytesRead(0),
 		totalBytesRead(0), contentLength(0), method(ERROR) {}
@@ -119,6 +120,7 @@ class HTTPHandler
 	response_t &getResponse(void);
 	Server *getServer(void);
 	std::shared_ptr<Locations> findMatchingDirective(void);
+	void parsingErrorCheck(void);
 	void setCurrentSocket(int fd);
 	void setBooleans(void);
 	bool getCgi(void);

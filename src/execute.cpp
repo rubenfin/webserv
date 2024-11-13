@@ -104,7 +104,7 @@ int Webserv::execute(void)
 		try
 		{
 			checkCGItimeouts();
-			logger.log(INFO, "Waiting for events...");
+			// logger.log(INFO, "Waiting for events...");
 			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
 			for (int idx = 0; idx < eventCount && !interrupted; ++idx)
 			{
@@ -125,6 +125,7 @@ int Webserv::execute(void)
 		{
 			logger.log(ERR, "Caught an error inside loop: "
 				+ std::string(e.what()));
+			removeSocketFromReceivedFirstRequest(client_socket);
 			close(client_socket);
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/08/19 15:12:21 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:21:14 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/12 15:42:06 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,4 +39,4 @@ void HttpException::setCustomPage(const std::string& exceptionName, const char* 
 
 char* HttpException::getPageContent() const {
     return pageContent;
-}
+} 

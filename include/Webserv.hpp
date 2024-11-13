@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/11 18:07:21 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 16:24:29 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class Webserv
 	std::unordered_map<int, bool> _socketReceivedFirstRequest;
 
   public:
-	Webserv(std::string fileName);
+	Webserv(char *fileName);
 	~Webserv();
 
 	void initalizeServers(socklen_t &addrlen);

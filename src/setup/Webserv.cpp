@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/12 14:52:46 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/13 16:26:40 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,12 @@ int Webserv::checkForNewConnection(int eventFd)
 	return (-1);
 }
 
-Webserv::Webserv(std::string fileName)
+Webserv::Webserv(char *fileName)
 {
+	setConfig(std::string(fileName));
 	_epollFd = epoll_create(1);
-	setConfig(fileName);
+    logger.setWorking(true);
+    disable_ctrl_chars();
 	interrupted = 0;
 	// _socketsConnectedToServers.reserve(MAX_EVENTS);
 }
