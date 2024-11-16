@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:43:34 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:19:00 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/14 10:37:24 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,3 +33,4 @@ void    resetCGI(CGI_t &CGI);
 int	    check_status(int status);
 void    throwException(HttpException &exception);
 void	my_epoll_add(int epoll_fd, int fd, uint32_t events);
+bool    argumentCheck(int argc, char **argv);

@@ -23,6 +23,7 @@
 #define PAGE_405 (char *)"<h1>405 - Method Not Allowed </h1>"
 #define PAGE_409 (char *)"<h1>409 - Conflict </h1>"
 #define PAGE_413 (char *)"<h1>413 - Payload Too Large </h1>"
+#define PAGE_431 (char *)"<h1>431 - Request header fields too large </h1>"
 #define PAGE_500 (char *)"<h1>500 - Internal Server Error </h1>"
 #define PAGE_501 (char *)"<h1>501 - Not Implemented </h1>"
 #define PAGE_502 (char *)"<h1>502 - Bad Gateway </h1>"
@@ -44,6 +45,7 @@ enum class httpStatusCode {
     MethodNotAllowed = 405,
     Conflict = 409,
     PayloadTooLarge = 413,
+    RequestHeaderTooLong = 431,
     InternalServerError = 500,
     NotImplemented = 501,
     BadGateway = 502,

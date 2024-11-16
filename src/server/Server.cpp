@@ -65,28 +65,26 @@ void Server::setClientBodySize(void)
 	std::string bodySizeM = trim(extractValueUntilLocation("client_body_size "));
 	if (bodySizeM.empty())
 	{
-		logger.log(INFO, "Default client body size used (5MB)");
+		logger.log(DEBUG, "Default client body size used (5MB)");
 		_client_body_size_server = 5242880;
 		return ;
 	}
 	else if (!bodySizeM.empty() && bodySizeM.back() != 'M')
 	{
 		logger.log(ERR, "Server client body size can only be set in megabytes, please end with M");
-		logger.log(INFO, "Default client body size used (5MB)");
+		logger.log(DEBUG, "Default client body size used (5MB)");
 		_client_body_size_server = 5242880;
 		return ;
 	}
 	bodySizeM.pop_back();
-	logger.log(ERR, "SERVER" + bodySizeM);
-	if (std::stoll(bodySizeM) > 100)
+	if (std::stoll(bodySizeM) > 1000000)
 	{
-		logger.log(ERR, "Server client body size exceeded, max body size is 100MB");
-		logger.log(INFO, "Default client body size used (5MB)");
+		logger.log(ERR, "Server client body size exceeded, max body size is 1000000MB");
+		logger.log(DEBUG, "Default client body size used (5MB)");
 		_client_body_size_server = 5242880;
 		return ;
 	}
 	_client_body_size_server = std::stoll(bodySizeM) * 1048576;
-	logger.log(ERR, std::to_string(_client_body_size_server));
 }
 
 void Server::makeResponseForRedirect(HTTPHandler &handler)

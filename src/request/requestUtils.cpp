@@ -37,6 +37,8 @@ void	resetRequest(request_t &request)
 {
 	request.internalError = false;
 	request.bin = false;
+	request.foundHeaderEnd = false;
+	request.favIcon = false;
 	request.http_v = "";
 	request.firstLine = "";
 	request.requestContent = "";

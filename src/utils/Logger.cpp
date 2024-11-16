@@ -27,6 +27,7 @@ std::string getCurrTime()
     std::string formattedTime = "[" + (std::string)timestamp + "]";
     return (formattedTime);
 }
+
 Logger &Logger::getInstance()
 {
 	std::call_once(initInstanceFlag, []() { instance.reset(new Logger()); });

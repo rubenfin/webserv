@@ -20,12 +20,12 @@ void replaceEncodedSpaces(std::string& text) {
 	if (pos == std::string::npos)
 		return;
 
-    while (pos != std::string::npos) {
+    while (pos != std::string::npos) { 
         firstLine.replace(pos, 3, " ");
         pos = firstLine.find("%20", pos + 1);
     }
 
-    text = firstLine + text.substr(newlinePos);
+    text = firstLine + text.substr(newlinePos); 
 }
 
 std::string extractValueDoubleQuote(request_t &req, const std::string &toSearch) {
@@ -164,8 +164,7 @@ static void	setRequestHeader(request_t &req)
 {
 	std::size_t startPos = req.requestContent.find("\n") + 1;
 	std::size_t endPos;
-	while ((endPos = req.requestContent.find("\n",
-				startPos)) != std::string::npos)
+	while ((endPos = req.requestContent.find("\n", startPos)) != std::string::npos)
 	{
 		std::string headerLine = req.requestContent.substr(startPos, endPos
 				- startPos);
@@ -197,6 +196,14 @@ static void	setRequestBody(request_t &req)
 	req.requestBody = req.requestContent.substr(foundBody);
 }
 
+static void findHeadingEnd(request_t &req)
+{
+	std::size_t foundBody = req.requestContent.find("\r\n\r\n");
+	if (foundBody != std::string::npos)
+	{
+		req.foundHeaderEnd = true;
+	}
+}
 
 void	parse_request(request_t &req, std::string buffer)
 {
@@ -205,6 +212,7 @@ void	parse_request(request_t &req, std::string buffer)
 		req.requestContent = buffer;
 		req.file.fileExists = false;
 		req.firstLine = req.requestContent.substr(0, req.requestContent.find("\n"));
+		findHeadingEnd(req);
 		setHttpVersion(req);
 		setRequestURL(req);
 		setMethod(req);
@@ -216,9 +224,13 @@ void	parse_request(request_t &req, std::string buffer)
 		if (req.contentLength)
 			printFileStruct(&req.file);
 	}
+	catch (const FavIconException &e)
+	{
+		req.favIcon = true;
+	}
 	catch(const std::exception& e)
 	{
-		logger.log(ERR, "Error while parsing request: " + std::string(e.what()));
+		logger.log(ERR, std::string(e.what()));
 		req.internalError = true;
 	}
 }

@@ -178,8 +178,7 @@ void Server::setPortHost(void)
 	else 
 		throw std::invalid_argument("No : in the listen argument");
     
-    std::cout << "PORT STRING: " << _portString << " |" << std::endl;
-    std::cout << "HOST STRING: " << _host << " |" << std::endl;
+	logger.log (INFO, "Server found on: " + _host + ":" + _portString);
     try {
         _port = std::stoi(_portString);
 		if (!(_port >= 0 && _port <= 65535))
@@ -403,34 +402,39 @@ std::map<int, CGI_t *> &Server::getFdsRunningCGI(void)
 
 void Server::setLocationsRegex(std::string serverContent)
 {
-	size_t	index;
-	bool	copyAllowed;
-	int		count;
+    size_t index = 0;
+    bool copyAllowed = false;
+    std::string line;
+    std::istringstream iss(serverContent);
+    std::regex startPattern(R"(location)");
+    std::vector<std::string> locationsStrings;
 
-	index = 0;
-	copyAllowed = false;
-	std::string line;
-	std::istringstream iss(serverContent);
-	std::regex startPattern(R"(location)");
-	std::string locationsStrings[1000]; // NEED TO FIX MAYBE?
-	while (std::getline(iss, line))
-	{
-		if (std::regex_search(line, startPattern))
-		{
-			if (copyAllowed)
-				index++;
-			copyAllowed = true;
-		}
-		if (copyAllowed)
-			locationsStrings[index] += line + '\n';
-	}
-	count = 0;
-	for (size_t i = 0; i <= index; i++)
-	{
-		count++;
-		_locations.emplace_back(locationsStrings[i]);
-	}
+    // Ensure the vector has at least one element to start
+    locationsStrings.emplace_back("");
+
+    while (std::getline(iss, line))
+    {
+        if (std::regex_search(line, startPattern))
+        {
+            if (copyAllowed)
+            {
+                // Start a new location block
+                locationsStrings.emplace_back("");
+                index++;
+            }
+            copyAllowed = true;
+        }
+        if (copyAllowed)
+            locationsStrings[index] += line + '\n';
+    }
+
+    // Add collected location strings to _locations
+    for (const auto& loc : locationsStrings)
+    {
+        _locations.emplace_back(loc);
+    }
 }
+
 
 void Server::linkHandlerResponseRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest)
 {
@@ -445,7 +449,6 @@ void Server::logThrowStatus(HTTPHandler &handler, const level &lvl,
 	const std::string &msg, const httpStatusCode &status,
 	HttpException exception)
 {
-
 	logger.log(lvl, msg);
 	handler.getResponse().status = status;
 	throwException(exception);

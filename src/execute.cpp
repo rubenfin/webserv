@@ -99,7 +99,7 @@ int Webserv::execute(void)
 
 	initalizeServers(addrlen);
 
-	while (!interrupted)
+	while (!interrupted) 
 	{
 		try
 		{

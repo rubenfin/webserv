@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/13 18:50:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/14 10:36:31 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,25 @@ void HTTPHandler::combineRightUrl(void)
 			return ;
 		else
 			getServer()->logThrowStatus(*this, ERR,
-				"[403] No index foundDirective in config file and no autoindex in foundDirective, is your alias ok?", httpStatusCode::Forbidden,
+				"[403] No index foundDirective in config file and no autoindex in foundDirective", httpStatusCode::Forbidden,
+				ForbiddenException());
+	} else if (_foundDirective->getRoot() != "")
+	{
+		if (!_foundDirective->getIndex().empty())
+			getRequest().requestURL = _foundDirective->getRoot() + getRequest().requestURL  + "/"
+				+ _foundDirective->getIndex();
+		else if (_foundDirective->getAutoIndex())
+		{
+			getRequest().requestURL = _foundDirective->getRoot() + getRequest().requestURL + "/"
+				+ _foundDirective->getIndex();
+			_returnAutoIndex = true;
+			logger.log(WARNING, "No index found in foundDirective, now trying autoindex");
+		}
+		else if (_hasRedirect)
+			return ;
+		else
+			getServer()->logThrowStatus(*this, ERR,
+				"[403] No index foundDirective in config file and no autoindex in foundDirective?", httpStatusCode::Forbidden,
 				ForbiddenException());
 	}
 	else if (_foundDirective->getLocationDirective() == "/")
@@ -299,9 +317,18 @@ void HTTPHandler::totalPathCheck(void)
 {
 	if (_foundDirective->getAlias().empty())
 	{
-		pathCheck(getServer()->getRoot() + getRequest().requestDirectory,
-			getServer()->getRoot() + getRequest().requestDirectory
-			+ getRequest().requestFile);
+		if (!_foundDirective->getRoot().empty())
+		{
+			pathCheck(_foundDirective->getRoot() + getRequest().requestDirectory,
+				_foundDirective->getRoot() + getRequest().requestDirectory
+				+ getRequest().requestFile);
+		}
+		else
+		{
+			pathCheck(getServer()->getRoot() + getRequest().requestDirectory,
+				getServer()->getRoot() + getRequest().requestDirectory
+				+ getRequest().requestFile);
+		}
 	}
 	else
 	{
@@ -338,10 +365,28 @@ void HTTPHandler::parsingErrorCheck(void)
 			httpStatusCode::InternalServerError, InternalServerErrorException());
 }
 
+void HTTPHandler::headerTooLongCheck(void)
+{
+	if (!getRequest().foundHeaderEnd)
+	{
+		getServer()->logThrowStatus(*this, ERR, "[431] Header too long",
+			httpStatusCode::RequestHeaderTooLong, RequestHeaderTooLongException());
+	}
+}
+
+void HTTPHandler::favIconCheck(void)
+{
+	if (getRequest().favIcon)
+	{
+		getServer()->logThrowStatus(*this, ERR, "[404] FavIcon has not been found", httpStatusCode::NotFound, FavIconException());
+	}
+}
 
 void HTTPHandler::handleRequest(Server &serverAddress)
 {
+	favIconCheck();
 	parsingErrorCheck();
+	headerTooLongCheck();
 	_server = &serverAddress;
 	_isCgi = false;
 	_hasRedirect = false;

@@ -33,7 +33,6 @@ void Webserv::printParsing(void)
 			tmp[i].printMethods();
 			std::cout << "Root " << tmp[i].getRoot() << std::endl;
 			std::cout << "Index " << tmp[i].getIndex() << std::endl;
-			std::cout << "Cgi_pass " << tmp[i].getCgi_pass() << std::endl;
 		}
 	}
 }
@@ -98,10 +97,10 @@ int Webserv::checkForNewConnection(int eventFd)
 
 Webserv::Webserv(char *fileName)
 {
-	setConfig(std::string(fileName));
-	_epollFd = epoll_create(1);
     logger.setWorking(true);
     disable_ctrl_chars();
+	setConfig(std::string(fileName));
+	_epollFd = epoll_create(1);
 	interrupted = 0;
 	// _socketsConnectedToServers.reserve(MAX_EVENTS);
 }
@@ -237,7 +236,7 @@ int Webserv::initializeConnection(const socklen_t &addrlen, int &client_socket,
 
 void Webserv::setupServers(socklen_t &addrlen)
 {
-	std::cout << "amount of servers = " << _servers.size() << std::endl;
+	logger.log(INFO, "Total amount of servers: " + std::to_string(_servers.size()));
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		addrlen = sizeof(_servers[i].getAddress());

@@ -39,20 +39,19 @@ class Locations
 	MethodsLoc	_allowedMethods;
 	std::string _root;
 	std::string _index;
-	std::string _cgi_pass;
 	std::string _alias;
-	std::string _url;
 	std::string _return;
 	long long 	_client_body_size;
 	bool 		_autoindex;
 
   public:
-	void linkServer(Server *server);
+	Locations(std::string locationContent);
+	~Locations();
+	
 	void printMethods(void);
 	std::string getLocationDirective(void);
 	void setRoot(void);
 	void setIndex(void);
-	void setCgi_pass(void);
 	void setMethods(void);
 	void setAlias(void);
 	void setReturn(void);
@@ -60,18 +59,14 @@ class Locations
 	void setClientBodySize(void);
 	std::string getRoot(void);
 	std::string getIndex(void);
-	std::string getCgi_pass(void);
 	MethodsLoc getMethods(void);
 	std::string getAlias(void);
 	std::string getReturn(void);
 	bool 		getAutoIndex(void);
 	long long  	getClientBodySize(void);
+	void checkIfBothAliasAndRoot();
 	std::string extractValue(std::string toSearch);
 	std::string extractValueUntilNL(std::string toSearch);
 	void printLocationsContent(void);
 	void getLocationRegex(void);
-	Locations(std::string locationContent);
-	Locations(const Locations *other);
-	Locations();
-	~Locations();
 };

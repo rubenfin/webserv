@@ -193,3 +193,18 @@ int	checkIfFile(const std::string &pathname)
 	}
 	return (0);
 }
+
+bool argumentCheck(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        logger.log(ERR, "usage: ./webserv [configuration_file]");
+        return false;
+    }
+    if (!configPathCheck(std::string(argv[1])))
+    {
+        logger.log(ERR, "Configuration path check failed for file: " + std::string(argv[1]));
+        return false;
+    }
+    return true;
+}

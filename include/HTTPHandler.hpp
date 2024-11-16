@@ -51,6 +51,8 @@ typedef struct request_t
 {
 	bool	    internalError;
 	bool		bin;
+	bool		foundHeaderEnd;
+	bool		favIcon;
 	std::string http_v;
 	std::string firstLine;
 	std::string requestContent;
@@ -66,7 +68,7 @@ typedef struct request_t
 	METHODS	method;
 	std::map<std::string, std::string> header;
 	
-	request_t() : internalError(false), bin(false), http_v(""), firstLine(""), requestContent(""),
+	request_t() : internalError(false), bin(false), foundHeaderEnd(false), favIcon(false), http_v(""), firstLine(""), requestContent(""),
 		requestBody(""), requestURL(""), requestDirectory(""),
 		requestFile(""), contentType(""), currentBytesRead(0),
 		totalBytesRead(0), contentLength(0), method(ERROR) {}
@@ -95,6 +97,7 @@ class HTTPHandler
 	HTTPHandler();
 	~HTTPHandler();
 
+	void favIconCheck(void);
 	void setIndex(const int& idx);
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);
@@ -120,6 +123,7 @@ class HTTPHandler
 	response_t &getResponse(void);
 	Server *getServer(void);
 	std::shared_ptr<Locations> findMatchingDirective(void);
+	void headerTooLongCheck(void);
 	void parsingErrorCheck(void);
 	void setCurrentSocket(int fd);
 	void setBooleans(void);

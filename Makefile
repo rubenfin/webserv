@@ -1,4 +1,4 @@
-CPP = c++ -std=c++11
+CPP = g++ -std=c++11
 CPPFLAGS = -Wall -Wextra -Werror -g
 LDFLAGS = -fsanitize=address
 SRC_DIR = src

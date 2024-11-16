@@ -20,7 +20,6 @@
 #include <memory>
 #include <stdexcept>
 
-// Base HttpException class
 class HttpException : public std::runtime_error {
 protected:
     int statusCode;
@@ -35,14 +34,12 @@ public:
     static void setCustomPage(const std::string& exceptionName, const char* content);
 };
 
-// Macro to define specific HTTP exceptions
 #define DEFINE_HTTP_EXCEPTION(name, code, defaultContent) \
 class name ## Exception : public HttpException { \
 public: \
     name ## Exception() : HttpException(code, #name, defaultContent) {} \
 };
 
-// Define specific HTTP exceptions with default content
 DEFINE_HTTP_EXCEPTION(Created, 201, PAGE_201)
 DEFINE_HTTP_EXCEPTION(Accepted, 202, PAGE_202)
 DEFINE_HTTP_EXCEPTION(NoContent, 204, PAGE_204)
@@ -54,11 +51,11 @@ DEFINE_HTTP_EXCEPTION(FavIcon, 404, PAGE_404)
 DEFINE_HTTP_EXCEPTION(MethodNotAllowed, 405, PAGE_405)
 DEFINE_HTTP_EXCEPTION(Conflict, 409, PAGE_409)
 DEFINE_HTTP_EXCEPTION(PayloadTooLarge, 413, PAGE_413)
+DEFINE_HTTP_EXCEPTION(RequestHeaderTooLong, 431, PAGE_431)
 DEFINE_HTTP_EXCEPTION(InternalServerError, 500, PAGE_500)
 DEFINE_HTTP_EXCEPTION(NotImplemented, 501, PAGE_501)
 DEFINE_HTTP_EXCEPTION(BadGateway, 502, PAGE_502)
 DEFINE_HTTP_EXCEPTION(ServiceUnavailable, 503, PAGE_503)
 DEFINE_HTTP_EXCEPTION(HttpVersionNotSupported, 505, PAGE_505)
-
 
 #endif
