@@ -72,6 +72,8 @@ protected:
   
 
 public:
+  std::vector<HTTPHandler>& getHTTPHandlers(void);
+  int readFromFile(const int &fd, HTTPHandler &handler);
   void readWriteCGI(const int& socket, HTTPHandler &handler);
   void removeCGIrunning(const int& socket);
   std::map<int, CGI_t *> &getFdsRunningCGI(void);

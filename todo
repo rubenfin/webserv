@@ -4,7 +4,10 @@ Webserv TODO
 <!-- - Wat is het verschil tussen een 301 en 302 redirect? -->
 <!-- - Wat is het verschil tussen root en alias? -->
 - Redirection van verschillende servers nakijken
-- Request doen met curl
+<!-- - Request doen met curl -->
 - Alle files langs gaan en checken
+- cat with space fixen
+- goeie pagina maken voor eval met goede testcases
+- Multiple CGI en cookies?
 - Makefile aanpassen naar c++ en niet g++
 

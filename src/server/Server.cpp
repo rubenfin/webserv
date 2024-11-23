@@ -85,6 +85,7 @@ void Server::setClientBodySize(void)
 		return ;
 	}
 	_client_body_size_server = std::stoll(bodySizeM) * 1048576;
+	logger.log(DEBUG, "Server client body size set to: " + std::to_string(_client_body_size_server));
 }
 
 void Server::makeResponseForRedirect(HTTPHandler &handler)
@@ -132,26 +133,65 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler &handler)
 	handler.getResponse().response = header + buffer + "\r\n";
 }
 
-void Server::readFile(HTTPHandler &handler)
-{
-	long long	fileSize;
+// void Server::readFile(HTTPHandler &handler)
+// {
+// 	long long	fileSize;
 
-	std::ifstream file;
-	std::string fileContents;
+// 	std::ifstream file;
+// 	std::string fileContents;
+// 	logger.log(DEBUG, "Request URL in readFile(): "
+// 		+ handler.getRequest().requestURL);
+// 	fileSize = getFileSize(handler.getRequest().requestURL, handler);
+// 	file.open(handler.getRequest().requestURL, std::ios::in | std::ios::binary);
+// 	if (!file.is_open())
+// 	{
+// 		handler.getResponse().status = httpStatusCode::NotFound;
+// 		throw NotFoundException();
+// 	}
+// 	fileContents.resize(static_cast<std::size_t>(fileSize));
+// 	file.read((char *)fileContents.data(), fileSize);
+// 	file.close();
+// 	makeResponse(fileContents, handler);
+// }
+
+void Server::readFile(HTTPHandler& handler)
+{
+	int fds[2];
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ handler.getRequest().requestURL);
-	fileSize = getFileSize(handler.getRequest().requestURL, handler);
-	file.open(handler.getRequest().requestURL, std::ios::in | std::ios::binary);
-	if (!file.is_open())
+	handler.setTotalToRead(getFileSize(handler.getRequest().requestURL, handler));
+	fds[0] = open(handler.getRequest().requestURL.c_str(), O_RDONLY);
+	if (fds[0] == -1)
 	{
-		handler.getResponse().status = httpStatusCode::NotFound;
-		throw NotFoundException();
+		logThrowStatus(handler, ERR,
+				"[500] ERROR",
+				httpStatusCode::InternalServerError,
+				InternalServerErrorException());		
 	}
-	fileContents.resize(static_cast<std::size_t>(fileSize));
-	file.read((char *)fileContents.data(), fileSize);
-	file.close();
-	makeResponse(fileContents, handler);
+	if (pipe(fds) == -1)
+	{
+		logThrowStatus(handler, ERR,
+				"[500] ERROR",
+				httpStatusCode::InternalServerError,
+				InternalServerErrorException());	
+	}
+	close(fds[1]);
+	fcntl(fds[0], F_SETFL, O_NONBLOCK);
+	epoll_event ev;
+	ev.events = EPOLLIN;
+	ev.data.fd = fds[0];
+	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, fds[0], &ev) ==
+			-1)
+	{
+		logThrowStatus(handler, ERR,
+				"[500] Couldn't add readFile FD to epoll",
+				httpStatusCode::InternalServerError,
+				InternalServerErrorException());
+	}
+	handler.setConnectedToFile(fds[0]);
+	std::cout << "CONNECTED TO:" << handler.getConnectedToFile() << std::endl;
 }
+
 
 void Server::removeSocketAndServer(const int &socket)
 {
@@ -165,6 +205,31 @@ void Server::removeSocketAndServer(const int &socket)
 		return ;
 	}
 	logger.log(INFO, "Couldn't find socket in connectedSocketsToServers");
+}
+
+int Server::readFromFile(const int &fd, HTTPHandler &handler)
+{
+	char	buffer[BUFFERSIZE];
+	int		br;
+	
+	logger.log(DEBUG, "INSIDE READ FROM FILE WITH FD: " + std::to_string(fd));
+	br = read(fd, buffer, BUFFERSIZE);
+	if (br == -1)
+	{
+		logThrowStatus(handler, ERR, "[500] Internal server error while reading a normal fd", httpStatusCode::InternalServerError, InternalServerErrorException());
+	}
+	buffer[br] = '\0';
+	logger.log(INFO, "Read " + std::to_string(br) + " bytes from file");
+	handler.getResponse().response += buffer;
+	handler.setFileBytesRead(handler.getFileBytesRead() + br);
+	std::cout << handler.getFileBytesRead() << "|" << handler.getTotalToRead() << std::endl;
+	if (handler.getFileBytesRead() >= handler.getTotalToRead())
+	{
+		removeFdFromEpoll(fd);
+		makeResponse(handler.getResponse().response, handler);
+		sendResponse(handler, handler.getConnectedToSocket());
+	}
+	return (1);
 }
 
 void Server::readWriteCGI(const int &CGI_FD, HTTPHandler &handler)
@@ -336,6 +401,8 @@ HTTPHandler *Server::matchSocketToHandler(const int &socket)
 		cgiPtr = _http_handler.at(i).getConnectedToCGI();
 		if (socket == _http_handler.at(i).getConnectedToSocket())
 			return (&(_http_handler.at(i)));
+		if (socket == _http_handler.at(i).getConnectedToFile())
+			return (&(_http_handler.at(i)));
 		if (cgiPtr != nullptr)
 		{
 			if (socket == cgiPtr->ReadFd || socket == cgiPtr->WriteFd)
@@ -344,6 +411,11 @@ HTTPHandler *Server::matchSocketToHandler(const int &socket)
 	}
 	logger.log(ERR, "Couldn't match socket or CGI FD to handler");
 	return (nullptr);
+}
+
+std::vector<HTTPHandler>& Server::getHTTPHandlers(void)
+{
+	return (_http_handler);
 }
 
 void Server::removeCGIrunning(const int &socket)

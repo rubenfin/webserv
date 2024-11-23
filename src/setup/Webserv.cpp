@@ -148,6 +148,7 @@ int Webserv::handleFirstRequest(const int &client_socket)
 		return (0);
 	}
 	std::string firstRequest(buffer, rd_bytes);
+	logger.log(DEBUG, firstRequest);
 	foundServer = findRightServer(firstRequest);
 	if (foundServer == -1)
 	{
@@ -176,8 +177,17 @@ Server *Webserv::findServerConnectedToSocket(const int &socket)
 	{
 		return (found->second);
 	}
+
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
+		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
+		for (HTTPHandler& handler : handlers)
+		{
+			std::cout << handler.getConnectedToFile() << "|" << socket << std::endl;
+			if (handler.getConnectedToFile() == socket)
+				return (&(_servers[i]));
+		}
+
 		std::map<int, CGI_t *> &fdsRunningCGI = _servers[i].getFdsRunningCGI();
 		for (auto it = fdsRunningCGI.begin(); it != fdsRunningCGI.end(); ++it)
 		{
@@ -282,9 +292,11 @@ int Webserv::findRightServer(const std::string &buffer)
 	serverName = trim(serverName);
 	port = trim(port);
 	for (size_t i = 0; i < _servers.size(); i++)
+	{
 		if (_servers[i].getServerName() == serverName
 			&& _servers[i].getPortString() == port)
 			return (i);
+	}
 	for (size_t i = 0; i < _servers.size(); i++)
 		if (_servers[i].getHost() == serverName
 			&& _servers[i].getPortString() == port)

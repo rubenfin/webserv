@@ -146,7 +146,9 @@ static void setRequestURL(request_t &req)
 static void setRequestDirFile(request_t &req)
 {
 	if (req.requestURL.find(".") == std::string::npos)
+	{
 		req.requestDirectory = req.requestURL;
+	}
 	else
 	{
 		auto lastSlash = req.requestURL.rfind("/");

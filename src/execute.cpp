@@ -78,8 +78,11 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 	currentHTTPHandler = currentServer->matchSocketToHandler(event_fd);
 	if (currentHTTPHandler)
 	{
-		if (currentHTTPHandler->getConnectedToCGI() == nullptr)
+		std::cout << "CONNECTED TO FILE: " << currentHTTPHandler->getConnectedToFile()  << std::endl;
+		if (currentHTTPHandler->getConnectedToCGI() == nullptr && currentHTTPHandler->getConnectedToFile() == -1)
 			currentServer->readWriteServer(eventList[idx], *currentHTTPHandler);
+		else if (currentHTTPHandler->getConnectedToFile() != -1)
+			currentServer->readFromFile(event_fd, *currentHTTPHandler);
 		else
 			currentServer->readWriteCGI(event_fd, *currentHTTPHandler);
 	}

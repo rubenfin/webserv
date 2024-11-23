@@ -32,7 +32,6 @@ struct			MethodsLoc
 class Locations
 {
   private:
-	Server* 	_server;
 	std::string _locationContent;
 	std::string _methodsList;
 	std::string _locationDirective;

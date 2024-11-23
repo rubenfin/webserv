@@ -83,21 +83,33 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 	CGIinfo = new CGI_t();
 	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));
 	if (access(handler.getRequest().requestURL.c_str(), X_OK) != 0)
+	{
+		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[403] Script doesn't have executable rights",
 			httpStatusCode::Forbidden, ForbiddenException());
+	}
 	if (pipe(childToParent) == -1)
+	{
+		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
+	}
 	if (pipe(parentToChild) == -1)
+	{
+		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
+	}
 	CGIinfo->PID = fork();
 	if (CGIinfo->PID == -1)
+	{
+		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Fork has failed",
 			httpStatusCode::InternalServerError,
 			InternalServerErrorException());
+	}
 	else if (CGIinfo->PID == 0)
 		execute_CGI_script(childToParent, parentToChild,
 			handler.getRequest().requestURL.c_str(), handler);
@@ -117,6 +129,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 		if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, childToParent[0], &ev) ==
 			-1)
 		{
+			delete CGIinfo;
 			logThrowStatus(handler, ERR,
 				"[500] Couldn't add childToParent FD to epoll in CGI",
 				httpStatusCode::InternalServerError,
@@ -127,6 +140,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 		if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, parentToChild[1], &ev) ==
 			-1)
 		{
+			delete CGIinfo;
 			logThrowStatus(handler, ERR,
 				"[500] Couldn't add parentToChild FD to epoll in CGI",
 				httpStatusCode::InternalServerError,
@@ -157,11 +171,25 @@ void Server::checkFileDetails(HTTPHandler &handler, std::ofstream &file)
 			logger.log(WARNING, "Made upload dir");
 		}
 		std::string fileName = handler.getRequest().file.fileName;
-		std::string fullPath = uploadPath + "/" + fileName;
-		if (fileName.empty())
+		if (fileName.empty() && handler.getRequest().file.fileContentType == "multipart/form-data")
 			logThrowStatus(handler, ERR, "[403] No file has been uploaded",
 				httpStatusCode::Forbidden, ForbiddenException());
-		else if (access(fullPath.c_str(), F_OK) == 0)
+		else
+		{
+			std::string tmp = uploadPath + "/tmp";
+			if (access(tmp.c_str(), F_OK) != 0)
+			{
+				if (mkdir(tmp.c_str(), 0775) == -1)
+					logThrowStatus(handler, ERR,
+						"[500] tmp directory not found and unable to make one",
+						httpStatusCode::InternalServerError,
+						InternalServerErrorException());
+			}
+			handler.getRequest().file.fileName = std::tmpnam(nullptr);
+			handler.getRequest().file.fileName += ".txt";
+		}
+		std::string fullPath = uploadPath + "/" + handler.getRequest().file.fileName;
+		if (access(fullPath.c_str(), F_OK) == 0)
 		{
 			logger.log(WARNING,
 				"File with same name already exists and has been overwritten");
@@ -176,17 +204,28 @@ void Server::setFileInServer(HTTPHandler &handler)
 {
 	std::ofstream file;
 	std::string &fileContent = handler.getRequest().file.fileContent;
-	std::string fullPath = getUpload() + "/"
-		+ handler.getRequest().file.fileName;
 	if (!handler.getRequest().file.fileChecked)
 		checkFileDetails(handler, file);
+	std::string fullPath = getUpload() + "/"
+		+ handler.getRequest().file.fileName;
 	logger.log(DEBUG, "in setFileInServer");
 	file.open(fullPath,
 		std::ios::out | std::ios::in | std::ios::app | std::ios::binary);
-	if (file.is_open())
+	if  (handler.getRequest().file.fileContentLength != 0 && file.is_open())
 	{
 		file << fileContent;
 		if (handler.getRequest().totalBytesRead >= handler.getRequest().contentLength)
+		{
+			file.close();
+			logThrowStatus(handler, INFO, "[201] Done uploading file, read all the bytes of file: " + fullPath + " with size: "
+				+ std::to_string(getFileSize(fullPath, handler)),
+				httpStatusCode::Created, CreatedException());
+		}
+	}
+	else if (file.is_open() && handler.getRequest().requestBody != "")
+	{
+		file << handler.getRequest().requestBody;
+		if (handler.getRequest().currentBytesRead < BUFFERSIZE)
 		{
 			file.close();
 			logThrowStatus(handler, INFO, "[201] Done uploading file, read all the bytes of file: " + fullPath + " with size: "
@@ -271,11 +310,11 @@ int Server::serverActions(HTTPHandler& handler, int &socket)
 		setFileInServer(handler);
 	else
 		readFile(handler);
-	if (handler.getRequest().currentBytesRead < BUFFERSIZE - 1
-		&& !handler.getChunked() && !handler.getCgi())
-	{
-		sendResponse(handler, socket);
-		return (0);
-	}
+	// if (handler.getRequest().currentBytesRead < BUFFERSIZE - 1
+	// 	&& !handler.getChunked() && !handler.getCgi())
+	// {
+	// 	sendResponse(handler, socket);
+	// 	return (0);
+	// }
 	return (1);
 }

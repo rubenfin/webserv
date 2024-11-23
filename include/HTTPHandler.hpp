@@ -87,6 +87,9 @@ class HTTPHandler
 	Server *_server;
 	std::unordered_map<int, bool> *_socketReceivedFirstRequest;
 	int _currentSocket;
+	int _connectedToFile;
+	long long _fileBytesRead;
+	long long _totalToRead;
 	bool _isCgi;
 	bool _hasRedirect;
 	bool _returnAutoIndex;
@@ -101,6 +104,8 @@ class HTTPHandler
 	void setIndex(const int& idx);
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);
+	void setConnectedToFile(const int &fd);
+	int getConnectedToFile(void);
 	void setFirstRequest(std::string buffer);
 	void checkRequestData(void);
 	void combineRightUrl(void);
@@ -133,5 +138,9 @@ class HTTPHandler
 	bool getReturnAutoIndex(void);
 	bool getHeaderChecked(void);
 	bool getChunked(void);
+	void setFileBytesRead(long long size);
+	void setTotalToRead(long long total);
+	long long getFileBytesRead(void);
+	long long getTotalToRead(void);
 	void cleanHTTPHandler();
 };
