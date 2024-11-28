@@ -97,7 +97,7 @@ int Webserv::checkForNewConnection(int eventFd)
 
 Webserv::Webserv(char *fileName)
 {
-    logger.setWorking(true);
+    logger.setWorking(false);
     disable_ctrl_chars();
 	setConfig(std::string(fileName));
 	_epollFd = epoll_create(1);
@@ -123,25 +123,34 @@ int Webserv::handleFirstRequest(const int &client_socket)
 	std::string bufferString;
 	rd_bytes = read(client_socket, buffer, BUFFERSIZE);
 	buffer[rd_bytes] = '\0';
-	if (rd_bytes > 0)
+	if (rd_bytes == -1)
 	{
-		buffer[rd_bytes] = '\0';
-	}
-	else if (rd_bytes == 0)
-	{
-		logger.log(INFO, "Closed socket since 0 bytes read: "
+		logger.log(INFO, "Read failed, closing client socket: "
 			+ std::to_string(client_socket));
-		buffer[rd_bytes] = '\0';
+		buffer[0] = '\0';
+		sendInternalServerError(client_socket);
 		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
 		return (0);
 	}
+	else if (rd_bytes > BUFFERSIZE) {
+    logger.log(ERR, "Read buffer overflow detected, rd_bytes: " + std::to_string(rd_bytes) + " , BUFFERSIZE: " + std::to_string(BUFFERSIZE));
+    sendInternalServerError(client_socket);
+	removeSocketFromReceivedFirstRequest(client_socket);
+    removeFdFromEpoll(client_socket);
+    close(client_socket);
+    return 0;
+	}
+	else if (rd_bytes > 0)
+	{
+		buffer[rd_bytes] = '\0';
+	}
 	else
 	{
-		logger.log(INFO, "Read failed, closing client socket: "
+		logger.log(INFO, "Closed socket since 0 bytes read: "
 			+ std::to_string(client_socket));
-		buffer[0] = '\0';
+		buffer[rd_bytes] = '\0';
 		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
@@ -153,6 +162,7 @@ int Webserv::handleFirstRequest(const int &client_socket)
 	if (foundServer == -1)
 	{
 		logger.log(ERR, "Couldn't find server for first request");
+		sendInternalServerError(client_socket);
 		removeSocketFromReceivedFirstRequest(client_socket);
 		removeFdFromEpoll(client_socket);
 		close(client_socket);
@@ -183,8 +193,7 @@ Server *Webserv::findServerConnectedToSocket(const int &socket)
 		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
 		for (HTTPHandler& handler : handlers)
 		{
-			std::cout << handler.getConnectedToFile() << "|" << socket << std::endl;
-			if (handler.getConnectedToFile() == socket)
+			if (handler.getFDs().getReadFd() == socket || handler.getFDs().getWriteFd() == socket)
 				return (&(_servers[i]));
 		}
 

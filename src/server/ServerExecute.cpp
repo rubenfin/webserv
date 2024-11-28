@@ -174,7 +174,7 @@ void Server::checkFileDetails(HTTPHandler &handler, std::ofstream &file)
 		if (fileName.empty() && handler.getRequest().file.fileContentType == "multipart/form-data")
 			logThrowStatus(handler, ERR, "[403] No file has been uploaded",
 				httpStatusCode::Forbidden, ForbiddenException());
-		else
+		else if (fileName.empty() && handler.getRequest().file.fileContentType != "multipart/form-data")
 		{
 			std::string tmp = uploadPath + "/tmp";
 			if (access(tmp.c_str(), F_OK) != 0)
@@ -299,6 +299,7 @@ int Server::serverActions(HTTPHandler& handler, int &socket)
 	{
 		makeResponse((char *)returnAutoIndex(handler,
 				handler.getRequest().requestURL).c_str(), handler);
+		sendResponse(handler, socket);		
 	}
 	else if (handler.getRequest().method == DELETE)
 		deleteFileInServer(handler);

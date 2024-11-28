@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/13 18:15:28 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/26 14:56:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler &handler)
 		header += "Content-Type: image/png\r\n";
 	if (!buffer.empty())
 	{
-		header += "Content-Length: " + std::to_string(buffer.size() + 2)
+		header += "Content-Length: " + std::to_string(buffer.size())
 			+ "\r\n";
 	}
 	else
@@ -156,40 +156,37 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler &handler)
 
 void Server::readFile(HTTPHandler& handler)
 {
-	int fds[2];
+	int pipeFds[2];
+	FileDescriptor &FDs = handler.getFDs();
 	logger.log(DEBUG, "Request URL in readFile(): "
 		+ handler.getRequest().requestURL);
-	handler.setTotalToRead(getFileSize(handler.getRequest().requestURL, handler));
-	fds[0] = open(handler.getRequest().requestURL.c_str(), O_RDONLY);
-	if (fds[0] == -1)
+	int total = getFileSize(handler.getRequest().requestURL, handler);
+	FDs.setTotalToRead(total);
+	FDs.setTotalToWrite(total);
+	int fd = open(handler.getRequest().requestURL.c_str(), O_RDONLY);
+	if (fd == -1)
 	{
 		logThrowStatus(handler, ERR,
-				"[500] ERROR",
+				"[500] Couldn't open file",
 				httpStatusCode::InternalServerError,
 				InternalServerErrorException());		
 	}
-	if (pipe(fds) == -1)
+	FDs.setFileFd(fd);
+	if (pipe(pipeFds) == -1)
 	{
 		logThrowStatus(handler, ERR,
 				"[500] ERROR",
 				httpStatusCode::InternalServerError,
 				InternalServerErrorException());	
 	}
-	close(fds[1]);
-	fcntl(fds[0], F_SETFL, O_NONBLOCK);
+	fcntl(pipeFds[0], F_SETFL, O_NONBLOCK);
+	fcntl(pipeFds[1], F_SETFL, O_NONBLOCK);
+	FDs.setReadFd(pipeFds[0]);
+	FDs.setWriteFd(pipeFds[1]);
 	epoll_event ev;
-	ev.events = EPOLLIN;
-	ev.data.fd = fds[0];
-	if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, fds[0], &ev) ==
-			-1)
-	{
-		logThrowStatus(handler, ERR,
-				"[500] Couldn't add readFile FD to epoll",
-				httpStatusCode::InternalServerError,
-				InternalServerErrorException());
-	}
-	handler.setConnectedToFile(fds[0]);
-	std::cout << "CONNECTED TO:" << handler.getConnectedToFile() << std::endl;
+	addFdToReadEpoll(ev, pipeFds[1]);
+	setFdReadyForWrite(pipeFds[1]);
+	addFdToReadEpoll(ev, pipeFds[0]);
 }
 
 
@@ -210,25 +207,70 @@ void Server::removeSocketAndServer(const int &socket)
 int Server::readFromFile(const int &fd, HTTPHandler &handler)
 {
 	char	buffer[BUFFERSIZE];
-	int		br;
-	
+	int		br = 0;
+	int 	bw = 0;
+	FileDescriptor &FDs = handler.getFDs();
 	logger.log(DEBUG, "INSIDE READ FROM FILE WITH FD: " + std::to_string(fd));
-	br = read(fd, buffer, BUFFERSIZE);
-	if (br == -1)
+
+	std::cout << FDs.toString() << std::endl;
+	if (fd == FDs.getReadFd())
 	{
-		logThrowStatus(handler, ERR, "[500] Internal server error while reading a normal fd", httpStatusCode::InternalServerError, InternalServerErrorException());
+		br = read(fd, buffer, BUFFERSIZE);
+		if (br == -1)
+		{
+			logThrowStatus(handler, ERR, "[500] Internal server error while reading from piped fd", httpStatusCode::InternalServerError, InternalServerErrorException());
+		}
+        handler.getResponse().response.append(buffer, br);
+		logger.log(INFO, "Read " + std::to_string(br) + " from the pipe");
+		FDs.incrementBytesRead(br);
+		setFdReadyForRead(FDs.getReadFd());
+		if (FDs.isReadComplete())
+		{
+			// setFdReadyForWrite(handler.getConnectedToSocket());
+			makeResponse(handler.getResponse().response, handler);
+			sendResponse(handler, handler.getConnectedToSocket());
+			// removeFdFromEpoll(FDs.getReadFd());
+			FDs.reset();
+			return (1);
+		}
 	}
-	buffer[br] = '\0';
-	logger.log(INFO, "Read " + std::to_string(br) + " bytes from file");
-	handler.getResponse().response += buffer;
-	handler.setFileBytesRead(handler.getFileBytesRead() + br);
-	std::cout << handler.getFileBytesRead() << "|" << handler.getTotalToRead() << std::endl;
-	if (handler.getFileBytesRead() >= handler.getTotalToRead())
+	else if (fd == FDs.getWriteFd())
 	{
-		removeFdFromEpoll(fd);
-		makeResponse(handler.getResponse().response, handler);
-		sendResponse(handler, handler.getConnectedToSocket());
+		if (FDs.getFileFd() != 1)
+		{	
+			br = read(FDs.getFileFd(), buffer, BUFFERSIZE);
+			if (br == -1)
+			{
+				logThrowStatus(handler, ERR, "[500] Internal server error while reading from normal fd", httpStatusCode::InternalServerError, InternalServerErrorException());
+			}
+			buffer[br] = '\0';
+			logger.log(INFO, "Read " + std::to_string(br) + " bytes from file");
+			if (br == 0)
+			{
+				::close(FDs.getFileFd());
+				FDs.setFileFd(-1);
+			}
+		}
+		if (br > 0)
+		{
+			bw = write(FDs.getWriteFd(), buffer, br);
+			logger.log(INFO, "Wrote " + std::to_string(bw) + " bytes into the pipe");
+			if (bw > 0)
+				FDs.incrementBytesWritten(bw);
+			setFdReadyForWrite(FDs.getWriteFd());
+			if (FDs.isWriteComplete())
+			{
+				removeFdFromEpoll(FDs.getWriteFd());
+				::close(FDs.getWriteFd());
+				return (1);
+				// int readSide = FDs.getReadFd();
+				// epoll_event ev;
+				// std::cout << "TRYING TO ADD READSIDE TO EPOLL " << std::endl;
+				// addFdToReadEpoll(ev, readSide);
+			}
+		}
 	}
+
 	return (1);
 }
 
@@ -401,7 +443,7 @@ HTTPHandler *Server::matchSocketToHandler(const int &socket)
 		cgiPtr = _http_handler.at(i).getConnectedToCGI();
 		if (socket == _http_handler.at(i).getConnectedToSocket())
 			return (&(_http_handler.at(i)));
-		if (socket == _http_handler.at(i).getConnectedToFile())
+		if (socket == _http_handler.at(i).getFDs().getReadFd() || socket == _http_handler.at(i).getFDs().getWriteFd())
 			return (&(_http_handler.at(i)));
 		if (cgiPtr != nullptr)
 		{
@@ -457,10 +499,10 @@ void Server::sendResponse(HTTPHandler &handler, const int &socket)
 	{
 		logger.log(ERR, "[500] Failed to send response to client, socket is most likely closed");
 	}
-	handler.cleanHTTPHandler();
 	removeSocketAndServer(socket);
 	removeFdFromEpoll(socket);
 	close(socket);
+	handler.cleanHTTPHandler();
 }
 
 Server::~Server()

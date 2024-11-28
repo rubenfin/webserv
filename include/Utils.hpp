@@ -34,3 +34,4 @@ int	    check_status(int status);
 void    throwException(HttpException &exception);
 void	my_epoll_add(int epoll_fd, int fd, uint32_t events);
 bool    argumentCheck(int argc, char **argv);
+void    sendInternalServerError(int socket);

@@ -208,3 +208,19 @@ bool argumentCheck(int argc, char **argv)
     }
     return true;
 }
+
+void sendInternalServerError(int socket) {
+    const char* errorResponse = "HTTP/1.1 500 Internal Server Error\r\n"
+                                "Content-Type: text/plain\r\n"
+                                "Content-Length: 28\r\n"
+                                "Connection: close\r\n\r\n"
+                                "Internal Server Error Occurred";
+
+    ssize_t bytesSent = write(socket, errorResponse, strlen(errorResponse));
+    if (bytesSent == -1) {
+		std::cout << "FD: " << socket << std::endl;
+	    perror("Failed to send 500 Internal Server Error");
+    }
+    
+    close(socket);
+}

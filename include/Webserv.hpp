@@ -42,7 +42,7 @@
 #include <filesystem>
 #include <sstream>
 
-#define BUFFERSIZE 8192
+#define BUFFERSIZE 4096
 // #define MAX_FDS 1024
 #define MAX_EVENTS 64
 #define MIN_SIZE 5

@@ -11,7 +11,7 @@ void Server::readWriteServer(epoll_event &event, HTTPHandler &handler)
 		client_tmp = event.data.fd;
 		if (event.events & EPOLLIN)
 		{
-			bytes_read = read(client_tmp, buffer, BUFFERSIZE - 1);
+			bytes_read = read(client_tmp, buffer, BUFFERSIZE);
 			if (bytes_read < 1)
 			{
 				readFromSocketError(bytes_read, handler, client_tmp);
@@ -78,10 +78,9 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 	currentHTTPHandler = currentServer->matchSocketToHandler(event_fd);
 	if (currentHTTPHandler)
 	{
-		std::cout << "CONNECTED TO FILE: " << currentHTTPHandler->getConnectedToFile()  << std::endl;
-		if (currentHTTPHandler->getConnectedToCGI() == nullptr && currentHTTPHandler->getConnectedToFile() == -1)
+		if (currentHTTPHandler->getConnectedToCGI() == nullptr && !currentHTTPHandler->getFDs().isOpen())
 			currentServer->readWriteServer(eventList[idx], *currentHTTPHandler);
-		else if (currentHTTPHandler->getConnectedToFile() != -1)
+		else if (currentHTTPHandler->getFDs().isOpen())
 			currentServer->readFromFile(event_fd, *currentHTTPHandler);
 		else
 			currentServer->readWriteCGI(event_fd, *currentHTTPHandler);

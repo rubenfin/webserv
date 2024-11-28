@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/14 10:36:31 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/11/26 13:55:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,92 @@
 
 HTTPHandler::HTTPHandler() : _connectedToSocket(-1), _cgiPtr(nullptr),
 							 _idx(-1), _response(), _request(), _foundDirective(nullptr),
-							 _server(nullptr), _fileBytesRead (0), _isCgi(false), _hasRedirect(false)
+							 _server(nullptr), _isCgi(false), _hasRedirect(false)
 {
 }
+
+HTTPHandler::HTTPHandler(const HTTPHandler& other)
+    : _connectedToSocket(other._connectedToSocket),
+      _cgiPtr(other._cgiPtr),  // Deep copy if necessary
+      _FDs(other._FDs),
+      _idx(other._idx),
+      _firstRequest(other._firstRequest),
+      _response(other._response),
+      _request(other._request),
+      _foundDirective(other._foundDirective),
+      _server(other._server),
+      _socketReceivedFirstRequest(other._socketReceivedFirstRequest),
+      _currentSocket(other._currentSocket),
+      _isCgi(other._isCgi),
+      _hasRedirect(other._hasRedirect),
+      _returnAutoIndex(other._returnAutoIndex),
+      _headerChecked(other._headerChecked),
+      _isChunked(other._isChunked) {}
+
+HTTPHandler& HTTPHandler::operator=(const HTTPHandler& other) {
+    if (this != &other) {
+        // Clean up existing resources
+        // Copy resources
+        _cgiPtr = other._cgiPtr;
+        _connectedToSocket = other._connectedToSocket;
+        _idx = other._idx;
+        _firstRequest = other._firstRequest;
+        _response = other._response;
+        _request = other._request;
+        _foundDirective = other._foundDirective;
+        _server = other._server;
+        _socketReceivedFirstRequest = other._socketReceivedFirstRequest;
+        _currentSocket = other._currentSocket;
+        _isCgi = other._isCgi;
+        _hasRedirect = other._hasRedirect;
+        _returnAutoIndex = other._returnAutoIndex;
+        _headerChecked = other._headerChecked;
+        _isChunked = other._isChunked;
+    }
+    return *this;
+}
+
+
+HTTPHandler::HTTPHandler(HTTPHandler &&other) noexcept
+        : _connectedToSocket(other._connectedToSocket),
+          _cgiPtr(std::exchange(other._cgiPtr, nullptr)),
+          _FDs(std::move(other._FDs)),
+          _idx(other._idx),
+          _firstRequest(std::move(other._firstRequest)),
+          _response(std::move(other._response)),
+          _request(std::move(other._request)),
+          _foundDirective(std::move(other._foundDirective)),
+          _server(std::exchange(other._server, nullptr)),
+          _socketReceivedFirstRequest(std::exchange(other._socketReceivedFirstRequest, nullptr)),
+          _currentSocket(other._currentSocket),
+          _isCgi(other._isCgi),
+          _hasRedirect(other._hasRedirect),
+          _returnAutoIndex(other._returnAutoIndex),
+          _headerChecked(other._headerChecked),
+          _isChunked(other._isChunked) {}
+
+    // Move Assignment Operator
+    HTTPHandler &HTTPHandler::operator=(HTTPHandler &&other) noexcept {
+        if (this != &other) {
+            _connectedToSocket = other._connectedToSocket;
+            _cgiPtr = std::exchange(other._cgiPtr, nullptr);
+            _FDs = std::move(other._FDs);
+            _idx = other._idx;
+            _firstRequest = std::move(other._firstRequest);
+            _response = std::move(other._response);
+            _request = std::move(other._request);
+            _foundDirective = std::move(other._foundDirective);
+            _server = std::exchange(other._server, nullptr);
+            _socketReceivedFirstRequest = std::exchange(other._socketReceivedFirstRequest, nullptr);
+            _currentSocket = other._currentSocket;
+            _isCgi = other._isCgi;
+            _hasRedirect = other._hasRedirect;
+            _returnAutoIndex = other._returnAutoIndex;
+            _headerChecked = other._headerChecked;
+            _isChunked = other._isChunked;
+        }
+        return *this;
+    }
 
 HTTPHandler::~HTTPHandler()
 {
@@ -290,14 +373,12 @@ void HTTPHandler::cleanHTTPHandler()
 	resetRequestResponse(_request, _response);
 	// _connectedToCGI = -1;
 	_socketReceivedFirstRequest->erase(_connectedToSocket);
+	getFDs().close();
 	_connectedToSocket = -1;
 	_cgiPtr = nullptr;
 	_firstRequest = "";
 	_server = nullptr;
 	_foundDirective = nullptr;
-	_connectedToFile = -1;
-	_fileBytesRead = 0;
-	_totalToRead = 0;
 	_isCgi = false;
 	_hasRedirect = false;
 	_returnAutoIndex = false;
@@ -448,36 +529,13 @@ void HTTPHandler::setConnectedToCGI(CGI_t *cgiPtr)
 	_cgiPtr = cgiPtr;
 }
 
-void HTTPHandler::setConnectedToFile(const int &fd)
-{
-	_connectedToFile = fd;
-}
-
-int HTTPHandler::getConnectedToFile(void)
-{
-	return (_connectedToFile);
-}
-
-void HTTPHandler::setFileBytesRead(long long size)
-{
-	_fileBytesRead = size;
-}
-void HTTPHandler::setTotalToRead(long long total)
-{
-	_totalToRead = total;
-}
-
-long long HTTPHandler::getFileBytesRead(void)
-{
-	return (_fileBytesRead);
-}
-
-long long HTTPHandler::getTotalToRead(void)
-{
-	return (_totalToRead);
-}
 
 CGI_t *HTTPHandler::getConnectedToCGI(void)
 {
 	return (_cgiPtr);
+}
+
+FileDescriptor& HTTPHandler::getFDs(void)
+{
+	return (_FDs);
 }
