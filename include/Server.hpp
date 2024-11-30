@@ -78,7 +78,7 @@ public:
   void removeCGIrunning(const int& socket);
   std::map<int, CGI_t *> &getFdsRunningCGI(void);
   void removeSocketAndServer(const int& socket);
-  void addFdToReadEpoll(epoll_event &eventConfig, int &socket);
+  int addFdToReadEpoll(epoll_event &eventConfig, int &socket);
   void readFromSocketError(const int &err, HTTPHandler &handler, int &socket);
   int serverActions(HTTPHandler &handler, int &socket);
   void readFromSocketSuccess(HTTPHandler &handler, const char *buffer,

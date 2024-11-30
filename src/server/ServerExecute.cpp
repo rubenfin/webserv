@@ -84,12 +84,14 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 	logger.log(DEBUG, "in CGI in socket: " + std::to_string(socket));
 	if (access(handler.getRequest().requestURL.c_str(), X_OK) != 0)
 	{
+		resetCGI(*CGIinfo);
 		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[403] Script doesn't have executable rights",
 			httpStatusCode::Forbidden, ForbiddenException());
 	}
 	if (pipe(childToParent) == -1)
 	{
+		resetCGI(*CGIinfo);
 		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
@@ -97,6 +99,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 	}
 	if (pipe(parentToChild) == -1)
 	{
+		resetCGI(*CGIinfo);
 		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Pipe has failed",
 			httpStatusCode::InternalServerError,
@@ -105,6 +108,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 	CGIinfo->PID = fork();
 	if (CGIinfo->PID == -1)
 	{
+		resetCGI(*CGIinfo);
 		delete CGIinfo;
 		logThrowStatus(handler, ERR, "[500] Fork has failed",
 			httpStatusCode::InternalServerError,
@@ -129,6 +133,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 		if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, childToParent[0], &ev) ==
 			-1)
 		{
+			resetCGI(*CGIinfo);
 			delete CGIinfo;
 			logThrowStatus(handler, ERR,
 				"[500] Couldn't add childToParent FD to epoll in CGI",
@@ -140,6 +145,7 @@ void Server::cgi(HTTPHandler &handler, const int& socket)
 		if (epoll_ctl((*_epollFDptr), EPOLL_CTL_ADD, parentToChild[1], &ev) ==
 			-1)
 		{
+			resetCGI(*CGIinfo);
 			delete CGIinfo;
 			logThrowStatus(handler, ERR,
 				"[500] Couldn't add parentToChild FD to epoll in CGI",
@@ -299,7 +305,8 @@ int Server::serverActions(HTTPHandler& handler, int &socket)
 	{
 		makeResponse((char *)returnAutoIndex(handler,
 				handler.getRequest().requestURL).c_str(), handler);
-		sendResponse(handler, socket);		
+		sendResponse(handler, socket);
+		return (0);	
 	}
 	else if (handler.getRequest().method == DELETE)
 		deleteFileInServer(handler);
@@ -311,6 +318,7 @@ int Server::serverActions(HTTPHandler& handler, int &socket)
 		setFileInServer(handler);
 	else
 		readFile(handler);
+	
 	// if (handler.getRequest().currentBytesRead < BUFFERSIZE - 1
 	// 	&& !handler.getChunked() && !handler.getCgi())
 	// {

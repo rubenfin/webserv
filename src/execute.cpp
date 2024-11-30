@@ -78,10 +78,8 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 	currentHTTPHandler = currentServer->matchSocketToHandler(event_fd);
 	if (currentHTTPHandler)
 	{
-		if (currentHTTPHandler->getConnectedToCGI() == nullptr && !currentHTTPHandler->getFDs().isOpen())
+		if (currentHTTPHandler->getConnectedToCGI() == nullptr)
 			currentServer->readWriteServer(eventList[idx], *currentHTTPHandler);
-		else if (currentHTTPHandler->getFDs().isOpen())
-			currentServer->readFromFile(event_fd, *currentHTTPHandler);
 		else
 			currentServer->readWriteCGI(event_fd, *currentHTTPHandler);
 	}
@@ -91,6 +89,34 @@ int Webserv::handleEvent(struct epoll_event *eventList, const int &event_fd, int
 	return (1) ;
 }
 
+void Webserv::checkFiles(std::vector<FileDescriptor *>& files)
+{
+	char buffer[BUFFERSIZE];
+	int br = 0;
+
+	for (FileDescriptor* file : files)
+	{
+
+		if (!file || !file->isOpen() || file->isReadComplete()) continue;
+
+		HTTPHandler *handler = file->getHandler();
+
+		br = read(file->getFileFd(), buffer, BUFFERSIZE);
+		if (br == -1)
+		{
+			std::cout << "handle error" << std::endl;
+		}
+		buffer[br] = '\0';
+		handler->getResponse().response.append(buffer, br);
+		file->incrementBytesRead(br);
+		if (file->isReadComplete())
+		{
+			handler->getServer()->makeResponse(handler->getResponse().response, *handler);
+			handler->getServer()->sendResponse(*handler, handler->getConnectedToSocket());
+		}
+	}
+}
+
 int Webserv::execute(void)
 {
 	int					client_socket;
@@ -98,16 +124,27 @@ int Webserv::execute(void)
 	int					serverEvent;
 	socklen_t			addrlen;
 	struct epoll_event	eventList[MAX_EVENTS];
+	std::vector<FileDescriptor *> files(MAX_EVENTS);
+
 
 	initalizeServers(addrlen);
+	for (std::size_t i = 0; i < this->_servers.size(); i++)
+	{
+		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
+		for (auto & handler : handlers)
+		{
+			files.push_back(handler.getFDs());
+		}
+	}
 
 	while (!interrupted) 
 	{
 		try
 		{
 			checkCGItimeouts();
-			// logger.log(INFO, "Waiting for events...");
-			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1000);
+			checkFiles(files);
+			logger.log(INFO, "Waiting for events...");
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
 			for (int idx = 0; idx < eventCount && !interrupted; ++idx)
 			{
 				serverEvent = checkForNewConnection(eventList[idx].data.fd);

@@ -522,7 +522,7 @@ void Server::removeFdFromEpoll(const int &socket)
 	}
 }
 
-void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
+int Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 {
 	eventConfig.events = EPOLLIN | EPOLLET;
 	eventConfig.data.fd = socket;
@@ -531,7 +531,9 @@ void Server::addFdToReadEpoll(epoll_event &eventConfig, int &socket)
 		perror("");
 		std::cout << "addFdToReadEpoll fails!" << std::endl;
 		close(socket);
+		return (0);
 	}
+	return (1);
 }
 
 void Server::clientConnectionFailed(int client_socket, HTTPHandler &handler)

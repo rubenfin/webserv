@@ -16,6 +16,7 @@ HTTPHandler::HTTPHandler() : _connectedToSocket(-1), _cgiPtr(nullptr),
 							 _idx(-1), _response(), _request(), _foundDirective(nullptr),
 							 _server(nullptr), _isCgi(false), _hasRedirect(false)
 {
+	getFDs()->setHandler(this);
 }
 
 HTTPHandler::HTTPHandler(const HTTPHandler& other)
@@ -373,7 +374,7 @@ void HTTPHandler::cleanHTTPHandler()
 	resetRequestResponse(_request, _response);
 	// _connectedToCGI = -1;
 	_socketReceivedFirstRequest->erase(_connectedToSocket);
-	getFDs().close();
+	_FDs.clean();
 	_connectedToSocket = -1;
 	_cgiPtr = nullptr;
 	_firstRequest = "";
@@ -535,7 +536,7 @@ CGI_t *HTTPHandler::getConnectedToCGI(void)
 	return (_cgiPtr);
 }
 
-FileDescriptor& HTTPHandler::getFDs(void)
+FileDescriptor* HTTPHandler::getFDs(void)
 {
-	return (_FDs);
+	return (&_FDs);
 }

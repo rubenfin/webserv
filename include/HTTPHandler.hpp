@@ -28,6 +28,7 @@ class	Server;
 struct request_t;
 struct response_t;
 struct CGI_t;
+class FileDescriptor;
 
 struct file_t;
 
@@ -46,6 +47,34 @@ typedef struct response_t
 	int contentLength; 
 	response_t() : status(httpStatusCode::OK), response(""), contentLength(0) {}
 }					response_t;
+
+class FileDescriptor {
+private:
+    int _fd;
+    int64_t _totalToRead;
+    int64_t _bytesRead;
+    bool _isOpen;
+    HTTPHandler* _connectedToHandler;
+
+public:
+    FileDescriptor();
+    FileDescriptor(const FileDescriptor&);
+    FileDescriptor& operator=(const FileDescriptor&) ;
+    FileDescriptor(FileDescriptor&& other) noexcept ;
+    FileDescriptor& operator=(FileDescriptor&& other) noexcept;
+    void setFileFd(int fd);
+    void setTotalToRead(int64_t total);
+    void setHandler(HTTPHandler* handler);
+    HTTPHandler* getHandler(void);
+    void incrementBytesRead(int64_t bytes);
+    int getFileFd() const ;
+    int64_t getTotalToRead() const ;
+    int64_t getBytesRead() const;
+    bool isOpen() const;
+    bool isReadComplete() const;
+    void clean();
+    ~FileDescriptor();
+};
 
 
 typedef struct request_t
@@ -104,7 +133,7 @@ class HTTPHandler
 	~HTTPHandler();
 
 	void favIconCheck(void);
-	FileDescriptor& getFDs(void);
+	FileDescriptor* getFDs(void);
 	void setIndex(const int& idx);
   	CGI_t * getConnectedToCGI(void);
   	void setConnectedToCGI(CGI_t *cgiPtr);

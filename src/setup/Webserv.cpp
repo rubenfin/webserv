@@ -97,7 +97,7 @@ int Webserv::checkForNewConnection(int eventFd)
 
 Webserv::Webserv(char *fileName)
 {
-    logger.setWorking(false);
+    logger.setWorking(true);
     disable_ctrl_chars();
 	setConfig(std::string(fileName));
 	_epollFd = epoll_create(1);
@@ -190,13 +190,6 @@ Server *Webserv::findServerConnectedToSocket(const int &socket)
 
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
-		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
-		for (HTTPHandler& handler : handlers)
-		{
-			if (handler.getFDs().getReadFd() == socket || handler.getFDs().getWriteFd() == socket)
-				return (&(_servers[i]));
-		}
-
 		std::map<int, CGI_t *> &fdsRunningCGI = _servers[i].getFdsRunningCGI();
 		for (auto it = fdsRunningCGI.begin(); it != fdsRunningCGI.end(); ++it)
 		{
@@ -423,8 +416,8 @@ void Webserv::checkCGItimeouts(void)
 					kill(it->second->PID, SIGKILL);
 				}
 				close(currSocket);
-				delete currCGI;
 				resetCGI(*currCGI);
+				delete currCGI;
 				break ;
 			}
 		}
