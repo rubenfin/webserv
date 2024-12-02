@@ -313,7 +313,11 @@ int Server::serverActions(HTTPHandler& handler, int &socket)
 	else if (handler.getCgi())
 		cgi(handler, socket);
 	else if (handler.getRedirect())
+	{
 		makeResponseForRedirect(handler);
+		sendResponse(handler, socket);
+		return (0);
+	}
 	else if (handler.getRequest().file.fileExists)
 		setFileInServer(handler);
 	else

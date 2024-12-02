@@ -36,7 +36,10 @@ void Locations::setMethods(void)
 
 void Locations::setAlias(void)
 {
-	_alias = trim(extractValue("alias "));
+	_alias = extractValue(" alias ");
+	if (_alias.empty())
+		_alias = extractValue("	alias ");
+
 	if (!_alias.empty())
 	{
 		logger.log(DEBUG, "Alias has been set to: " + _alias + " in location: " + this->_locationDirective);
@@ -198,7 +201,9 @@ void Locations::setRoot(void)
 
 void Locations::setIndex(void)
 {
-	_index = extractValue("	index");
+	_index = extractValue(" index");
+	if (_index.empty())
+		_index = extractValue("	index ");
 	if (!_index.empty())
 	{
 		logger.log(DEBUG, "Index set as: " + _index);
@@ -207,7 +212,9 @@ void Locations::setIndex(void)
 
 void Locations::setReturn(void)
 {
-	_return =  extractValue("return");
+	_return = extractValue(" return");
+	if (_return.empty())
+		_return = extractValue("	return ");
 	if (!_return.empty())
 	{
 		logger.log(DEBUG, "Return set as: " + _return);

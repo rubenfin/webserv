@@ -258,10 +258,9 @@ void HTTPHandler::httpVersionCheck(void)
 int HTTPHandler::pathCheck(const std::string &dir, const std::string &file)
 {
 	if (!dir.empty())
-	{
+	{		
 		if (!checkIfDir(dir))
 		{
-			std::cout << RED << dir << RESET << std::endl;
 			getServer()->logThrowStatus(*this, ERR,
 										"[404] Directory doesn't exist", httpStatusCode::NotFound,
 										NotFoundException());

@@ -218,7 +218,6 @@ void sendInternalServerError(int socket) {
 
     ssize_t bytesSent = write(socket, errorResponse, strlen(errorResponse));
     if (bytesSent == -1) {
-		std::cout << "FD: " << socket << std::endl;
 	    perror("Failed to send 500 Internal Server Error");
     }
     

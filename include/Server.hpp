@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/11 12:06:55 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 15:54:30 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "HTTPHandler.hpp"
 #include "Locations.hpp"
 #include "Webserv.hpp"
+#include "SessionManager.hpp"
 #include <fcntl.h>
 #include <iostream>
 #include <netinet/in.h>
@@ -39,6 +40,7 @@
 class	Locations;
 class	HTTPHandler;
 class	HttpException;
+class SessionManager;
 struct CGI_t;
 
 struct Methods {
@@ -69,8 +71,8 @@ protected:
   socklen_t _addrlen;
   long long _client_body_size_server;
   std::vector<HTTPHandler> _http_handler;
+  SessionManager _sessionManager;
   
-
 public:
   std::vector<HTTPHandler>& getHTTPHandlers(void);
   int readFromFile(const int &fd, HTTPHandler &handler);

@@ -60,6 +60,8 @@
         <button id="testButtonInvalid">Invalid URL, should go to 404</button>
         <button id="testButtonRedirect">Redirect to YouTube</button>
         <button id="testUploadFile">Upload a file</button>
+        <button id="testFiles">All uploaded files</button>
+        <button id="testAlias">Alias testing</button>
         <p class="error-message" id="errorMessage"></p>
     </div>
 
@@ -85,6 +87,12 @@
         });
         document.getElementById('testUploadFile').addEventListener('click', function() {
             sendRequest('GET', '/upload_file');
+        });
+        document.getElementById('testFiles').addEventListener('click', function() {
+            sendRequest('GET', '/uploads');
+        });
+        document.getElementById('testAlias').addEventListener('click', function() {
+            sendRequest('GET', '/alias');
         });
     
         function sendRequest(method, url) {

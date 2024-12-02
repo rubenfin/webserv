@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "FD.hpp"
+#include "FileDescriptor.hpp"
 
 FileDescriptor::FileDescriptor()
     : _fd(-1),
@@ -20,24 +20,23 @@ FileDescriptor::FileDescriptor()
 {
 }
 
-    FileDescriptor::FileDescriptor(const FileDescriptor& other)
-        : _fd(-1),  // Initialize new descriptors as closed
-          _totalToRead(other._totalToRead),
-          _bytesRead(other._bytesRead),
-          _isOpen(other._isOpen) {}
+FileDescriptor::FileDescriptor(const FileDescriptor& other)
+    : _fd(-1),
+      _totalToRead(other._totalToRead),
+      _bytesRead(other._bytesRead),
+      _isOpen(other._isOpen) {}
 
-    // Copy assignment operator
-    FileDescriptor& FileDescriptor::operator=(const FileDescriptor& other) {
-        if (this != &other) {
-            if (_fd != -1) ::close(_fd);
-
-            _fd = -1;
-            _totalToRead = other._totalToRead;
-            _bytesRead = other._bytesRead;
-            _isOpen = other._isOpen;
-        }
-        return *this;
+FileDescriptor& FileDescriptor::operator=(const FileDescriptor& other) {
+    if (this != &other) {
+        if (_fd != -1)
+            ::close(_fd);
+        _fd = -1;
+        _totalToRead = other._totalToRead;
+        _bytesRead = other._bytesRead;
+        _isOpen = other._isOpen;
     }
+    return *this;
+}
 
 FileDescriptor::FileDescriptor(FileDescriptor &&other) noexcept
 {

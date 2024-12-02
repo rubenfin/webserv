@@ -471,17 +471,14 @@ long long Server::getFileSize(const std::string &filename, HTTPHandler& handler)
 	logger.log(DEBUG, filename + " getting checked by stat");
 	if (stat(filename.data(), &sb) == -1)
 	{
-		perror("stat");
-		logger.log(ERR, "[500] stat said |" + filename + "| is not a file");
-		handler.getResponse().status = httpStatusCode::InternalServerError;
-		throw InternalServerErrorException();
+		logThrowStatus(handler, ERR, "[404] Stat said file doesn't exist", httpStatusCode::NotFound, NotFoundException());
+		return (0);
 	}
 	else
 	{
 		return ((long long)sb.st_size);
 	}
 }
-
 
 void Server::setFdReadyForRead(const int &socket)
 {

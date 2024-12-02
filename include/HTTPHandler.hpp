@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/26 13:58:37 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 15:47:36 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "File.hpp"
-#include "FD.hpp"
+#include "FileDescriptor.hpp"
 
 class	Locations;
 class	Server;

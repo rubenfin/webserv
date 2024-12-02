@@ -97,22 +97,36 @@ void Webserv::checkFiles(std::vector<FileDescriptor *>& files)
 	for (FileDescriptor* file : files)
 	{
 
-		if (!file || !file->isOpen() || file->isReadComplete()) continue;
-
-		HTTPHandler *handler = file->getHandler();
-
-		br = read(file->getFileFd(), buffer, BUFFERSIZE);
-		if (br == -1)
+		if (file && file->isOpen() && !file->isReadComplete())
 		{
-			std::cout << "handle error" << std::endl;
+			HTTPHandler *handler = file->getHandler();
+
+			br = read(file->getFileFd(), buffer, BUFFERSIZE);
+			if (br == -1)
+			{
+				sendInternalServerError(handler->getConnectedToSocket());
+				continue;
+			}
+			buffer[br] = '\0';
+			handler->getResponse().response.append(buffer, br);
+			file->incrementBytesRead(br);
+			if (file->isReadComplete())
+			{
+				handler->getServer()->makeResponse(handler->getResponse().response, *handler);
+				handler->getServer()->sendResponse(*handler, handler->getConnectedToSocket());
+			}
 		}
-		buffer[br] = '\0';
-		handler->getResponse().response.append(buffer, br);
-		file->incrementBytesRead(br);
-		if (file->isReadComplete())
+	}
+}
+
+void Webserv::initializeFDs(std::vector<FileDescriptor *>& files)
+{
+	for (std::size_t i = 0; i < this->_servers.size(); i++)
+	{
+		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
+		for (auto & handler : handlers)
 		{
-			handler->getServer()->makeResponse(handler->getResponse().response, *handler);
-			handler->getServer()->sendResponse(*handler, handler->getConnectedToSocket());
+			files.push_back(handler.getFDs());
 		}
 	}
 }
@@ -126,16 +140,8 @@ int Webserv::execute(void)
 	struct epoll_event	eventList[MAX_EVENTS];
 	std::vector<FileDescriptor *> files(MAX_EVENTS);
 
-
 	initalizeServers(addrlen);
-	for (std::size_t i = 0; i < this->_servers.size(); i++)
-	{
-		std::vector<HTTPHandler>& handlers = _servers[i].getHTTPHandlers();
-		for (auto & handler : handlers)
-		{
-			files.push_back(handler.getFDs());
-		}
-	}
+	initializeFDs(files);
 
 	while (!interrupted) 
 	{
@@ -143,8 +149,8 @@ int Webserv::execute(void)
 		{
 			checkCGItimeouts();
 			checkFiles(files);
-			logger.log(INFO, "Waiting for events...");
-			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 10);
+			// logger.log(INFO, "Waiting for events...");
+			eventCount = epoll_wait(_epollFd, eventList, MAX_EVENTS, 1);
 			for (int idx = 0; idx < eventCount && !interrupted; ++idx)
 			{
 				serverEvent = checkForNewConnection(eventList[idx].data.fd);
@@ -164,6 +170,7 @@ int Webserv::execute(void)
 		{
 			logger.log(ERR, "Caught an error inside loop: "
 				+ std::string(e.what()));
+			sendInternalServerError(client_socket);
 			removeSocketFromReceivedFirstRequest(client_socket);
 			close(client_socket);
 		}

@@ -20,7 +20,7 @@
 #include "Response.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
-#include "FD.hpp"
+#include "FileDescriptor.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <fstream>
@@ -73,6 +73,7 @@ class Webserv
 	~Webserv();
 
 	void checkFiles(std::vector<FileDescriptor *>& files);
+	void initializeFDs(std::vector<FileDescriptor *>& files);
 	void initalizeServers(socklen_t &addrlen);
 	void cleanUpServers();
 	int handleEvent(epoll_event *eventList, const int &event_fd, int idx);

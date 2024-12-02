@@ -93,17 +93,13 @@ void Server::makeResponseForRedirect(HTTPHandler &handler)
 	std::string header;
 	std::string body;
 	logger.log(DEBUG, "in makeResponseForRedirect");
-	// Use 302 Found for temporary redirects,
-	// or 301 Moved Permanently for permanent redirects
 	handler.getResponse().status = httpStatusCode::MovedPermanently;
-	// or 301 for permanent
 	std::string message = getHttpStatusMessage(handler.getResponse().status);
 	header = "HTTP/1.1 " + message + "\r\n";
 	std::string redirectUrl = handler.getFoundDirective()->getReturn();
 	if (redirectUrl.substr(0, 4) != "http")
 	{
 		redirectUrl = "http://" + redirectUrl;
-		// Ensure the URL includes the protocol
 	}
 	header += "Location: " + redirectUrl + "\r\n";
 	header += "Content-Type: text/html\r\n";
@@ -346,6 +342,7 @@ void Server::readWriteCGI(const int &CGI_FD, HTTPHandler &handler)
 			buffer[br] = '\0';
 			logger.log(INFO, "Read " + std::to_string(br) + " bytes from CGI");
 			handler.getResponse().response += buffer;
+			std::cout << handler.getResponse().response << std::endl;
 		}
 		else if (br == 0)
 		{

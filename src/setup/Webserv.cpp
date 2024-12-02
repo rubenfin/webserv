@@ -97,7 +97,7 @@ int Webserv::checkForNewConnection(int eventFd)
 
 Webserv::Webserv(char *fileName)
 {
-    logger.setWorking(true);
+    logger.setWorking(1);
     disable_ctrl_chars();
 	setConfig(std::string(fileName));
 	_epollFd = epoll_create(1);
