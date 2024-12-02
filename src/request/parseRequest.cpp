@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/13 18:47:19 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:55:57 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,26 @@ static void findHeadingEnd(request_t &req)
 	}
 }
 
+static void setCookie(request_t& req)
+{
+	auto it = req.header.find("Cookie");
+	if (it != req.header.end())
+	{
+		req.cookie = it->second;
+	}
+	else
+		return ;
+	std::size_t equal = req.cookie.find("id=") + 3;
+	if (equal == std::string::npos)
+	{
+		req.cookie = "";
+		return ;
+	}
+	std::cout << equal << std::endl;
+	req.cookie = req.cookie.substr(equal, req.cookie.size() - equal);
+	std::cout << "setcookie: " << req.cookie << std::endl;
+}
+
 void	parse_request(request_t &req, std::string buffer)
 {
 	try
@@ -221,6 +241,7 @@ void	parse_request(request_t &req, std::string buffer)
 		setRequestDirFile(req);
 		setRequestHeader(req);
 		setRequestBody(req);
+		setCookie(req);
 		setFile(req, &req.file);
 		printRequestStruct(req);
 		if (req.contentLength)

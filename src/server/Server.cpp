@@ -6,13 +6,13 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/26 14:56:04 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:21:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Server.hpp"
 
-Server::Server(std::string serverContent)
+Server::Server(std::string serverContent) : _sessionManager(new SessionManager)
 {
 	_serverContent = serverContent;
 	_http_handler.resize(MAX_EVENTS);
@@ -118,6 +118,7 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler &handler)
 		header += "Content-Type: image/jpg\r\n";
 	else if (handler.getRequest().requestFile.find("png") != std::string::npos)
 		header += "Content-Type: image/png\r\n";
+	header += handler.getResponse().responseHeader;
 	if (!buffer.empty())
 	{
 		header += "Content-Length: " + std::to_string(buffer.size())
@@ -548,4 +549,5 @@ void Server::sendResponse(HTTPHandler &handler, const int &socket)
 Server::~Server()
 {
 	delete this->_address;
+	delete this->_sessionManager;
 }

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/12/02 15:54:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:12:58 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 #include "CGI.hpp"
 #include "Exceptions.hpp"
 #include "HTTPHandler.hpp"
+#include "SessionManager.hpp"
 #include "Locations.hpp"
 #include "Webserv.hpp"
-#include "SessionManager.hpp"
 #include <fcntl.h>
 #include <iostream>
 #include <netinet/in.h>
@@ -71,11 +71,11 @@ protected:
   socklen_t _addrlen;
   long long _client_body_size_server;
   std::vector<HTTPHandler> _http_handler;
-  SessionManager _sessionManager;
+  SessionManager *_sessionManager;
   
 public:
   std::vector<HTTPHandler>& getHTTPHandlers(void);
-  int readFromFile(const int &fd, HTTPHandler &handler);
+  SessionManager* getSessionManager(void);
   void readWriteCGI(const int& socket, HTTPHandler &handler);
   void removeCGIrunning(const int& socket);
   std::map<int, CGI_t *> &getFdsRunningCGI(void);

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:40:58 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/09/20 13:25:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:13:28 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -540,4 +540,9 @@ void Server::clientConnectionFailed(int client_socket, HTTPHandler &handler)
 	if (send(client_socket, handler.getResponse().response.c_str(),
 			handler.getResponse().response.size(), 0) == -1)
 		logger.log(ERR, "[500] Failed to send response to client");
+}
+
+SessionManager* Server::getSessionManager(void)
+{
+	return (_sessionManager);
 }

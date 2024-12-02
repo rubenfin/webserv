@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/12/02 15:47:36 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:20:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,10 @@ typedef enum METHODS
 typedef struct response_t
 {
 	httpStatusCode	status;
+	std::string responseHeader;
 	std::string response;
 	int contentLength; 
-	response_t() : status(httpStatusCode::OK), response(""), contentLength(0) {}
+	response_t() : status(httpStatusCode::OK), responseHeader(""), response(""), contentLength(0) {}
 }					response_t;
 
 class FileDescriptor {
@@ -91,6 +92,7 @@ typedef struct request_t
 	std::string requestDirectory;
 	std::string requestFile;
 	std::string contentType;
+	std::string cookie;
 	size_t		currentBytesRead;
 	size_t		totalBytesRead;
 	size_t		contentLength;
@@ -123,6 +125,7 @@ class HTTPHandler
 	bool _returnAutoIndex;
 	bool _headerChecked;
 	bool _isChunked;
+	bool _activeSession;
 
   public:
 	HTTPHandler();
@@ -132,6 +135,7 @@ class HTTPHandler
     HTTPHandler& operator=(const HTTPHandler&);
 	~HTTPHandler();
 
+	void checkForSession();
 	void favIconCheck(void);
 	FileDescriptor* getFDs(void);
 	void setIndex(const int& idx);
@@ -151,6 +155,8 @@ class HTTPHandler
 	void setChunked(bool boolean);
 	void setConnectedToSocket(const int& fd);
 	int& getConnectedToSocket(void);
+	bool getActiveSession();
+	void setActiveSession(bool boolean);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
 	void linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);

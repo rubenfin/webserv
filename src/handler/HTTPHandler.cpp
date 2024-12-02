@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/11/26 13:55:38 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 20:02:59 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,15 +453,42 @@ void HTTPHandler::favIconCheck(void)
 	}
 }
 
+void HTTPHandler::checkForSession()
+{
+
+	SessionManager * manager = getServer()->getSessionManager();
+	std::string cookie = getRequest().cookie;
+	std::string myCookie;
+	
+	std::cout << cookie << std::endl;
+	try
+	{
+		if (cookie.empty())
+		{
+			getResponse().responseHeader += "Set-Cookie: id=";
+			myCookie =  manager->createSession("Test");
+			getResponse().responseHeader += myCookie + "; Max-Age=600\r\n";
+			std::cout << getResponse().responseHeader << std::endl;
+		}
+		else
+		{
+			std::cout << cookie << std::endl;
+			manager->getSession(cookie);
+		}
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+}
+
 void HTTPHandler::handleRequest(Server &serverAddress)
 {
+	_server = &serverAddress;
 	favIconCheck();
 	parsingErrorCheck();
 	headerTooLongCheck();
-	_server = &serverAddress;
-	_isCgi = false;
-	_hasRedirect = false;
-	_returnAutoIndex = false;
+	checkForSession();
 	checkRequestData();
 	_foundDirective = findMatchingDirective();
 	if (_foundDirective)
@@ -502,6 +529,16 @@ bool HTTPHandler::getChunked(void)
 int HTTPHandler::getIdx(void)
 {
 	return (_idx);
+}
+
+bool HTTPHandler::getActiveSession()
+{
+	return (_activeSession);
+}
+
+void HTTPHandler::setActiveSession(bool boolean)
+{
+	_activeSession = boolean;
 }
 
 int &HTTPHandler::getConnectedToSocket(void)

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/13 18:47:12 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 19:37:54 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,11 @@ void	resetRequest(request_t &request)
 	request.requestDirectory = "";
 	request.requestFile = "";
 	request.contentType = "";
+	request.cookie = "";
 	request.method = ERROR;
 	request.currentBytesRead = 0;
 	request.totalBytesRead = 0;
+	request.header.clear();
 	resetRequestFile(request.file);
 }
 

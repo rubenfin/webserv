@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/13 16:26:40 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:49:03 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,6 +249,10 @@ int Webserv::initializeConnection(const socklen_t &addrlen, int &client_socket,
 void Webserv::setupServers(socklen_t &addrlen)
 {
 	logger.log(INFO, "Total amount of servers: " + std::to_string(_servers.size()));
+	
+	if (_servers.size() == 0)
+   		throw std::runtime_error("Not enough servers to start Webserv");
+
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		addrlen = sizeof(_servers[i].getAddress());

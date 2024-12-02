@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:18:07 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/08/17 12:39:30 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/02 18:21:19 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 void resetResponse(response_t &response)
 {
     response.status = httpStatusCode::OK;
+	response.responseHeader = "";
 	response.response = "";
 	response.contentLength = 0;
 }
