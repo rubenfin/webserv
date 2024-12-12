@@ -6,20 +6,25 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 18:36:00 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/02 19:37:54 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 11:57:15 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/Request.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <string>
+
 std::string trim(const std::string &str)
 {
-	std::string::const_iterator left = std::find_if(str.begin(), str.end(),
-			[](unsigned char ch) { return (!std::isspace(ch)); });
-	std::string::const_iterator right = std::find_if(str.rbegin(), str.rend(),
-			[](unsigned char ch) { return (!std::isspace(ch)); }).base();
-	return (right <= left ? std::string() : std::string(left, right));
+    std::string::const_iterator left = std::find_if(str.begin(), str.end(),
+            [](unsigned char ch) { return (!std::isspace(ch) && ch != '\r'); });
+    std::string::const_iterator right = std::find_if(str.rbegin(), str.rend(),
+            [](unsigned char ch) { return (!std::isspace(ch) && ch != '\r'); }).base();
+    return (right <= left ? std::string() : std::string(left, right));
 }
+
 
 void	resetRequestFile(file_t &file)
 {
@@ -35,6 +40,7 @@ void	resetRequestFile(file_t &file)
 
 void	resetRequest(request_t &request)
 {
+	request.badRequest = false;
 	request.internalError = false;
 	request.bin = false;
 	request.foundHeaderEnd = false;

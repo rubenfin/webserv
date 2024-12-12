@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/24 16:12:04 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/02 18:55:57 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/03 16:38:27 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,9 +222,8 @@ static void setCookie(request_t& req)
 		req.cookie = "";
 		return ;
 	}
-	std::cout << equal << std::endl;
-	req.cookie = req.cookie.substr(equal, req.cookie.size() - equal);
-	std::cout << "setcookie: " << req.cookie << std::endl;
+	req.cookie = req.cookie.substr(equal, req.cookie.size() - equal - 1);
+	trim(req.cookie);
 }
 
 void	parse_request(request_t &req, std::string buffer)

@@ -6,7 +6,7 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/12/02 17:34:54 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/02 20:04:26 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/03 15:04:38 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ std::string generateKey()
     return sessionId;
 }
 
-std::string SessionManager::createSession(const std::string &name)
+std::string SessionManager::createSession()
 {
     std::string sessionId;
     do 
@@ -36,28 +36,27 @@ std::string SessionManager::createSession(const std::string &name)
         sessionId = generateKey();
     } while (sessions.find(sessionId) != sessions.end());
 
-    sessions[sessionId] = {name, 0};
+    logger.log(INFO, "Created a new session with: " + sessionId);
+
+    time_t currTime = time(NULL);
+    sessions[sessionId] = {sessionId, 0, currTime};
     return sessionId;
 }
 
-SessionData SessionManager::getSession(std::string sessionId)
+std::shared_ptr<SessionData> SessionManager::getSession(std::string sessionId)
 {
-
-    // std::cout << "|" << sessionId << "|" << std::endl;
-    trim(sessionId);
-    for (auto &e : sessions)
-    {   
-        std::cout << "s: |";
-        std::cout << e.first << "|" << std::endl;        
-    }
-
+    checkForExpiredSessions();
+    
     auto it = sessions.find(sessionId);
     if (it != sessions.end())
     {
         it->second.value++;
-        return it->second;
+        logger.log(INFO, "Found active session with sessionId: " + sessionId);
+        logger.log(INFO, "Total amount of times this session has been retrieved: " + std::to_string(it->second.value));
+        return std::make_shared<SessionData>(it->second);
     }
-    throw std::runtime_error("Session not found");
+    logger.log(INFO, "Didn't find any active session with sessionId: " + sessionId);
+    return (nullptr);
 }
 
 void SessionManager::deleteSession(std::string sessionId)
@@ -68,3 +67,22 @@ void SessionManager::deleteSession(std::string sessionId)
         sessions.erase(it);
     }
 }
+
+void SessionManager::checkForExpiredSessions()
+{
+    time_t currentTime = time(NULL);
+
+    for (auto it = sessions.begin(); it != sessions.end();)
+    {
+        if (currentTime > it->second.timeStarted + 600) 
+        {
+            logger.log(WARNING, "Removed an expired session from Sessions with sessionId: " + it->first);
+            it = sessions.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+

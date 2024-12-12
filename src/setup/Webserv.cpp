@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 16:45:43 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/02 18:49:03 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 13:29:18 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int Webserv::checkForNewConnection(int eventFd)
 
 Webserv::Webserv(char *fileName)
 {
-    logger.setWorking(1);
+    logger.setWorking(true);
     disable_ctrl_chars();
 	setConfig(std::string(fileName));
 	_epollFd = epoll_create(1);
@@ -134,14 +134,6 @@ int Webserv::handleFirstRequest(const int &client_socket)
 		close(client_socket);
 		return (0);
 	}
-	else if (rd_bytes > BUFFERSIZE) {
-    logger.log(ERR, "Read buffer overflow detected, rd_bytes: " + std::to_string(rd_bytes) + " , BUFFERSIZE: " + std::to_string(BUFFERSIZE));
-    sendInternalServerError(client_socket);
-	removeSocketFromReceivedFirstRequest(client_socket);
-    removeFdFromEpoll(client_socket);
-    close(client_socket);
-    return 0;
-	}
 	else if (rd_bytes > 0)
 	{
 		buffer[rd_bytes] = '\0';
@@ -156,6 +148,7 @@ int Webserv::handleFirstRequest(const int &client_socket)
 		close(client_socket);
 		return (0);
 	}
+	
 	std::string firstRequest(buffer, rd_bytes);
 	logger.log(DEBUG, firstRequest);
 	foundServer = findRightServer(firstRequest);
@@ -249,7 +242,7 @@ int Webserv::initializeConnection(const socklen_t &addrlen, int &client_socket,
 void Webserv::setupServers(socklen_t &addrlen)
 {
 	logger.log(INFO, "Total amount of servers: " + std::to_string(_servers.size()));
-	
+	bool allowedToStart = true;
 	if (_servers.size() == 0)
    		throw std::runtime_error("Not enough servers to start Webserv");
 
@@ -259,7 +252,11 @@ void Webserv::setupServers(socklen_t &addrlen)
 		_servers[i].setServer(&_epollFd, &_socketsConnectedToServers);
 		logger.log(INFO, "Server " + _servers[i].getServerName()
 			+ " started on port " + _servers[i].getPortString());
+		if (!_portValidator.addToUsedPorts(_servers[i].getHost(), _servers[i].getPort()))
+			allowedToStart = false;
 	}
+	if (!allowedToStart)
+		throw std::runtime_error("Can't start Webserv, because multiple of the same host and port are in use");
 }
 
 int Webserv::findRightServer(const std::string &buffer)
@@ -449,7 +446,7 @@ void Webserv::cleanUpServers()
 				+ std::to_string(it->second->PID));
 			if (kill(it->second->PID, SIGTERM) == 0)
 			{
-				usleep(200000);
+				usleep(100000);
 				kill(it->second->PID, SIGKILL);
 			}
 			close(it->second->ReadFd);

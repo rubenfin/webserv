@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/11 17:00:53 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/02 18:21:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 12:59:53 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,27 +130,6 @@ void Server::makeResponse(const std::string &buffer, HTTPHandler &handler)
 	handler.getResponse().response = header + buffer + "\r\n";
 }
 
-// void Server::readFile(HTTPHandler &handler)
-// {
-// 	long long	fileSize;
-
-// 	std::ifstream file;
-// 	std::string fileContents;
-// 	logger.log(DEBUG, "Request URL in readFile(): "
-// 		+ handler.getRequest().requestURL);
-// 	fileSize = getFileSize(handler.getRequest().requestURL, handler);
-// 	file.open(handler.getRequest().requestURL, std::ios::in | std::ios::binary);
-// 	if (!file.is_open())
-// 	{
-// 		handler.getResponse().status = httpStatusCode::NotFound;
-// 		throw NotFoundException();
-// 	}
-// 	fileContents.resize(static_cast<std::size_t>(fileSize));
-// 	file.read((char *)fileContents.data(), fileSize);
-// 	file.close();
-// 	makeResponse(fileContents, handler);
-// }
-
 void Server::readFile(HTTPHandler& handler)
 {
 	FileDescriptor *fd = handler.getFDs();
@@ -160,75 +139,6 @@ void Server::readFile(HTTPHandler& handler)
 	fd->setTotalToRead(getFileSize(handler.getRequest().requestURL, handler));
 	handler.getFDs()->setFileFd(open(handler.getRequest().requestURL.data(), std::ios::in | std::ios::binary));
 }
-
-// void Server::readFile(HTTPHandler& handler)
-// {
-//     int pipeFds[2] = {-1, -1}; // Initialize for cleanup
-//     FileDescriptor &FDs = handler.getFDs();
-//     logger.log(DEBUG, "Request URL in readFile(): "
-//         + handler.getRequest().requestURL);
-
-//     int total = getFileSize(handler.getRequest().requestURL, handler);
-//     if (total < 0)
-//     {
-//         logThrowStatus(handler, ERR,
-//             "[500] Invalid file size",
-//             httpStatusCode::InternalServerError,
-//             InternalServerErrorException());
-//     }
-//     FDs.setTotalToRead(total);
-//     FDs.setTotalToWrite(total);
-
-//     int fd = open(handler.getRequest().requestURL.c_str(), O_RDONLY);
-//     if (fd == -1)
-//     {
-//         logThrowStatus(handler, ERR,
-//             "[500] Couldn't open file",
-//             httpStatusCode::InternalServerError,
-//             InternalServerErrorException());
-//     }
-//     FDs.setFileFd(fd);
-
-//     if (pipe(pipeFds) == -1)
-//     {
-//         close(fd); // Cleanup
-//         logThrowStatus(handler, ERR,
-//             "[500] Couldn't create pipe",
-//             httpStatusCode::InternalServerError,
-//             InternalServerErrorException());
-//     }
-
-//     if (fcntl(pipeFds[0], F_SETFL, O_NONBLOCK) == -1 ||
-//         fcntl(pipeFds[1], F_SETFL, O_NONBLOCK) == -1)
-//     {
-//         close(fd);
-//         close(pipeFds[0]);
-//         close(pipeFds[1]);
-//         logThrowStatus(handler, ERR,
-//             "[500] Failed to set non-blocking mode",
-//             httpStatusCode::InternalServerError,
-//             InternalServerErrorException());
-//     }
-
-//     FDs.setReadFd(pipeFds[0]);
-//     FDs.setWriteFd(pipeFds[1]);
-
-//     epoll_event ev;
-//     if (!addFdToReadEpoll(ev, pipeFds[1]) || !addFdToReadEpoll(ev, pipeFds[0]))
-//     {
-//         close(fd);
-//         close(pipeFds[0]);
-//         close(pipeFds[1]);
-//         logThrowStatus(handler, ERR,
-//             "[500] Failed to add file descriptor to epoll",
-//             httpStatusCode::InternalServerError,
-//             InternalServerErrorException());
-//     }
-
-//     setFdReadyForWrite(pipeFds[1]); // Mark write side ready for epoll
-// }
-
-
 
 void Server::removeSocketAndServer(const int &socket)
 {
@@ -243,78 +153,6 @@ void Server::removeSocketAndServer(const int &socket)
 	}
 	logger.log(INFO, "Couldn't find socket in connectedSocketsToServers");
 }
-
-// int Server::readFromFile(const int &fd, HTTPHandler &handler)
-// {
-// 	char	buffer[BUFFERSIZE];
-// 	int		br = 0;
-// 	int 	bw = 0;
-// 	FileDescriptor &FDs = handler.getFDs();
-// 	logger.log(DEBUG, "INSIDE READ FROM FILE WITH FD: " + std::to_string(fd));
-
-// 	std::cout << FDs.toString() << std::endl;
-// 	if (fd == FDs.getReadFd())
-// 	{
-// 		br = read(fd, buffer, BUFFERSIZE );
-// 		if (br == -1)
-// 		{
-// 			logThrowStatus(handler, ERR, "[500] Internal server error while reading from piped fd", httpStatusCode::InternalServerError, InternalServerErrorException());
-// 		}
-// 		else if (br < BUFFERSIZE)
-// 			buffer[br] = '\0';
-//         handler.getResponse().response.append(buffer, br);
-// 		logger.log(INFO, "Read " + std::to_string(br) + " from the pipe");
-// 		FDs.incrementBytesRead(br);
-// 		setFdReadyForRead(FDs.getReadFd());
-// 		if (FDs.isReadComplete())
-// 		{
-// 			// setFdReadyForWrite(handler.getConnectedToSocket());
-// 			makeResponse(handler.getResponse().response, handler);
-// 			sendResponse(handler, handler.getConnectedToSocket());
-// 			// removeFdFromEpoll(FDs.getReadFd());
-// 			FDs.reset();
-// 			return (1);
-// 		}
-// 	}
-// 	else if (fd == FDs.getWriteFd())
-// 	{
-// 		if (FDs.getFileFd() != 1)
-// 		{	
-// 			br = read(FDs.getFileFd(), buffer, BUFFERSIZE);
-// 			if (br == -1)
-// 			{
-// 				logThrowStatus(handler, ERR, "[500] Internal server error while reading from normal fd", httpStatusCode::InternalServerError, InternalServerErrorException());
-// 			}
-// 			buffer[br] = '\0';
-// 			logger.log(INFO, "Read " + std::to_string(br) + " bytes from file");
-// 			// if (br == 0)
-// 			// {
-// 				// ::close(FDs.getFileFd());
-// 				// FDs.setFileFd(-1);
-// 			// }
-// 		}
-// 		if (br > 0)
-// 		{
-// 			bw = write(FDs.getWriteFd(), buffer, br);
-// 			logger.log(INFO, "Wrote " + std::to_string(bw) + " bytes into the pipe");
-// 			if (bw > 0)
-// 				FDs.incrementBytesWritten(bw);
-// 			setFdReadyForWrite(FDs.getWriteFd());
-// 			if (FDs.isWriteComplete())
-// 			{
-// 				removeFdFromEpoll(FDs.getWriteFd());
-// 				::close(FDs.getWriteFd());
-// 				return (1);
-// 				// int readSide = FDs.getReadFd();
-// 				// epoll_event ev;
-// 				// std::cout << "TRYING TO ADD READSIDE TO EPOLL " << std::endl;
-// 				// addFdToReadEpoll(ev, readSide);
-// 			}
-// 		}
-// 	}
-
-// 	return (1);
-// }
 
 void Server::readWriteCGI(const int &CGI_FD, HTTPHandler &handler)
 {
@@ -343,7 +181,10 @@ void Server::readWriteCGI(const int &CGI_FD, HTTPHandler &handler)
 			buffer[br] = '\0';
 			logger.log(INFO, "Read " + std::to_string(br) + " bytes from CGI");
 			handler.getResponse().response += buffer;
-			std::cout << handler.getResponse().response << std::endl;
+		}
+		else if (br == -1)
+		{
+			logger.log(WARNING, "Read from CGI returned -1");
 		}
 		else if (br == 0)
 		{

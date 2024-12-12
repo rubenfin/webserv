@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:00:39 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/12/02 18:20:53 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 11:57:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ struct request_t;
 struct response_t;
 struct CGI_t;
 class FileDescriptor;
+struct SessionData;
 
 struct file_t;
 
@@ -80,6 +81,7 @@ public:
 
 typedef struct request_t
 {
+	bool		badRequest;
 	bool	    internalError;
 	bool		bin;
 	bool		foundHeaderEnd;
@@ -100,7 +102,7 @@ typedef struct request_t
 	METHODS	method;
 	std::map<std::string, std::string> header;
 	
-	request_t() : internalError(false), bin(false), foundHeaderEnd(false), favIcon(false), http_v(""), firstLine(""), requestContent(""),
+	request_t() : badRequest(false), internalError(false), bin(false), foundHeaderEnd(false), favIcon(false), http_v(""), firstLine(""), requestContent(""),
 		requestBody(""), requestURL(""), requestDirectory(""),
 		requestFile(""), contentType(""), currentBytesRead(0),
 		totalBytesRead(0), contentLength(0), method(ERROR) {}
@@ -125,7 +127,7 @@ class HTTPHandler
 	bool _returnAutoIndex;
 	bool _headerChecked;
 	bool _isChunked;
-	bool _activeSession;
+	std::shared_ptr<SessionData> _currentSession;
 
   public:
 	HTTPHandler();
@@ -135,8 +137,10 @@ class HTTPHandler
     HTTPHandler& operator=(const HTTPHandler&);
 	~HTTPHandler();
 
+	std::shared_ptr<SessionData> getCurrentSession();
 	void checkForSession();
 	void favIconCheck(void);
+	void createNewSession();
 	FileDescriptor* getFDs(void);
 	void setIndex(const int& idx);
   	CGI_t * getConnectedToCGI(void);
@@ -155,8 +159,6 @@ class HTTPHandler
 	void setChunked(bool boolean);
 	void setConnectedToSocket(const int& fd);
 	int& getConnectedToSocket(void);
-	bool getActiveSession();
-	void setActiveSession(bool boolean);
 	void checkLocationMethod(void);
 	void checkClientBodySize();
 	void linkToReceivedFirstRequest(std::unordered_map<int, bool> *_socketReceivedFirstRequest);

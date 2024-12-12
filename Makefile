@@ -1,6 +1,6 @@
-CPP = c++ -std=c++17
+CPP = c++ -std=c++11
 CPPFLAGS = -Wall -Wextra -Werror -g
-# LDFLAGS = -fsanitize=address
+LDFLAGS = -fsanitize=address
 SRC_DIR = src
 SERVER_DIR = server
 UTILS_DIR = utils

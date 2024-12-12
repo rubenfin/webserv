@@ -6,14 +6,14 @@
 /*   By: rfinneru <rfinneru@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/07/31 12:43:34 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/14 10:37:24 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 13:20:46 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Webserv.hpp"
-#include<termios.h>
+#include <termios.h>
 
 size_t	ft_strlen(const char *s);
 char	*ft_strjoin(char const *s1, char const *s2);

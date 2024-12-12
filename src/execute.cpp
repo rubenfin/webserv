@@ -105,6 +105,8 @@ void Webserv::checkFiles(std::vector<FileDescriptor *>& files)
 			if (br == -1)
 			{
 				sendInternalServerError(handler->getConnectedToSocket());
+				removeFdFromEpoll(handler->getConnectedToSocket());
+				close(handler->getConnectedToSocket());
 				continue;
 			}
 			buffer[br] = '\0';

@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/11/13 16:24:29 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 13:23:20 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "FileDescriptor.hpp"
+#include "PortValidator.hpp"
 #include <dirent.h>
 #include <fcntl.h>
 #include <fstream>
@@ -55,6 +56,7 @@ class							Server;
 class							Locations;
 class							HTTPHandler;
 class							FileDescriptor;
+class							PortValidator;
 
 extern Logger &logger;
 
@@ -64,6 +66,7 @@ class Webserv
 	int _epollFd;
 	epoll_event _event;
 	HTTPHandler *_handler;
+	PortValidator _portValidator;
 	std::vector<Server> _servers;
 	std::unordered_map<int, Server *> _socketsConnectedToServers;
 	std::unordered_map<int, bool> _socketReceivedFirstRequest;

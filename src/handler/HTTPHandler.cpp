@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/13 20:01:28 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/12/02 20:02:59 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 14:08:56 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ HTTPHandler::HTTPHandler() : _connectedToSocket(-1), _cgiPtr(nullptr),
 
 HTTPHandler::HTTPHandler(const HTTPHandler& other)
     : _connectedToSocket(other._connectedToSocket),
-      _cgiPtr(other._cgiPtr),  // Deep copy if necessary
+      _cgiPtr(other._cgiPtr),
       _FDs(other._FDs),
       _idx(other._idx),
       _firstRequest(other._firstRequest),
@@ -39,8 +39,6 @@ HTTPHandler::HTTPHandler(const HTTPHandler& other)
 
 HTTPHandler& HTTPHandler::operator=(const HTTPHandler& other) {
     if (this != &other) {
-        // Clean up existing resources
-        // Copy resources
         _cgiPtr = other._cgiPtr;
         _connectedToSocket = other._connectedToSocket;
         _idx = other._idx;
@@ -62,45 +60,54 @@ HTTPHandler& HTTPHandler::operator=(const HTTPHandler& other) {
 
 
 HTTPHandler::HTTPHandler(HTTPHandler &&other) noexcept
-        : _connectedToSocket(other._connectedToSocket),
-          _cgiPtr(std::exchange(other._cgiPtr, nullptr)),
-          _FDs(std::move(other._FDs)),
-          _idx(other._idx),
-          _firstRequest(std::move(other._firstRequest)),
-          _response(std::move(other._response)),
-          _request(std::move(other._request)),
-          _foundDirective(std::move(other._foundDirective)),
-          _server(std::exchange(other._server, nullptr)),
-          _socketReceivedFirstRequest(std::exchange(other._socketReceivedFirstRequest, nullptr)),
-          _currentSocket(other._currentSocket),
-          _isCgi(other._isCgi),
-          _hasRedirect(other._hasRedirect),
-          _returnAutoIndex(other._returnAutoIndex),
-          _headerChecked(other._headerChecked),
-          _isChunked(other._isChunked) {}
+    : _connectedToSocket(other._connectedToSocket),
+      _cgiPtr(other._cgiPtr),
+      _FDs(std::move(other._FDs)),
+      _idx(other._idx),
+      _firstRequest(std::move(other._firstRequest)),
+      _response(std::move(other._response)),
+      _request(std::move(other._request)),
+      _foundDirective(std::move(other._foundDirective)),
+      _server(other._server),
+      _socketReceivedFirstRequest(other._socketReceivedFirstRequest),
+      _currentSocket(other._currentSocket),
+      _isCgi(other._isCgi),
+      _hasRedirect(other._hasRedirect),
+      _returnAutoIndex(other._returnAutoIndex),
+      _headerChecked(other._headerChecked),
+      _isChunked(other._isChunked)
+{
+    other._cgiPtr = nullptr;
+    other._server = nullptr;
+    other._socketReceivedFirstRequest = nullptr;
+}
 
-    // Move Assignment Operator
-    HTTPHandler &HTTPHandler::operator=(HTTPHandler &&other) noexcept {
-        if (this != &other) {
-            _connectedToSocket = other._connectedToSocket;
-            _cgiPtr = std::exchange(other._cgiPtr, nullptr);
-            _FDs = std::move(other._FDs);
-            _idx = other._idx;
-            _firstRequest = std::move(other._firstRequest);
-            _response = std::move(other._response);
-            _request = std::move(other._request);
-            _foundDirective = std::move(other._foundDirective);
-            _server = std::exchange(other._server, nullptr);
-            _socketReceivedFirstRequest = std::exchange(other._socketReceivedFirstRequest, nullptr);
-            _currentSocket = other._currentSocket;
-            _isCgi = other._isCgi;
-            _hasRedirect = other._hasRedirect;
-            _returnAutoIndex = other._returnAutoIndex;
-            _headerChecked = other._headerChecked;
-            _isChunked = other._isChunked;
-        }
-        return *this;
+HTTPHandler &HTTPHandler::operator=(HTTPHandler &&other) noexcept {
+    if (this != &other) {
+        _connectedToSocket = other._connectedToSocket;
+        _cgiPtr = other._cgiPtr;
+        _FDs = std::move(other._FDs);
+        _idx = other._idx;
+        _firstRequest = std::move(other._firstRequest);
+        _response = std::move(other._response);
+        _request = std::move(other._request);
+        _foundDirective = std::move(other._foundDirective);
+        _server = other._server;
+        _socketReceivedFirstRequest = other._socketReceivedFirstRequest;
+        _currentSocket = other._currentSocket;
+        _isCgi = other._isCgi;
+        _hasRedirect = other._hasRedirect;
+        _returnAutoIndex = other._returnAutoIndex;
+        _headerChecked = other._headerChecked;
+        _isChunked = other._isChunked;
+
+        other._cgiPtr = nullptr;
+        other._server = nullptr;
+        other._socketReceivedFirstRequest = nullptr;
     }
+    return *this;
+}
+
 
 HTTPHandler::~HTTPHandler()
 {
@@ -376,6 +383,7 @@ void HTTPHandler::cleanHTTPHandler()
 	_FDs.clean();
 	_connectedToSocket = -1;
 	_cgiPtr = nullptr;
+	_currentSession = nullptr;
 	_firstRequest = "";
 	_server = nullptr;
 	_foundDirective = nullptr;
@@ -431,7 +439,9 @@ void HTTPHandler::checkClientBodySize(void)
 
 void HTTPHandler::parsingErrorCheck(void)
 {
-	if (getRequest().internalError)
+	if (getRequest().badRequest)
+		getServer()->logThrowStatus(*this, ERR, "[400] Bad Request while parsing", httpStatusCode::BadRequest, BadRequestException());
+	else if (getRequest().internalError)
 		getServer()->logThrowStatus(*this, ERR, "[500] Error while parsing request",
 									httpStatusCode::InternalServerError, InternalServerErrorException());
 }
@@ -453,32 +463,41 @@ void HTTPHandler::favIconCheck(void)
 	}
 }
 
+void HTTPHandler::createNewSession()
+{
+	SessionManager * manager = getServer()->getSessionManager();
+	std::string cookie = manager->createSession();
+	getResponse().responseHeader += "Set-Cookie: id=";
+	getResponse().responseHeader += cookie + "; Max-Age=600\r\n";
+	_currentSession = manager->getSession(cookie);
+}
+
 void HTTPHandler::checkForSession()
 {
 
 	SessionManager * manager = getServer()->getSessionManager();
-	std::string cookie = getRequest().cookie;
-	std::string myCookie;
+	std::string glutenfreecookie = getRequest().cookie;
 	
-	std::cout << cookie << std::endl;
 	try
 	{
-		if (cookie.empty())
+		if (glutenfreecookie.empty())
 		{
-			getResponse().responseHeader += "Set-Cookie: id=";
-			myCookie =  manager->createSession("Test");
-			getResponse().responseHeader += myCookie + "; Max-Age=600\r\n";
-			std::cout << getResponse().responseHeader << std::endl;
+			createNewSession();
 		}
 		else
 		{
-			std::cout << cookie << std::endl;
-			manager->getSession(cookie);
+			_currentSession = manager->getSession(glutenfreecookie);
+			if (_currentSession == nullptr)
+			{
+				createNewSession();
+			}
 		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
+		getServer()->logThrowStatus(*this, ERR, "[500] Error while checking for session",
+									httpStatusCode::InternalServerError, InternalServerErrorException());
 	}
 }
 
@@ -499,6 +518,11 @@ void HTTPHandler::handleRequest(Server &serverAddress)
 		setBooleans();
 	}
 	combineRightUrl();
+}
+
+std::shared_ptr<SessionData> HTTPHandler::getCurrentSession()
+{
+	return (_currentSession);
 }
 
 std::shared_ptr<Locations> HTTPHandler::getFoundDirective(void)
@@ -529,16 +553,6 @@ bool HTTPHandler::getChunked(void)
 int HTTPHandler::getIdx(void)
 {
 	return (_idx);
-}
-
-bool HTTPHandler::getActiveSession()
-{
-	return (_activeSession);
-}
-
-void HTTPHandler::setActiveSession(bool boolean)
-{
-	_activeSession = boolean;
 }
 
 int &HTTPHandler::getConnectedToSocket(void)
