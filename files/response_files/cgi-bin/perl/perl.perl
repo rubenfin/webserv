@@ -14,7 +14,7 @@ print <<'HTML';
 </head>
 <body>
     <h1>CGI Test Successful</h1>
-    <p>If you're seeing this page, your CGI script is working!</p>
+    <p>If you're seeing this page, your Perl CGI script is working!</p>
     <p>Current server time: <code>
 HTML
 

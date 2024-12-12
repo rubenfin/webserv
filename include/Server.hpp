@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 15:40:25 by jade-haa      #+#    #+#                 */
-/*   Updated: 2024/12/02 18:12:58 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 14:18:04 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@
 #include <netdb.h>
 #include <cstring>
 
-#define MAX_EVENTS 64
+#define MAX_EVENTS 128
 
 class	Locations;
 class	HTTPHandler;

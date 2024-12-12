@@ -6,7 +6,7 @@
 /*   By: jade-haa <jade-haa@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/06/09 14:51:39 by rfinneru      #+#    #+#                 */
-/*   Updated: 2024/12/12 13:23:20 by rfinneru      ########   odam.nl         */
+/*   Updated: 2024/12/12 14:18:01 by rfinneru      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@
 
 #define BUFFERSIZE 4096
 // #define MAX_FDS 1024
-#define MAX_EVENTS 64
+#define MAX_EVENTS 128
 #define MIN_SIZE 5
 
 extern volatile sig_atomic_t	interrupted;
