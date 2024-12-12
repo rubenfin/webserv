@@ -11,7 +11,6 @@ Webserv is an HTTP server built from scratch based on the features of Nginx. Thi
 - **File Uploading**: Allows users to upload images to the server.
 - **Custom Error Pages**: Displays user-defined error pages for common HTTP errors (404, 500, etc.).
 - **Configuration File**: Uses a configuration file for server settings, including port, autoindex, and location blocks.
-- **Concurrency**: Supports handling multiple requests simultaneously through multi-threading.
 - **Logging**: Implements logging for incoming requests and errors for easier debugging.
 
 ## Installation
@@ -20,7 +19,7 @@ To compile and run Webserv, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone git@github.com:Jackdehaan/webserv.git
+   git clone https://github.com/rubenfin/webserv.git
    cd webserv
 
 2. **Compile Webserver**:
